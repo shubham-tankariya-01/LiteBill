@@ -1,0 +1,20 @@
+{
+  "name": "litebill",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Shubham-tankariya",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1",
+    "gitignore": "^0.7.0",
+    "mongoose": "^9.3.3",
+    "nodemon": "^3.1.14",
+    "path": "^0.12.7"
+  }
+}

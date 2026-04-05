@@ -1,0 +1,135 @@
+/* ===== READINGS INTERFACE ===== */
+.readings-container {
+    margin-top: 100px;
+    padding: 50px;
+    background: rgba(0, 255, 21, 0.05);
+    border: 1px solid var(--cyan);
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 40px;
+}
+
+.readings-header {
+    text-align: center;
+    color: var(--cyan);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 5px;
+    margin-top: 20px;
+    text-shadow: 0 0 15px var(--cyan);
+}
+
+/* INPUT BLOCKS */
+.secure-input-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.cyber-sequence-input {
+    width: 360px;
+    height: 60px;
+    background: rgba(10, 11, 16, 0.8);
+    border: 2px solid rgba(255, 140, 0, 0.4);
+    color: var(--orange);
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    letter-spacing: 38px;
+    padding-left: 22px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 10px rgba(255, 140, 0, 0.1);
+    
+    /* Simulate columns using a repeating gradient */
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent 0px,
+        transparent 59px,
+        rgba(255, 140, 0, 0.4) 59px,
+        rgba(255, 140, 0, 0.4) 60px
+    );
+}
+
+.cyber-sequence-input:focus {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 15px rgba(0, 229, 255, 0.2);
+    transform: scale(1.05);
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent 0px,
+        transparent 59px,
+        var(--cyan) 59px,
+        var(--cyan) 60px
+    );
+}
+
+/* DECORATIVE ELEMENTS */
+.telemetry-deco {
+    width: 100%;
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+    border-top: 1px dashed rgba(0, 229, 255, 0.3);
+    border-bottom: 1px dashed rgba(0, 229, 255, 0.3);
+    display: flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: rgba(0, 229, 255, 0.5);
+    white-space: nowrap;
+}
+
+.telemetry-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scrollTelemetry 15s linear infinite;
+}
+
+@keyframes scrollTelemetry {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.radar-deco {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.1) 0%, transparent 70%);
+}
+
+.radar-sweep {
+    width: 50%;
+    height: 2px;
+    background: var(--cyan);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: 0 50%;
+    animation: sweep 2s linear infinite;
+    box-shadow: 0 0 15px var(--cyan);
+}
+
+@keyframes sweep {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

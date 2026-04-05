@@ -1,0 +1,40 @@
+/* ===== NAVIGATION ===== */
+.cyber-nav {
+    position: fixed;
+    top: 0; width: 100%; z-index: 1000;
+    background: rgba(10, 11, 16, 0.85);
+    border-bottom: 2px solid var(--orange);
+    backdrop-filter: blur(15px);
+}
+
+.nav-wrapper {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 1.2rem 0;
+}
+
+.brand {
+    font-family: 'Syncopate', sans-serif;
+    text-decoration: none; color: #fff;
+    letter-spacing: 5px; font-size: 1.4rem;
+}
+.brand span { color: var(--orange); text-shadow: 0 0 10px var(--orange); }
+
+.nav-links { display: flex; gap: 2.5rem; }
+
+.nav-link-cyber {
+    text-decoration: none; color: #888;
+    font-size: 0.8rem; letter-spacing: 2px;
+    position: relative; transition: 0.3s;
+}
+
+/* Orange Kinetic Underline */
+.nav-link-cyber::after {
+    content: ''; position: absolute;
+    bottom: -8px; left: 0; width: 0%; height: 3px;
+    background: var(--orange);
+    box-shadow: 0 0 15px var(--orange);
+    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.nav-link-cyber:hover { color: #fff; }
+.nav-link-cyber:hover::after { width: 100%; }

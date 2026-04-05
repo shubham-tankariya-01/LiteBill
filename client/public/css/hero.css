@@ -1,0 +1,45 @@
+/* ===== HERO INTERFACE ===== */
+.hero-interface {
+    margin-top: 160px; padding: 50px;
+    background: rgba(255, 145, 0, 0.166);
+    border: 1px solid rgb(255, 140, 0);
+    position: relative;
+    clip-path: polygon(0 0, 95% 0, 100% 15%, 100% 100%, 5% 100%, 0 85%);
+}
+
+.corner-accents::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 40px; height: 40px;
+    border-top: 4px solid var(--orange); border-left: 4px solid var(--orange);
+}
+
+.hero-title {
+    font-size: 4rem; font-weight: 800; letter-spacing: -2px;
+}
+
+/* ===== DATA PULSE LOADER (NEW) ===== */
+.data-pulse-container {
+    display: flex; gap: 8px; margin-top: 30px;
+}
+
+.pulse-segment {
+    width: 30px; height: 8px;
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.3);
+    animation: segmentPulse 1.5s infinite;
+}
+
+.pulse-segment:nth-child(2) { animation-delay: 0.2s; }
+.pulse-segment:nth-child(3) { animation-delay: 0.4s; }
+.pulse-segment:nth-child(4) { animation-delay: 0.6s; }
+.pulse-segment:nth-child(5) { animation-delay: 0.8s; }
+.pulse-segment:nth-child(6) { animation-delay: 1.0s; }
+
+@keyframes segmentPulse {
+    0%, 100% { background: rgba(255, 140, 0, 0.1); box-shadow: none; }
+    50% { 
+        background: var(--orange); 
+        box-shadow: 0 0 15px var(--orange); 
+        transform: scaleY(1.3);
+    }
+}

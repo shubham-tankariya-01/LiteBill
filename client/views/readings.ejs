@@ -1,0 +1,30 @@
+<% layout('layouts/boilerplate') %>
+    <!-- Import required Component Styles -->
+    <link rel="stylesheet" href="/public/css/actions.css" />
+    <link rel="stylesheet" href="/public/css/readings.css" />
+
+    <section class="readings-container">
+        <div class="radar-deco">
+            <div class="radar-sweep"></div>
+        </div>
+
+        <h2 class="readings-header">INPUT_<span class="text-glow-orange">SEQUENCE</span></h2>
+
+        <form action="#" style="display: flex; flex-direction: column; align-items: center; gap: 40px;">
+            <div class="secure-input-group">
+                <input type="text" name="reading" maxlength="6" class="cyber-sequence-input" autofocus
+                    autocomplete="off" />
+            </div>
+
+            <button type="button" class="btn-cyber btn-orange-green" style="min-width: 250px;"
+                onclick="document.querySelector('.telemetry-text').innerText += ' | AUTH_REQ_SENT...'; setTimeout(() => alert('SEQUENCE_UPLOADED'), 500)">
+                <span class="btn-text">SUBMIT_DATA</span>
+                <div class="btn-glitch"></div>
+            </button>
+        </form>
+
+        <div class="telemetry-deco">
+            <span class="telemetry-text">> SYS_CHECK_OK | UPLINK_ESTABLISHED | WAITING_FOR_INPUT | ENCRYPTION:
+                SECURE_AES | NODE_394_READY | TRACING_IP... </span>
+        </div>
+    </section>

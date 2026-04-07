@@ -1,48 +1,29 @@
 <% layout('layouts/boilerplate') %>
 
-    <link rel="stylesheet" href="/public/css/hero.css" />
-    <section class="hero-interface">
-        <div class="corner-accents"></div>
+<link rel="stylesheet" href="/public/css/hero.css" />
+<section class="hero-dashboard card-minimal">
+    <header class="hero-header">
+        <p class="status-code text-muted">
+            <span class="status-dot"></span> System Ready
+        </p>
+        <h1 class="hero-title">
+            Dashboard <span class="text-primary">Overview</span>
+        </h1>
+    </header>
+    
+    <div class="interface-body">
+        <p class="text-main">Welcome back. Select an action below to continue.</p>
+    </div>
+</section>
 
-        <header class="hero-header">
-            <p class="status-code">
-                <span class="text-red">● OFFLINE_SHIELD</span>
-                <span class="text-green">● READY </span>
-            </p>
-            <h1 class="hero-title">
-                CORE <span class="text-glow-orange">INTERFACE</span>
-            </h1>
-        </header>
-
-        <div class="interface-body">
-
-            <div class="data-pulse-container">
-                <div class="pulse-segment"></div>
-                <div class="pulse-segment"></div>
-                <div class="pulse-segment"></div>
-                <div class="pulse-segment"></div>
-                <div class="pulse-segment"></div>
-                <div class="pulse-segment"></div>
-            </div>
-
-        </div>
-    </section>
-
-    <link rel="stylesheet" href="/public/css/actions.css" />
-    <section class="home-work container">
-        <div class="interface-footer-bar">
-            <span class="pulse-dot"></span> SYSTEM_READY_FOR_INPUT
-        </div>
-
-        <div class="action-grid">
-            <a href="/readings" class="btn-cyber btn-orange-green">
-                <span class="btn-text">Submit_Readings</span>
-                <div class="btn-glitch"></div>
-            </a>
-
-            <a href="#" class="btn-cyber btn-white-blue">
-                <span class="btn-text">How_Used</span>
-                <div class="btn-glitch"></div>
-            </a>
-        </div>
-    </section>
+<link rel="stylesheet" href="/public/css/actions.css" />
+<section class="home-actions mt-4">
+    <div class="action-grid">
+        <a href="/readings" class="btn-action btn-primary">
+            Submit Readings
+        </a>
+        <a href="#" class="btn-action btn-secondary">
+            How to Use
+        </a>
+    </div>
+</section>

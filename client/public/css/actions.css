@@ -1,109 +1,53 @@
-/* ===== HOME-WORK SECTION LAYOUT ===== */
-.home-work {
-    margin-top: 40px;
-    padding: 20px;
-    border-top: 1px solid rgba(255, 140, 0, 0.2);
-    background: rgba(255, 140, 0, 0.02);
+/* ===== ACTIONS SECTION ===== */
+.home-actions {
+    padding: 1.2rem 0;
 }
 
-.interface-footer-bar {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--orange);
-    margin-bottom: 25px;
-    letter-spacing: 2px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--orange);
-    border-radius: 50%;
-    animation: dotPulse 1s infinite;
-}
-
-@keyframes dotPulse {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(1.5); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-/* ===== UNIVERSAL RHOMBUS BUTTONS ===== */
 .action-grid {
     display: flex;
-    gap: 25px;
-    flex-wrap: wrap; /* Ensures mobile responsiveness */
+    gap: 1.5rem;
+    flex-wrap: wrap; 
 }
 
-.btn-cyber {
-    position: relative;
-    padding: 14px 40px;
+/* Base button styles */
+.btn-action {
+    padding: 0.9rem 2rem;
     text-decoration: none !important;
     font-family: var(--font-main);
     font-size: 1rem;
-    font-weight: 900;
-    letter-spacing: 2px;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    
-    /* THE RHOMBUS CUT */
-    clip-path: polygon(12% 0%, 100% 0%, 88% 100%, 0% 100%);
-    border: none;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    border-radius: var(--radius);
     cursor: pointer;
-    min-width: 220px;
+    border: none;
+    min-width: 200px;
 }
 
-/* ORANGE TO GREEN LOGIC */
-.btn-orange-green {
-    background: var(--orange);
-    color: #000 !important;
-    box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+/* Primary minimal button - Orange */
+.btn-primary {
+    background: var(--primary);
+    color: #ffffff !important;
 }
 
-.btn-orange-green:hover {
-    background: var(--green); /* Cyber Green */
-    box-shadow: 0 0 25px #00ea89;
-    transform: translateY(-2px);
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2); /* Subtle Orange Shadow */
 }
 
-/* WHITE TO BLUE LOGIC */
-.btn-white-blue {
-    background: #ffffff;
-    color: #000 !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+/* Secondary minimal button - Yellow Outline */
+.btn-secondary {
+    background: transparent;
+    color: var(--secondary) !important;
+    border: 1.5px solid var(--secondary);
 }
 
-.btn-white-blue:hover {
-    background: #00e5ff; /* Cyber Blue/Cyan */
-    box-shadow: 0 0 25px #00e5ff;
-    transform: translateY(-2px);
-}
-
-/* INTERNALS */
-.btn-text {
-    position: relative;
-    z-index: 5;
-}
-
-.btn-glitch {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255, 255, 255, 0);
-    transition: 0.2s;
-}
-
-.btn-cyber:hover .btn-glitch {
-    background: rgba(255, 255, 255, 0.15);
-    animation: glitchFlash 0.3s steps(2) infinite;
-}
-
-@keyframes glitchFlash {
-    0% { opacity: 0; transform: translateX(-5px); }
-    50% { opacity: 1; transform: translateX(5px); }
-    100% { opacity: 0; }
+.btn-secondary:hover {
+    background: var(--secondary);
+    color: #1a202c !important; /* Dark text on yellow background */
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2); /* Subtle Yellow Shadow */
 }

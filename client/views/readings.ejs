@@ -1,30 +1,24 @@
 <% layout('layouts/boilerplate') %>
-    <!-- Import required Component Styles -->
-    <link rel="stylesheet" href="/public/css/actions.css" />
-    <link rel="stylesheet" href="/public/css/readings.css" />
+<link rel="stylesheet" href="/public/css/actions.css" />
+<link rel="stylesheet" href="/public/css/readings.css" />
 
-    <section class="readings-container">
-        <div class="radar-deco">
-            <div class="radar-sweep"></div>
-        </div>
+<section class="readings-container card-minimal">
+    <div class="readings-content">
+        <h2 class="readings-header">Enter <span class="text-primary">Sequence</span></h2>
+        <p class="text-main text-center mb-4">Please input your 6-digit sequence down below to submit data.</p>
 
-        <h2 class="readings-header">INPUT_<span class="text-glow-orange">SEQUENCE</span></h2>
-
-        <form action="#" style="display: flex; flex-direction: column; align-items: center; gap: 40px;">
+        <form action="#" class="readings-form">
             <div class="secure-input-group">
-                <input type="text" name="reading" maxlength="6" class="cyber-sequence-input" autofocus
-                    autocomplete="off" />
+                <input type="text" name="reading" maxlength="6" class="minimal-sequence-input" autofocus autocomplete="off" placeholder="• • • • • •" />
             </div>
 
-            <button type="button" class="btn-cyber btn-orange-green" style="min-width: 250px;"
-                onclick="document.querySelector('.telemetry-text').innerText += ' | AUTH_REQ_SENT...'; setTimeout(() => alert('SEQUENCE_UPLOADED'), 500)">
-                <span class="btn-text">SUBMIT_DATA</span>
-                <div class="btn-glitch"></div>
+            <button type="button" class="btn-action btn-primary submit-btn" onclick="document.querySelector('.telemetry-text').innerText = 'Authenticating...'; setTimeout(() => alert('Sequence Uploaded Successfully'), 500)">
+                Submit Data
             </button>
         </form>
 
         <div class="telemetry-deco">
-            <span class="telemetry-text">> SYS_CHECK_OK | UPLINK_ESTABLISHED | WAITING_FOR_INPUT | ENCRYPTION:
-                SECURE_AES | NODE_394_READY | TRACING_IP... </span>
+            <span class="telemetry-text text-muted">Ready for input</span>
         </div>
-    </section>
+    </div>
+</section>

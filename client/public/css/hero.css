@@ -1,45 +1,46 @@
-/* ===== HERO INTERFACE ===== */
-.hero-interface {
-    margin-top: 160px; padding: 50px;
-    background: rgba(255, 145, 0, 0.166);
-    border: 1px solid rgb(255, 140, 0);
+/* ===== HERO DASHBOARD ===== */
+.hero-dashboard {
+    margin-top: 100px;
+    padding: 3rem;
     position: relative;
-    clip-path: polygon(0 0, 95% 0, 100% 15%, 100% 100%, 5% 100%, 0 85%);
+    background: rgba(30, 41, 59, 0.4);
+    /* Glassmorphism effect on dark background */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.corner-accents::before {
-    content: ''; position: absolute; top: 0; left: 0;
-    width: 40px; height: 40px;
-    border-top: 4px solid var(--orange); border-left: 4px solid var(--orange);
+.status-code {
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.2rem;
+    color: var(--text-muted);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--secondary);
+    /* Use yellow for status dot */
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 12px var(--secondary);
+    /* Subtle yellow glow for status only */
 }
 
 .hero-title {
-    font-size: 4rem; font-weight: 800; letter-spacing: -2px;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
 }
 
-/* ===== DATA PULSE LOADER (NEW) ===== */
-.data-pulse-container {
-    display: flex; gap: 8px; margin-top: 30px;
-}
-
-.pulse-segment {
-    width: 30px; height: 8px;
-    background: rgba(255, 140, 0, 0.1);
-    border: 1px solid rgba(255, 140, 0, 0.3);
-    animation: segmentPulse 1.5s infinite;
-}
-
-.pulse-segment:nth-child(2) { animation-delay: 0.2s; }
-.pulse-segment:nth-child(3) { animation-delay: 0.4s; }
-.pulse-segment:nth-child(4) { animation-delay: 0.6s; }
-.pulse-segment:nth-child(5) { animation-delay: 0.8s; }
-.pulse-segment:nth-child(6) { animation-delay: 1.0s; }
-
-@keyframes segmentPulse {
-    0%, 100% { background: rgba(255, 140, 0, 0.1); box-shadow: none; }
-    50% { 
-        background: var(--orange); 
-        box-shadow: 0 0 15px var(--orange); 
-        transform: scaleY(1.3);
-    }
+.hero-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-main);
+    max-width: 600px;
 }

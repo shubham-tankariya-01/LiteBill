@@ -40,7 +40,7 @@ async function main() {
 // Routes =========================================================
 app.use("/home", homeRoute);
 app.use("/readings", readingsRoute);
-app.use("/login", authRoute);
+app.use("/signup", authRoute);
 
 //connecting to the server port...
 app.listen(port ,(req,res)=>{

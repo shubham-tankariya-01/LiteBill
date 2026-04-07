@@ -1,40 +1,64 @@
 /* ===== NAVIGATION ===== */
-.cyber-nav {
+.dash-nav {
     position: fixed;
-    top: 0; width: 100%; z-index: 1000;
-    background: rgba(10, 11, 16, 0.85);
-    border-bottom: 2px solid var(--orange);
-    backdrop-filter: blur(15px);
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.8); /* Semi-transparent navy */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .nav-wrapper {
-    display: flex; justify-content: space-between;
-    align-items: center; padding: 1.2rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 0;
 }
 
 .brand {
-    font-family: 'Syncopate', sans-serif;
-    text-decoration: none; color: #fff;
-    letter-spacing: 5px; font-size: 1.4rem;
-}
-.brand span { color: var(--orange); text-shadow: 0 0 10px var(--orange); }
-
-.nav-links { display: flex; gap: 2.5rem; }
-
-.nav-link-cyber {
-    text-decoration: none; color: #888;
-    font-size: 0.8rem; letter-spacing: 2px;
-    position: relative; transition: 0.3s;
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
-/* Orange Kinetic Underline */
-.nav-link-cyber::after {
-    content: ''; position: absolute;
-    bottom: -8px; left: 0; width: 0%; height: 3px;
-    background: var(--orange);
-    box-shadow: 0 0 15px var(--orange);
-    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+.brand span {
+    color: var(--primary); /* Use orange primary variable */
 }
 
-.nav-link-cyber:hover { color: #fff; }
-.nav-link-cyber:hover::after { width: 100%; }
+.nav-links {
+    display: flex;
+    gap: 2.5rem;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+/* Primary Underline */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}

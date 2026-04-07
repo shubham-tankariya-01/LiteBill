@@ -1,48 +1,69 @@
 :root {
-    --bg: #0a0b10;
-    --grid-color: rgba(255, 140, 0, 0.07);
-    --orange: #ff8c00;
-    --red: #ff3e3e;
-    --green: #00ff95;
-    --cyan: #00e5ff;
-    --font-main: 'Orbitron', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --bg-main: linear-gradient(135deg, #0f172a 0%, #000000 100%);
+    --bg-surface: #1e293b;
+    --text-main: #ffffff;
+    --text-muted: #cbd5e1;
+    --primary: #f97316;
+    /* Vibrant Orange */
+    --primary-hover: #ea580c;
+    --secondary: #fbbf24;
+    /* Professional Yellow */
+    --secondary-hover: #f59e0b;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --radius: 16px;
+    --font-main: 'Inter', sans-serif;
+    --font-heading: 'Outfit', sans-serif;
 }
 
 body {
-    background-color: var(--bg);
-    /* High-visibility Grid Squares */
-    background-image: 
-        linear-gradient(var(--grid-color) 1.5px, transparent 1.5px),
-        linear-gradient(90deg, var(--grid-color) 1.5px, transparent 1.5px);
-    background-size: 40px 40px;
-    color: #e0e0e0;
+    background: var(--bg-main);
+    background-attachment: fixed;
+    color: var(--text-main);
     font-family: var(--font-main);
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* ===== AMBIENT ORANGE GLOW TEXT ===== */
-.bg-hologram {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-10deg);
-    font-size: 12vw;
-    font-weight: 900;
-    color: rgba(255, 140, 0, 0.03);
-    text-shadow: 0 0 20px rgba(255, 140, 0, 0.1);
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: -1;
-    user-select: none;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand {
+    font-family: var(--font-heading);
+    font-weight: 600;
 }
 
-/* ===== GLOW & COLOR UTILITIES ===== */
-.text-glow-orange { color: var(--orange); text-shadow: 0 0 20px rgba(255, 140, 0, 0.6); }
-.text-red { color: var(--red); text-shadow: 0 0 10px var(--red); margin-right: 15px; }
-.text-green { color: var(--green); text-shadow: 0 0 10px var(--green); }
-.text-cyan { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); font-family: var(--font-mono); }
+/* Minimal Utilities */
+.text-primary {
+    color: var(--primary);
+}
 
-.mono-text { font-family: var(--font-mono); margin-top: 20px; opacity: 0.8; }
+.text-secondary {
+    color: var(--secondary);
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-main {
+    color: var(--text-main) !important;
+}
+
+.card-minimal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-minimal:hover {
+    box-shadow: var(--shadow-md);
+}

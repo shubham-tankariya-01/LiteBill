@@ -1,0 +1,57 @@
+<% layout('layouts/boilerplate') %>
+<link rel="stylesheet" href="/public/css/actions.css" />
+<link rel="stylesheet" href="/public/css/login.css" />
+
+<section class="auth-container card-minimal">
+  <div class="auth-content">
+    <h2 class="auth-header text-center">Sign Up</h2>
+    <p class="text-main text-center mb-4">Create your account to continue</p>
+
+    <form class="auth-form" action="#" method="POST">
+      <!-- Mobile Number -->
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input
+          type="tel"
+          name="mobile"
+          class="minimal-input-field"
+          placeholder="Enter 10-digit number"
+          required
+        />
+      </div>
+
+      <!-- Submeters Row side-by-side -->
+      <div class="submeter-row">
+        <div class="form-group submeter-col">
+          <label class="form-label">No. of Submeters</label>
+          <input
+            type="number"
+            name="submeterCount"
+            min="0"
+            class="minimal-input-field"
+            placeholder="e.g. 2"
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input
+            type="password"
+            name="password"
+            class="minimal-input-field"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-submit">
+        <button type="submit" class="btn-action btn-primary submit-btn">
+          Next
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

@@ -1,72 +1,108 @@
-export const rooms = [
-  {
-    _id: "660000000000000000000001",
-    name: "Room A",
-    last_reading: 1240
-  },
-  {
-    _id: "660000000000000000000002",
-    name: "Room B",
-    last_reading: 980
-  },
-  {
-    _id: "660000000000000000000003",
-    name: "Room C",
-    last_reading: 1560
-  }
-];
-export const readings = [
-  {
-    room: "660000000000000000000001",
-    previous: 1100,
-    current: 1240,
-    units: 140,
-    date: new Date("2026-03-01")
-  },
-  {
-    room: "660000000000000000000002",
-    previous: 850,
-    current: 980,
-    units: 130,
-    date: new Date("2026-03-01")
-  },
-  {
-    room: "660000000000000000000003",
-    previous: 1300,
-    current: 1560,
-    units: 260,
-    date: new Date("2026-03-01")
-  }
-];
-export const bills = [
-  {
-    totalUnits: 530,
-    totalAmount: 3180,
-    extraUnits: 30,
-    splitType: "equal",
+import mongoose from "mongoose";
 
-    rooms: [
-      {
-        room: "660000000000000000000001",
-        units: 140,
-        extraUnits: 10,
-        finalUnits: 150,
-        amount: 900
-      },
-      {
-        room: "660000000000000000000002",
-        units: 130,
-        extraUnits: 10,
-        finalUnits: 140,
-        amount: 840
-      },
-      {
-        room: "660000000000000000000003",
-        units: 260,
-        extraUnits: 10,
-        finalUnits: 270,
-        amount: 1620
-      }
-    ]
+const { ObjectId } = mongoose.Types;
+
+// 🔷 Create IDs manually
+const unit1Id = new ObjectId();
+const unit2Id = new ObjectId();
+const unit3Id = new ObjectId();
+const unit4Id = new ObjectId();
+const unit5Id = new ObjectId();
+
+const room1Id = new ObjectId();
+const room2Id = new ObjectId();
+const room3Id = new ObjectId();
+const room4Id = new ObjectId();
+const room5Id = new ObjectId();
+
+const mainBillId = new ObjectId();
+
+// 🔷 Units Info
+export const unitsData = [
+  {
+    _id: unit1Id,
+    room: room1Id,
+    previous_reading: 100,
+    current_reading: 150,
+    bill_amount: 500
+  },
+  {
+    _id: unit2Id,
+    room: room2Id,
+    previous_reading: 200,
+    current_reading: 260,
+    bill_amount: 700
+  },
+  {
+    _id: unit3Id,
+    room: room3Id,
+    previous_reading: 50,
+    current_reading: 90,
+    bill_amount: 300
+  },
+  {
+    _id: unit4Id,
+    room: room4Id,
+    previous_reading: 80,
+    current_reading: 140,
+    bill_amount: 450
+  },
+  {
+    _id: unit5Id,
+    room: room5Id,
+    previous_reading: 120,
+    current_reading: 180,
+    bill_amount: 600
   }
 ];
+
+// 🔷 Rooms (reference UnitsInfo)
+export const roomsData = [
+  {
+    _id: room1Id,
+    room_name: "Room 1"
+  },
+  {
+    _id: room2Id,
+    room_name: "Room 2"
+  },
+  {
+    _id: room3Id,
+    room_name: "Room 3"
+  },
+  {
+    _id: room4Id,
+    room_name: "Room 4"
+  },
+  {
+    _id: room5Id,
+    room_name: "Room 5"
+  }
+];
+
+// 🔷 Main Bill
+export const mainBillData = {
+  _id: mainBillId,
+  main_units: 400,
+  main_total_bill_amount: 5000
+};
+
+// 🔷 User (reference rooms + bill)
+export const userData = {
+  user_name: "Shubham",
+  mobile_number: "9999999999",
+  house_id: "HOUSE_1",
+  rooms: [
+    { room_id: room1Id },
+    { room_id: room2Id },
+    { room_id: room3Id },
+    { room_id: room4Id },
+    { room_id: room5Id }
+  ],
+  bills: [
+    {
+      bill_id: mainBillId,
+      date: new Date()
+    }
+  ]
+};

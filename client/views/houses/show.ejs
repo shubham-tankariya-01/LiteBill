@@ -1,0 +1,47 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="page-header">
+    <div>
+        <h1 style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="home" style="color: var(--accent-yellow);"></i> <%= houseId %> Overview</h1>
+        <p style="color: var(--text-muted); margin-top: 0.5rem;">User ID Reference: System Owner</p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="/houses/<%= houseId %>/edit" class="btn btn-outline"><i data-lucide="settings-2" style="width: 16px;"></i> Edit Configuration</a>
+        <form action="/houses/<%= houseId %>?_method=DELETE" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5;"><i data-lucide="trash-2" style="width: 16px;"></i></button>
+        </form>
+    </div>
+</div>
+
+<div class="grid-layout">
+    <div class="analytic-card theme-room">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <h3><i data-lucide="bed-double"></i> Rooms</h3>
+            <span class="badge" style="background: rgba(209, 124, 148, 0.15); color: var(--accent-pink);">5 Configured</span>
+        </div>
+        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Manage individual unit setups and capacities.</p>
+        <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+            <a href="/houses/<%= houseId %>/rooms" class="btn btn-outline" style="flex: 1;">View All</a>
+            <a href="/houses/<%= houseId %>/rooms/new" class="btn btn-primary" style="background: var(--accent-pink);"><i data-lucide="plus" style="width: 16px;"></i></a>
+        </div>
+    </div>
+
+    <div class="analytic-card theme-cycle">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <h3><i data-lucide="calendar-clock"></i> Billing Cycles</h3>
+        </div>
+        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">View ongoing and past periods for calculations.</p>
+        <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+            <a href="/houses/<%= houseId %>/cycles" class="btn btn-outline" style="flex: 1;">History</a>
+            <a href="/houses/<%= houseId %>/cycles/new" class="btn btn-blue"><i data-lucide="plus" style="width: 16px;"></i></a>
+        </div>
+    </div>
+    
+    <div class="analytic-card theme-bill" style="background: #10B981; border-color: #10B981;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #fff;">
+            <h3 style="color: #fff;"><i data-lucide="zap"></i> Fast Input</h3>
+        </div>
+        <p style="color: rgba(255,255,255,0.9); margin-bottom: 1.5rem; font-size: 0.85rem;">Log meter readings for all rooms instantly to start billing.</p>
+        <a href="/houses/<%= houseId %>/readings/new" class="btn" style="background: #fff; color: #10B981; width: 100%; margin-top: auto;">Record Meter Readings</a>
+    </div>
+</div>

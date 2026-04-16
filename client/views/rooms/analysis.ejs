@@ -1,0 +1,18 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="analytic-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2>Room Analytics (ID: <%= roomId %>)</h2>
+            <p class="text-muted">Consumption trends and history.</p>
+        </div>
+        <a href="/rooms/<%= roomId %>" class="btn btn-outline">Back to Room</a>
+    </div>
+
+    <div class="analytic-card" style="min-height: 300px; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border: none;">
+        <div style="text-align: center;">
+            <i data-lucide="bar-chart-2" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <p class="text-muted">Chart rendering would go here.</p>
+        </div>
+    </div>
+</div>

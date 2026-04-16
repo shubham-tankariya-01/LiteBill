@@ -1,0 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Flat Page Aviation-inspired Palette */
+    --bg-body: #F4F6F5;        /* Very light soft grey for the whole page */
+    --bg-card: #FFFFFF;        /* Pure white for cards */
+    --bg-nav: #FFFFFF;         /* White top nav */
+    
+    /* Text */
+    --text-main: #1D211F;      
+    --text-muted: #7E8684;     
+    --text-light: #B4BCBA;     
+
+    /* Dynamic Page Accents */
+    --accent-orange: #FE8A5C;  /* General */
+    --accent-blue: #70B2DC;    /* Cycles / Timeline */
+    --accent-green: #AEE2C2;   /* Bills / Money */
+    --accent-yellow: #FBCB45;  /* Houses / Units */
+    --accent-pink: #D17C94;    /* Rooms / Config */
+    
+    /* Borders & Shadows */
+    --border-soft: #EAECEB;
+    --shadow-faint: 0px 4px 15px rgba(0, 0, 0, 0.02);
+    --shadow-nav: 0px 4px 20px rgba(0, 0, 0, 0.03);
+
+    /* Edges */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-pill: 9999px;
+
+    /* Fonts */
+    --font-main: 'Plus Jakarta Sans', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==================================================== 
+   LAYOUT: Top Navbar & Main Container 
+==================================================== */
+.top-navbar {
+    background-color: var(--bg-nav);
+    padding: 1rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-nav);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-item {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+}
+
+.nav-item i {
+    width: 16px;
+    height: 16px;
+}
+
+.nav-item:hover {
+    color: var(--text-main);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* ==================================================== 
+   TOP HEADER IN PAGES
+==================================================== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+
+/* ==================================================== 
+   CARDS 
+==================================================== */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.analytic-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-faint);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.analytic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.analytic-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.analytic-card i {
+    width: 18px;
+    height: 18px;
+}
+
+/* Specific Accent themes for cards */
+.theme-house { border-top: 4px solid var(--accent-yellow); }
+.theme-house h3 i { color: var(--accent-yellow); }
+
+.theme-room { border-top: 4px solid var(--accent-pink); }
+.theme-room h3 i { color: var(--accent-pink); }
+
+.theme-cycle { border-top: 4px solid var(--accent-blue); }
+.theme-cycle h3 i { color: var(--accent-blue); }
+
+.theme-bill { border-top: 4px solid #10B981; } /* Slightly stronger green for reading ease */
+.theme-bill h3 i { color: #10B981; }
+
+/* ==================================================== 
+   FORMS & BUTTONS
+==================================================== */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background-color: #F8F9FA;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--text-muted);
+    background-color: #FFF;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-main);
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary { background: var(--text-main); color: #fff; }
+.btn-primary:hover { filter: brightness(1.2); }
+
+.btn-orange { background: var(--accent-orange); color: #fff; }
+.btn-orange:hover { filter: brightness(1.1); }
+
+.btn-blue { background: var(--accent-blue); color: #fff; }
+.btn-green { background: #10B981; color: #fff; }
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: var(--text-main);
+}
+.btn-outline:hover {
+    background: var(--bg-body);
+}
+
+a {
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+h1, h2, h3, h4 { color: var(--text-main); font-weight: 700; margin-bottom: 0.5rem; }
+p { color: var(--text-muted); }
+
+/* Badges */
+.badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 600;
+}

@@ -1,0 +1,19 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="analytic-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2>Billing Cycles</h2>
+            <p class="text-muted">History of all billing periods for House ID: <%= houseId %></p>
+        </div>
+        <a href="/houses/<%= houseId %>/readings/new" class="btn btn-primary">Start New Cycle (Readings)</a>
+    </div>
+
+    <div class="grid-layout">
+        <div class="analytic-card border-top-pink">
+            <h3 style="margin-bottom: 0.5rem; color: var(--accent-pink-light);">Cycle: Oct 2023</h3>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Start Date -> End Date</p>
+            <a href="/cycles/1" class="btn btn-outline" style="width: 100%;">View Cycle Dashboard</a>
+        </div>
+    </div>
+</div>

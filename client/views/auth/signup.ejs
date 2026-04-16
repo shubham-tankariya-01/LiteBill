@@ -1,0 +1,25 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container" style="max-width: 450px; margin-top: 4rem;">
+    <div class="analytic-card" style="text-align: center;">
+        <i data-lucide="zap" style="color: var(--primary); width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+        <h2 style="margin-bottom: 0.5rem;">Create Account</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">Sign up to start tracking bills.</p>
+
+        <form action="/auth/signup" method="POST" style="text-align: left;">
+            <div class="form-group">
+                <label class="form-label" for="mobile_number">Mobile Number</label>
+                <input type="text" id="mobile_number" name="mobile_number" class="form-control" required placeholder="Enter 10-digit number">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="Create a password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign Up</button>
+        </form>
+        
+        <p class="text-muted" style="margin-top: 2rem; font-size: 0.875rem;">Already have an account? <a href="/auth/login">Log In</a></p>
+    </div>
+</div>

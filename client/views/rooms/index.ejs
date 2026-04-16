@@ -1,0 +1,17 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="page-header">
+    <h1><i data-lucide="bed-double" style="color: var(--accent-pink);"></i> Rooms Configured</h1>
+    <a href="/houses/1/rooms/new" class="btn btn-primary" style="background: var(--accent-pink);"><i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Room</a>
+</div>
+
+<div class="grid-layout">
+    <div class="analytic-card theme-room">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0;">Suite 101</h3>
+            <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">Occupied</span>
+        </div>
+        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Allocated to: John Doe</p>
+        <a href="/rooms/1" class="btn btn-outline" style="width: 100%;">View Room Profile</a>
+    </div>
+</div>

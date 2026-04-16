@@ -1,0 +1,40 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="top-header" style="margin-bottom: 2rem;">
+    <h1>Bill Distribution</h1>
+    <div class="top-filters">
+        <div class="filter-pill active">Cycle <%= cycleId %></div>
+        
+        <div class="user-actions">
+            <button style="background:none; border:none; color: var(--text-main); font-weight: 600; font-size: 0.85rem; cursor:pointer; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="download" style="width: 14px;"></i> Export</button>
+        </div>
+    </div>
+</div>
+
+<div class="grid-layout">
+    <div class="analytic-card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;"><div style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent-orange);"></div> Room 1</h3>
+            <span style="font-size: 0.75rem; background: rgba(174, 226, 194, 0.3); color: #047857; padding: 0.2rem 0.6rem; border-radius: 99px; font-weight: 600;">Calculated</span>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <!-- Big metric like in the image -->
+            <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); line-height: 1;">₹1,250<span style="font-size: 1.2rem; color: var(--text-muted);">.00</span></div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Total Payable</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-top: 1px dashed var(--border-soft);">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Previous Reading</span>
+            <span style="font-weight: 600; font-size: 0.9rem;">100.0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-top: 1px dashed var(--border-soft);">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Current Reading</span>
+            <span style="font-weight: 600; font-size: 0.9rem;">150.0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; background: #F8F9FA; margin: 0 -1.5rem -1.5rem -1.5rem; padding: 1rem 1.5rem; border-radius: 0 0 var(--radius-md) var(--radius-md);">
+            <strong style="font-size: 0.9rem;">Consumed</strong>
+            <strong style="color: var(--accent-orange);">50 Units</strong>
+        </div>
+    </div>
+</div>

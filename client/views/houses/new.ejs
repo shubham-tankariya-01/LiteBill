@@ -1,0 +1,20 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container" style="max-width: 600px;">
+    <div class="analytic-card">
+        <h2>Add New House</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">Create a new property to manage rooms and billing.</p>
+
+        <form action="/houses" method="POST">
+            <div class="form-group">
+                <label class="form-label" for="house_name">House Name</label>
+                <input type="text" id="house_name" name="house_name" class="form-control" required placeholder="e.g. Sunset Villa">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Create House</button>
+                <a href="/houses" class="btn btn-outline" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

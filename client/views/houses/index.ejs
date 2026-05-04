@@ -1,18 +1,96 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header">
-    <h1><i data-lucide="home" style="color: var(--accent-yellow);"></i> My Houses</h1>
-    <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Property</a>
-</div>
-
-<div class="grid-layout">
-    <!-- Card 1 -->
-    <div class="analytic-card theme-house">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-            <h3 style="margin: 0; color: var(--text-main);">Sunset Villa</h3>
-            <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">Active</span>
-        </div>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Ref: user_1234</p>
-        <a href="/houses/1" class="btn btn-outline" style="width: 100%;">Enter Dashboard</a>
+    <div class="page-header">
+        <h1><i data-lucide="home" style="color: var(--accent-yellow);"></i> My Houses</h1>
+        <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            Add &nbsp; House</a>
     </div>
-</div>
+
+    <div class="grid-layout">
+        <!-- Houses -->
+        <!-- Card 1 -->
+        <% houses.forEach(house=> { %>
+            <div class="analytic-card theme-house">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; color: var(--text-main);">
+                        <%= house.house_name %>
+                    </h3>
+                </div>
+                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Ref: <%= house._id %>
+                </p>
+                <a href="/houses/<%= house._id %>" class="btn btn-outline" style="width: 100%;">Enter Dashboard</a>
+            </div>
+            <% }) %>
+    </div>
+
+
+
+    <!-- //House adding modal -->
+    <link rel="stylesheet" href="/public/css/houses.css" />
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content analytic-card theme-house">
+            <button type="button" id="closeModalBtn" class="modal-close-btn">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+            </button>
+
+            <!-- STEP 1 -->
+            <div id="step1" class="step-container">
+                <h2 class="modal-title">
+                    <div class="modal-icon-wrapper">
+                        <i data-lucide="home"></i>
+                    </div>
+                    Add House Details
+                </h2>
+
+                <div class="form-group mb-2">
+                    <label class="form-label" for="houseName">House Name</label>
+                    <input type="text" id="houseName" class="form-control" placeholder="e.g. Sunset Villa"
+                        autocomplete="off" />
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline flex-1"
+                        onclick="document.getElementById('closeModalBtn').click()">Cancel</button>
+                    <button type="button" id="nextBtn" class="btn btn-primary flex-1">Next &nbsp;<i
+                            data-lucide="arrow-right" class="icon-sm"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="step2" class="step-container hidden">
+                <h2 class="modal-title mb-1">
+                    <div class="modal-icon-wrapper bg-green-soft">
+                        <i data-lucide="zap" class="text-green"></i>
+                    </div>
+                    Name the Meters
+                </h2>
+                <p class="text-muted mb-2" style="font-size: 0.85rem;">Enter the names of the meters installed in this
+                    house.</p>
+
+                <div id="metersContainer">
+                    <div class="form-group meter-row">
+                        <input type="text" name="meters[]" class="form-control" placeholder="e.g. Main Electricity"
+                            autocomplete="off" />
+                        <!-- default one cannot be removed easily, hiding button -->
+                        <button type="button" class="remove-meter-btn" title="Remove" style="visibility: hidden;">
+                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" id="addMeterBtn" class="btn btn-dashed-green">
+                    <i data-lucide="plus" class="icon-sm"></i> Add Another Meter
+                </button>
+
+                <div class="modal-actions">
+                    <button type="button" id="backToStep1Btn" class="btn btn-outline flex-1">Back</button>
+                    <button type="button" id="submitBtn" class="btn btn-primary flex-1-5"><i data-lucide="check"
+                            class="icon-sm"></i> Complete Setup</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/public/js/houses.js"></script>

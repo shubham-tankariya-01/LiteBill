@@ -2,26 +2,34 @@
 
 :root {
     /* Flat Page Aviation-inspired Palette */
-    --bg-body: #F4F6F5;        /* Very light soft grey for the whole page */
-    --bg-card: #FFFFFF;        /* Pure white for cards */
-    --bg-nav: #FFFFFF;         /* White top nav */
-    
+    --bg-body: #F4F6F5;
+    /* Very light soft grey for the whole page */
+    --bg-card: #FFFFFF;
+    /* Pure white for cards */
+    --bg-nav: #FFFFFF;
+    /* White top nav */
+
     /* Text */
-    --text-main: #1D211F;      
-    --text-muted: #7E8684;     
-    --text-light: #B4BCBA;     
+    --text-main: #1D211F;
+    --text-muted: #7E8684;
+    --text-light: #B4BCBA;
 
     /* Dynamic Page Accents */
-    --accent-orange: #FE8A5C;  /* General */
-    --accent-blue: #70B2DC;    /* Cycles / Timeline */
-    --accent-green: #AEE2C2;   /* Bills / Money */
-    --accent-yellow: #FBCB45;  /* Houses / Units */
-    --accent-pink: #D17C94;    /* Rooms / Config */
-    
+    --accent-orange: #FE8A5C;
+    /* General */
+    --accent-blue: #70B2DC;
+    /* Cycles / Timeline */
+    --accent-green: #AEE2C2;
+    /* Bills / Money */
+    --accent-yellow: #FBCB45;
+    /* Houses / Units */
+    --accent-pink: #D17C94;
+    /* Rooms / Config */
+
     /* Borders & Shadows */
     --border-soft: #EAECEB;
     --shadow-faint: 0px 4px 15px rgba(0, 0, 0, 0.02);
-    --shadow-nav: 0px 4px 20px rgba(0, 0, 0, 0.03);
+    --shadow-nav: 0px 4px 20px rgba(254, 138, 92, 0.05);
 
     /* Edges */
     --radius-sm: 8px;
@@ -54,12 +62,11 @@ body {
     background-color: var(--bg-nav);
     padding: 1rem 3rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between !important;
     align-items: center;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 2px solid var(--accent-orange);
     box-shadow: var(--shadow-nav);
     position: sticky;
-    top: 0;
     z-index: 100;
 }
 
@@ -137,20 +144,22 @@ body {
     gap: 1.5rem;
 }
 
+.reading-input {
+    max-width: 1000px;
+    margin: 0 auto;
+    border: 2px solid var(--accent-orange);
+}
+
 .analytic-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
     padding: 1.5rem;
     box-shadow: var(--shadow-faint);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
-}
-
-.analytic-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .analytic-card h3 {
@@ -169,17 +178,38 @@ body {
 }
 
 /* Specific Accent themes for cards */
-.theme-house { border-top: 4px solid var(--accent-yellow); }
-.theme-house h3 i { color: var(--accent-yellow); }
+.theme-house {
+    border-top: 4px solid var(--accent-yellow);
+}
 
-.theme-room { border-top: 4px solid var(--accent-pink); }
-.theme-room h3 i { color: var(--accent-pink); }
+.theme-house h3 i {
+    color: var(--accent-yellow);
+}
 
-.theme-cycle { border-top: 4px solid var(--accent-blue); }
-.theme-cycle h3 i { color: var(--accent-blue); }
+.theme-room {
+    border-top: 4px solid var(--accent-pink);
+}
 
-.theme-bill { border-top: 4px solid #10B981; } /* Slightly stronger green for reading ease */
-.theme-bill h3 i { color: #10B981; }
+.theme-room h3 i {
+    color: var(--accent-pink);
+}
+
+.theme-cycle {
+    border-top: 4px solid var(--accent-blue);
+}
+
+.theme-cycle h3 i {
+    color: var(--accent-blue);
+}
+
+.theme-bill {
+    border-top: 4px solid #10B981;
+}
+
+/* Slightly stronger green for reading ease */
+.theme-bill h3 i {
+    color: #10B981;
+}
 
 /* ==================================================== 
    FORMS & BUTTONS
@@ -229,22 +259,44 @@ body {
     font-family: var(--font-main);
 }
 
-.btn:active { transform: scale(0.97); }
+.btn:active {
+    transform: scale(0.97);
+}
 
-.btn-primary { background: var(--text-main); color: #fff; }
-.btn-primary:hover { filter: brightness(1.2); }
+.btn-primary {
+    background: var(--text-main);
+    color: #fff;
+}
 
-.btn-orange { background: var(--accent-orange); color: #fff; }
-.btn-orange:hover { filter: brightness(1.1); }
+.btn-primary:hover {
+    filter: brightness(1.2);
+}
 
-.btn-blue { background: var(--accent-blue); color: #fff; }
-.btn-green { background: #10B981; color: #fff; }
+.btn-orange {
+    background: var(--accent-orange);
+    color: #fff;
+}
+
+.btn-orange:hover {
+    filter: brightness(1.1);
+}
+
+.btn-blue {
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+.btn-green {
+    background: #10B981;
+    color: #fff;
+}
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-soft);
+    border: 2px solid var(--text-main);
     color: var(--text-main);
 }
+
 .btn-outline:hover {
     background: var(--bg-body);
 }
@@ -254,13 +306,150 @@ a {
     color: var(--text-main);
 }
 
-h1, h2, h3, h4 { color: var(--text-main); font-weight: 700; margin-bottom: 0.5rem; }
-p { color: var(--text-muted); }
+h1,
+h2,
+h3,
+h4 {
+    color: var(--text-main);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+p {
+    color: var(--text-muted);
+}
 
 /* Badges */
 .badge {
+    display: flex;
     padding: 0.25rem 0.6rem;
     border-radius: var(--radius-pill);
     font-size: 0.75rem;
     font-weight: 600;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==================================================== 
+   RESPONSIVE DESIGN (Minimalist Layout Handlers)
+==================================================== */
+.hamburger-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+
+
+
+@media (max-width: 820px) {
+
+    /* Navbar collapses into a clean mobile drawer */
+    .hamburger-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-links,
+    .nav-actions {
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .nav-links.show,
+    .nav-actions.show {
+        display: flex;
+        animation: fadeInDown 0.3s ease forwards;
+    }
+
+    .nav-actions {
+        border-top: 1px solid var(--border-soft);
+        padding-top: 1.5rem;
+    }
+
+    .top-navbar {
+        padding: 1rem 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Structural down-scaling */
+    .main-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .page-header div[style*="display: flex"] {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    /* Typography precision */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    h2,
+    h3,
+    h4 {
+        font-size: 1.15rem;
+    }
+
+    .text-muted {
+        font-size: 0.8rem !important;
+    }
+
+    /* Component adjustments */
+    .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .grid-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-control {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .analytic-card {
+        padding: 1.25rem 1rem;
+        max-width: 100%;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    /* Safely wrap inner card navs */
+    .analytic-card>div[style*="justify-content: space-between"] {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .analytic-card>div[style*="display: flex"] {
+        flex-wrap: wrap;
+        width: 100%;
+    }
 }

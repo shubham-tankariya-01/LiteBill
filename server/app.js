@@ -8,6 +8,7 @@ import mainBillsRoute from "./routes/main_bills.js";
 import readingsRoute from "./routes/readings.js";
 import roomBillsRoute from "./routes/room_bills.js";
 import authRoute from "./routes/auth.js";
+import House from "./models/House.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ejsMate from "ejs-mate";
@@ -29,6 +30,20 @@ app.use(express.urlencoded({ extended: true }));
 // static files configuration
 app.use("/public", express.static(path.join(__dirname, "../client/public")));
 
+// Global middleware to pass houses to navbar dropdown
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      res.locals.navHouses = await House.find({});
+    } else {
+      res.locals.navHouses = [];
+    }
+  } catch (err) {
+    console.error("Error fetching houses for navbar:", err);
+    res.locals.navHouses = [];
+  }
+  next();
+});
 
 //db-connetion===================================================
 main()
@@ -50,9 +65,10 @@ app.use("/houses/:houseId/rooms", roomsRoute);
 app.use("/rooms", roomsRoute);
 app.use("/houses/:houseId/cycles", cyclesRoute);
 app.use("/cycles", cyclesRoute);
-app.use("/cycles/:cycleId/main-bill", mainBillsRoute);
-app.use("/main-bill", mainBillsRoute);
+app.use("/houses/:houseId/main-bill", mainBillsRoute);
 app.use("/houses/:houseId/readings", readingsRoute);
+app.use("/houses/:houseId/cycles/:cycleId/readings", readingsRoute);
+
 app.use("/cycles/:cycleId/room-bills", roomBillsRoute);
 app.use("/houses", housesRoute);
 app.use("/auth", authRoute);

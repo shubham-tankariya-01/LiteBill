@@ -1,17 +1,76 @@
 <% layout('layouts/boilerplate') %>
+    <div class="page-header">
+        <h1><i data-lucide="bed-double" style="color: var(--accent-pink);"></i> &nbsp;
 
-<div class="page-header">
-    <h1><i data-lucide="bed-double" style="color: var(--accent-pink);"></i> Rooms Configured</h1>
-    <a href="/houses/1/rooms/new" class="btn btn-primary" style="background: var(--accent-pink);"><i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Room</a>
-</div>
-
-<div class="grid-layout">
-    <div class="analytic-card theme-room">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-            <h3 style="margin: 0;">Suite 101</h3>
-            <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">Occupied</span>
-        </div>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Allocated to: John Doe</p>
-        <a href="/rooms/1" class="btn btn-outline" style="width: 100%;">View Room Profile</a>
+            <%= house.house_name %> &nbsp;
+                <span style="color: var(--accent-pink);">All Meters</span>
+        </h1>
+        <a href="/houses/1/rooms/new" class="btn btn-primary" style="background: var(--accent-pink);"><i
+                data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Room</a>
     </div>
-</div>
+    <div class="grid-layout">
+        <% rooms.forEach(room=> { %>
+            <div class="analytic-card theme-room">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0;">
+                        <%= room.meter_name %>
+                    </h3>
+                </div>
+                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Allocated to:
+                    <%= house.house_name %>
+                </p>
+                <a href="/rooms/<%= room._id %>" class="btn btn-outline" style="width: 100%;">View Room Profile</a>
+            </div>
+            <% }) %>
+    </div>
+
+    <!-- Modal for Adding Meters/Rooms -->
+    <link rel="stylesheet" href="/public/css/houses.css" />
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content analytic-card theme-room"
+            style="padding: 2.5rem; border-top: 4px solid var(--accent-pink);">
+            <button type="button" id="closeModalBtn" class="modal-close-btn">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+            </button>
+
+            <div id="step1" class="step-container">
+                <h2 class="modal-title mb-1">
+                    <div class="modal-icon-wrapper" style="background: rgba(209, 124, 148, 0.15);">
+                        <i data-lucide="bed-double" style="color: var(--accent-pink);"></i>
+                    </div>
+                    Add New Meters / Rooms
+                </h2>
+                <p class="text-muted mb-2" style="font-size: 0.85rem;">Enter the names of the meters to install in <%=
+                        house.house_name %>.</p>
+
+                <div id="metersContainer">
+                    <div class="form-group meter-row">
+                        <input type="text" name="meters[]" class="form-control" placeholder="e.g. Master Bedroom"
+                            autocomplete="off" />
+                        <button type="button" class="remove-meter-btn" title="Remove" style="visibility: hidden;">
+                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" id="addMeterBtn" class="btn btn-dashed-green"
+                    style="border-color: var(--accent-pink); color: #B35875; background: rgba(209, 124, 148, 0.05);">
+                    <i data-lucide="plus" class="icon-sm"></i> Add Another
+                </button>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline flex-1"
+                        onclick="document.getElementById('closeModalBtn').click()">Cancel</button>
+                    <button type="button" id="submitBtn" class="btn btn-primary flex-1-5"
+                        style="background: var(--accent-pink);"><i data-lucide="check" class="icon-sm"></i> Complete
+                        Setup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentHouseId = "<%= house._id %>";
+    </script>
+    <script src="/public/js/rooms.js"></script>

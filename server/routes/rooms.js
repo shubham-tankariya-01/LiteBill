@@ -1,20 +1,38 @@
 import express from "express";
 const router = express.Router({ mergeParams: true });
-
+import Room from "../models/Room.js";
+import House from "../models/House.js";
 // Note: Mounted as app.use("/houses/:houseId/rooms", roomsHouseRouter)
 // and app.use("/rooms", roomsBaseRouter) in app.js
 
 // -- Routes under /houses/:houseId/rooms --
-router.get("/", (req, res) => {
-    res.render("rooms/index", { houseId: req.params.houseId });
+router.get("/", async (req, res) => {
+    const rooms = await Room.find({ house_id: req.params.houseId }).populate("house_id");
+    const house = await House.findById(req.params.houseId);
+    res.render("rooms/index", { rooms, house });
 });
 
 router.get("/new", (req, res) => {
     res.render("rooms/new", { houseId: req.params.houseId });
 });
 
-router.post("/", (req, res) => {
-    res.redirect(`/houses/${req.params.houseId}/rooms`);
+router.post("/", async (req, res) => {
+    try {
+        const { meters } = req.body;
+        if (meters && meters.length > 0) {
+            const roomPromises = meters.map(meter => {
+                return new Room({
+                    house_id: req.params.houseId,
+                    meter_name: meter
+                }).save();
+            });
+            await Promise.all(roomPromises);
+        }
+        res.json({ message: "Success" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server Error" });
+    }
 });
 
 // -- Routes under /rooms --

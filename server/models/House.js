@@ -5,7 +5,6 @@ const houseSchema = new mongoose.Schema(
         user_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
             index: true,
         },
 
@@ -14,6 +13,17 @@ const houseSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        active_billing_cycle :{
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "BillingCycle",
+            default : null
+        },
+        previous_billing_cycle :{
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "BillingCycle",
+            default : null
+        }
+
     },
     { timestamps: true }
 );

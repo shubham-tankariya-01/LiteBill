@@ -1,41 +1,45 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header">
-    <h1>System Overview</h1>
-    <div>
-        <a href="/houses/new" class="btn btn-outline"><i data-lucide="plus" style="width: 14px;"></i> New Property</a>
-    </div>
-</div>
-
-<div class="grid-layout">
-    <!-- Houses Widget -->
-    <div class="analytic-card theme-house">
-        <h3><i data-lucide="home"></i> Properties</h3>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Manage your active rental units and houses.</p>
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
-            12 <span style="font-size: 1rem; color: var(--text-muted); font-weight: 500;">Active</span>
-        </div>
-        <a href="/houses" class="btn btn-outline" style="width: 100%;">View Houses</a>
+    <div class="page-header">
+        <h1>System Overview</h1>
     </div>
 
-    <!-- Billing Cycles Widget -->
-    <div class="analytic-card theme-cycle">
-        <h3><i data-lucide="calendar-clock"></i> Ongoing Cycles</h3>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Currently active calculation periods across all properties.</p>
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
-            3 <span class="badge" style="background: rgba(112, 178, 220, 0.2); color: var(--accent-blue); font-size: 0.8rem; margin-left: 0.5rem;">Processing</span>
+    <div class="grid-layout">
+        <!-- Houses Widget -->
+        <div class="analytic-card theme-house">
+            <h3><i data-lucide="home"></i> Properties</h3>
+            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Manage your active rental units and
+                houses.</p>
+            <div
+                style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
+                12 <span style="font-size: 1rem; color: var(--text-muted); font-weight: 500;">Active</span>
+            </div>
+            <a href="/houses" class="btn btn-outline" style="width: 100%;">View Houses</a>
         </div>
-        <a href="/cycles" class="btn btn-outline" style="width: 100%;">Monitor Cycles</a>
-    </div>
 
-    <!-- Revenue / Bills Widget -->
-    <div class="analytic-card theme-bill">
-        <h3><i data-lucide="indian-rupee"></i> Recent Debts</h3>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Cumulative calculated balances pending collection.</p>
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
-            ₹45K
+        <!-- Billing Cycles Widget -->
+        <div class="analytic-card theme-cycle">
+            <h3><i data-lucide="calendar-clock"></i> Ongoing Cycles</h3>
+            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Currently active calculation
+                periods across all properties.</p>
+            <div
+                style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
+                3 <span class="badge"
+                    style="background: rgba(112, 178, 220, 0.2); color: var(--accent-blue); font-size: 0.8rem; margin-left: 0.5rem;">Processing</span>
+            </div>
+            <a href="/cycles" class="btn btn-outline" style="width: 100%;">Monitor Cycles</a>
         </div>
-        <!-- Link to a specific cycle bill distribution or a master list when built -->
-        <a href="/cycles" class="btn btn-green" style="width: 100%;">Collection Hub</a>
+
+        <!-- Revenue / Bills Widget -->
+        <div class="analytic-card theme-bill">
+            <h3><i data-lucide="indian-rupee"></i> Recent Debts</h3>
+            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Cumulative calculated balances
+                pending collection.</p>
+            <div
+                style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
+                ₹45K
+            </div>
+            <!-- Link to a specific cycle bill distribution or a master list when built -->
+            <a href="/cycles" class="btn btn-green" style="width: 100%;">Collection Hub</a>
+        </div>
     </div>
-</div>

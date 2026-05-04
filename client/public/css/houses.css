@@ -1,0 +1,160 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(29, 33, 31, .4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity .3s ease, visibility .3s ease;
+}
+
+.modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Extends .analytic-card & .theme-house */
+.modal-content {
+    padding: 2.5rem;
+    width: 450px;
+    max-width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .15);
+    position: relative;
+    transform: translateY(0);
+    transition: transform .4s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+.modal.hidden .modal-content {
+    transform: translateY(30px);
+}
+
+.modal-title {
+    margin: 0 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: 1.5rem;
+}
+
+.modal-icon-wrapper {
+    background: rgba(251, 203, 69, .15);
+    padding: .6rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-icon-wrapper i {
+    width: 22px;
+    height: 22px;
+    color: var(--accent-yellow);
+}
+
+.modal-close-btn {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color .2s;
+    padding: .5rem;
+}
+
+.modal-close-btn:hover {
+    color: var(--text-main);
+}
+
+.step-container {
+    transition: opacity .3s ease, transform .3s ease;
+}
+
+.step-container.hidden {
+    display: none;
+}
+
+.meter-row {
+    display: flex;
+    gap: .75rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.meter-row .form-control {
+    margin-bottom: 0;
+}
+
+.remove-meter-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent-orange);
+    cursor: pointer;
+    padding: .5rem;
+    transition: transform .2s;
+}
+
+.remove-meter-btn:hover {
+    transform: scale(1.1);
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* UTILITIES */
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-1-5 {
+    flex: 1.5;
+}
+
+.mb-1 {
+    margin-bottom: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 2rem;
+}
+
+.icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.bg-green-soft {
+    background: rgba(16, 185, 129, .15);
+}
+
+.text-green {
+    color: #10B981;
+}
+
+/* Extends .btn */
+.btn-dashed-green {
+    width: 100%;
+    margin-bottom: 2rem;
+    border: 1px dashed var(--accent-green);
+    color: #4a7c59;
+    background: rgba(174, 226, 194, .15);
+}
+
+.btn-dashed-green:hover {
+    background: rgba(174, 226, 194, .35);
+    color: #3b6649;
+}

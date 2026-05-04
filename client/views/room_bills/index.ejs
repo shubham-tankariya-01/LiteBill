@@ -1,40 +1,144 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="top-header" style="margin-bottom: 2rem;">
-    <h1>Bill Distribution</h1>
-    <div class="top-filters">
-        <div class="filter-pill active">Cycle <%= cycleId %></div>
-        
-        <div class="user-actions">
-            <button style="background:none; border:none; color: var(--text-main); font-weight: 600; font-size: 0.85rem; cursor:pointer; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="download" style="width: 14px;"></i> Export</button>
+    <div class="top-header" style="margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin-bottom: 0.5rem;">Bill Distribution</h1>
+            <p class="text-muted">
+                <%= cycle.house.house_name %> |
+                    Period: <%= new Date(cycle.startDate).toLocaleDateString() %> - <%= cycle.endDate ? new
+                            Date(cycle.endDate).toLocaleDateString() : 'Active' %>
+            </p>
+        </div>
+        <div class="top-filters">
+            <a href="/houses/<%= houseId %>" class="btn btn-outline"
+                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="arrow-left" style="width: 16px;"></i> Back to House
+            </a>
+
         </div>
     </div>
-</div>
 
-<div class="grid-layout">
-    <div class="analytic-card">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;"><div style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent-orange);"></div> Room 1</h3>
-            <span style="font-size: 0.75rem; background: rgba(174, 226, 194, 0.3); color: #047857; padding: 0.2rem 0.6rem; border-radius: 99px; font-weight: 600;">Calculated</span>
-        </div>
-        
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <!-- Big metric like in the image -->
-            <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); line-height: 1;">₹1,250<span style="font-size: 1.2rem; color: var(--text-muted);">.00</span></div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Total Payable</div>
-        </div>
+    <!-- Main Bill Summary Card -->
+    <% if (mainBill) { %>
+        <div class="analytic-card" style="margin-bottom: 2rem; padding: 1.25rem;">
+            <div
+                style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-top: 1px dashed var(--border-soft);">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Previous Reading</span>
-            <span style="font-weight: 600; font-size: 0.9rem;">100.0</span>
+                <!-- Total Bill -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="background: rgba(79, 70, 229, 0.1); padding: 0.6rem; border-radius: 10px;">
+                        <i data-lucide="receipt" style="color: var(--primary); width: 20px; height: 20px;"></i>
+                    </div>
+                    <div>
+                        <div
+                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 0.1rem;">
+                            Utility Bill</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">₹<%=
+                                mainBill.total_amount.toLocaleString() %>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
+
+                <!-- Total Units -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="background: rgba(245, 158, 11, 0.1); padding: 0.6rem; border-radius: 10px;">
+                        <i data-lucide="zap" style="color: #f59e0b; width: 20px; height: 20px;"></i>
+                    </div>
+                    <div>
+                        <div
+                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 0.1rem;">
+                            Total Units</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">
+                            <%= mainBill.total_units %> <span
+                                    style="font-size: 0.8rem; font-weight: 500; opacity: 0.7;">Units</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
+
+                <!-- Rate -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 0.6rem; border-radius: 10px;">
+                        <i data-lucide="trending-up" style="color: #10b981; width: 20px; height: 20px;"></i>
+                    </div>
+                    <div>
+                        <div
+                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 0.1rem;">
+                            Unit Rate</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">₹<%=
+                                (mainBill.total_amount / mainBill.total_units).toFixed(2) %>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="window.print()"
+                    style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="printer" style="width: 16px;"></i> Print Summary
+                </button>
+
+            </div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-top: 1px dashed var(--border-soft);">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Current Reading</span>
-            <span style="font-weight: 600; font-size: 0.9rem;">150.0</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; background: #F8F9FA; margin: 0 -1.5rem -1.5rem -1.5rem; padding: 1rem 1.5rem; border-radius: 0 0 var(--radius-md) var(--radius-md);">
-            <strong style="font-size: 0.9rem;">Consumed</strong>
-            <strong style="color: var(--accent-orange);">50 Units</strong>
-        </div>
-    </div>
-</div>
+        <% } %>
+
+
+            <!-- Room Individual Bills Grid -->
+            <div class="grid-layout" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem;">
+                <% roomBills.forEach(bill=> { %>
+                    <div class="analytic-card"
+                        style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    <div
+                                        style="width: 12px; height: 12px; border-radius: 50%; background: var(--primary);">
+                                    </div>
+                                    <%= bill.room_id.meter_name %>
+                                </h3>
+                                <span
+                                    style="font-size: 0.75rem; background: rgba(174, 226, 194, 0.3); color: #047857; padding: 0.2rem 0.6rem; border-radius: 99px; font-weight: 600;">Final
+                                    Bill</span>
+                            </div>
+
+                            <div style="text-align: center; margin-bottom: 2rem; padding: 1rem 0;">
+                                <div
+                                    style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); line-height: 1;">
+                                    ₹<%= Math.floor(bill.amount).toLocaleString() %><span
+                                            style="font-size: 1.2rem; color: var(--text-muted);">.<%= (bill.amount %
+                                                1).toFixed(2).split('.')[1] %></span>
+                                </div>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    Individual Room Share</div>
+                            </div>
+
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 1px dashed var(--border-soft);">
+                                <span style="font-size: 0.9rem; color: var(--text-muted);">Previous Reading</span>
+                                <span style="font-weight: 600; font-size: 1rem;">
+                                    <%= bill.previous_reading %>
+                                </span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 1px dashed var(--border-soft);">
+                                <span style="font-size: 0.9rem; color: var(--text-muted);">Current Reading</span>
+                                <span style="font-weight: 600; font-size: 1rem;">
+                                    <%= bill.current_reading %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); margin: 1rem -1.5rem -1.5rem -1.5rem; padding: 1.2rem 1.5rem; border-radius: 0 0 var(--radius-md) var(--radius-md); border-top: 1px solid var(--border-soft);">
+                            <div style="display: flex; flex-direction: column;">
+                                <strong style="font-size: 1.1rem; color: var(--primary);">
+                                    <%= bill.units_consumed %> Units
+                                </strong>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">Adjusted Consumption</span>
+                            </div>
+                            <i data-lucide="chevron-right" style="color: var(--text-muted); width: 20px;"></i>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>

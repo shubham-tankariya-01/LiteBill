@@ -1,0 +1,37 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="analytic-card">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+        <div>
+            <h2>Initial House Setup</h2>
+            <p class="text-muted">Since this is a new house, please enter the <strong>starting meter readings</strong> for all rooms. 
+            This will establish the baseline for future bills.</p>
+        </div>
+        <i data-lucide="settings" style="color: var(--primary); width: 32px; height: 32px;"></i>
+    </div>
+
+    <form action="/houses/<%= houseId %>/readings/setup" method="POST">
+        <% rooms.forEach(room => { %>
+            <div class="analytic-card reading-input" style="margin-bottom: 1.5rem; background: var(--bg-main); border: none;">
+                <h4 style="margin-bottom: 1rem;"><%= room.meter_name %></h4>
+                <div class="grid-layout">
+                    <div class="form-group">
+                        <label class="form-label">Opening Reading (Value currently on meter)</label>
+                        <input type="number" step="0.1" name="readings[<%= room._id %>][units]"
+                            class="form-control" required placeholder="0.0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Setup Date</label>
+                        <input type="date" value="<%= new Date().toISOString().split('T')[0] %>"
+                            name="readings[<%= room._id %>][date]" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; max-width: 400px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Complete Setup</button>
+            <a href="/houses/<%= houseId %>" class="btn btn-outline" style="flex: 1;">Cancel</a>
+        </div>
+    </form>
+</div>

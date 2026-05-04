@@ -9,7 +9,7 @@ const roomSchema = new mongoose.Schema(
             index: true,
         },
 
-        room_name: {
+        meter_name: {
             type: String,
             required: true,
             trim: true,

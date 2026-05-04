@@ -1,0 +1,35 @@
+<% layout('layouts/boilerplate') %>
+    <link rel="stylesheet" href="/public/static/css/main_entries.css" />
+
+    <div class="main-entries-container">
+
+        <div class="main-entries-card">
+            <header class="main-entries-header-section">
+                <h1 class="main-entries-header">Main Bill <span class="text-primary">Entries</span></h1>
+                <p class="main-entries-subtitle">Initialize main entries by entering the following details.</p>
+            </header>
+            <form action="/readings/bill/submit" class="main-entries-form" method="post">
+                <div class="form-group">
+                    <label for="main_units" class="form-label">
+                        <i data-lucide="zap" class="label-icon"></i>
+                        Bill Units
+                    </label>
+                    <input type="text" maxlength="6" name="main_units" id="main_units" class="minimal-sequence-input"
+                        placeholder="000000" inputmode="numeric" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="main_total_bill_amount" class="form-label">
+                        <i data-lucide="banknote" class="label-icon"></i>
+                        Total Bill Amount
+                    </label>
+                    <input type="number" name="main_total_bill_amount" id="main_total_bill_amount"
+                        class="minimal-input-currency" placeholder="0.00" step="0.01" required>
+                </div>
+
+                <button type="submit" class="btn-submit-bill">
+                    Submit Bill Details
+                </button>
+            </form>
+        </div>
+    </div>

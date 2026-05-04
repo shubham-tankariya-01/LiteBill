@@ -2,20 +2,142 @@
     <div class="brand">
         <a href="/" style="display: flex; align-items: center; gap: 0.5rem;">
             <i data-lucide="zap" style="color: var(--accent-orange);"></i>
-            <span style="color: var(--text-main); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px;">LiteBill</span>
+            <span
+                style="color: var(--text-main); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px;">LiteBill</span>
         </a>
     </div>
 
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
         <a href="/dashboard" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
         <a href="/houses" class="nav-item"><i data-lucide="home"></i> Properties</a>
         <a href="/cycles" class="nav-item"><i data-lucide="calendar-clock"></i> Billing Cycles</a>
     </div>
 
-    <div class="nav-actions">
-        <a href="/houses/1/readings/new" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1rem;"><i data-lucide="pen-line" style="width: 14px;"></i> New Reading</a>
-        <a href="/user/profile" class="user-avatar">
-            <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
-        </a>
+    <div class="nav-actions" id="navActions">
+        <% if (typeof navHouses !=='undefined' && navHouses.length===1) { %>
+            <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="btn btn-primary"
+                style="font-size: 0.8rem; padding: 0.5rem 1rem;"><i data-lucide="pen-line" style="width: 14px;"></i>
+                Submit Readings</a>
+            <% } else if (typeof navHouses !=='undefined' && navHouses.length> 1) { %>
+                <div class="dropdown-container" style="position: relative;">
+                    <button id="navSubmitReadingsBtn" class="btn btn-primary"
+                        style="font-size: 0.8rem; padding: 0.5rem 1rem; cursor: pointer;"><i data-lucide="pen-line"
+                            style="width: 14px;"></i> Submit Readings <i data-lucide="chevron-down"
+                            style="width: 14px; margin-left: 0.25rem;"></i></button>
+                    <div id="navReadingsDropdown" class="nav-dropdown-menu hidden">
+                        <div class="dropdown-header">Select Property</div>
+                        <% navHouses.forEach(house=> { %>
+                            <a href="/houses/<%= house._id %>/main-bill/new" class="dropdown-item">
+                                <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i>
+                                <%= house.house_name %>
+                            </a>
+                            <% }) %>
+                    </div>
+                </div>
+                <% } else { %>
+                    <a href="/houses" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1rem;"
+                        title="Add a house first"><i data-lucide="pen-line" style="width: 14px;"></i> Submit
+                        Readings</a>
+                    <% } %>
+
+                        <a href="/user/profile" class="user-avatar">
+                            <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
+                        </a>
     </div>
+
+    <button id="mobileMenuBtn" class="hamburger-btn">
+        <i data-lucide="menu" style="width: 24px; color: var(--text-main);"></i>
+    </button>
 </nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Dropdown toggle
+        const dropBtn = document.getElementById("navSubmitReadingsBtn");
+        const dropMenu = document.getElementById("navReadingsDropdown");
+        if (dropBtn && dropMenu) {
+            dropBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropMenu.classList.toggle("hidden");
+            });
+            document.addEventListener("click", (e) => {
+                if (!dropMenu.contains(e.target)) {
+                    dropMenu.classList.add("hidden");
+                }
+            });
+        }
+
+        // Hamburger toggle
+        const hamburgerBtn = document.getElementById("mobileMenuBtn");
+        const navLinks = document.getElementById("navLinks");
+        const navActions = document.getElementById("navActions");
+        if (hamburgerBtn && navLinks && navActions) {
+            hamburgerBtn.addEventListener("click", () => {
+                navLinks.classList.toggle("show");
+                navActions.classList.toggle("show");
+            });
+        }
+    });
+</script>
+
+<style>
+    .nav-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: #fff;
+        border-radius: var(--radius-sm);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-soft);
+        min-width: 220px;
+        z-index: 1000;
+        overflow: hidden;
+        animation: fadeInDown 0.2s ease forwards;
+        transform-origin: top right;
+    }
+
+    .nav-dropdown-menu.hidden {
+        display: none;
+    }
+
+    .dropdown-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border-soft);
+        background: #F8F9FA;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-main);
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: rgba(251, 203, 69, 0.08);
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+</style>

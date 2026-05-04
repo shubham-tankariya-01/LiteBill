@@ -1,11 +1,15 @@
 import express from "express";
 const router = express.Router({ mergeParams: true });
+import BillingCycle from "../models/BillingCycle.js";
 
 // Note: Mounted as app.use("/houses/:houseId/cycles", houseCyclesRouter)
 // and app.use("/cycles", baseCyclesRouter) in app.js
 
-router.get("/", (req, res) => {
-    res.render("cycles/index", { houseId: req.params.houseId });
+router.get("/", async (req, res) => {
+    const { houseId } = req.params;
+    const cycles = await BillingCycle.find({ house_id: houseId });
+    console.log("CYCLES: ", cycles);
+    res.render("cycles/index", { houseId: req.params.houseId, cycles });
 });
 
 // -- Routes under /cycles --

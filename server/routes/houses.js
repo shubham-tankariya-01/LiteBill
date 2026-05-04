@@ -1,21 +1,46 @@
 import express from "express";
 const router = express.Router();
+import House from "../models/House.js";
+import Room from "../models/Room.js"
 
-router.get("/", (req, res) => {
-    res.render("houses/index");
+
+
+
+router.get("/", async (req, res) => {
+    const houses = await House.find();
+    console.log(houses);
+    res.render("houses/index", { houses });
 });
 
-router.get("/new", (req, res) => {
-    res.render("houses/new");
+router.post("/", async (req, res) => {
+    try {
+        const { house_name, meters } = req.body;
+        if (!house_name) {
+            return res.status(400).send("House name required");
+        }
+        const newHouse = new House({ house_name });
+        await newHouse.save();
+        if (meters && meters.length > 0) {
+            const roomPromises = meters.map(meter => {
+                return new Room({
+                    house_id: newHouse._id,
+                    meter_name: meter
+                }).save();
+            });
+            await Promise.all(roomPromises);
+        }
+        res.redirect("/houses");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
-router.post("/", (req, res) => {
-    // Controller logic to be implemented later
-    res.redirect("/houses");
-});
 
-router.get("/:houseId", (req, res) => {
-    res.render("houses/show", { houseId: req.params.houseId });
+router.get("/:houseId", async (req, res) => {
+    const house = await House.findById(req.params.houseId);
+    const rooms = await Room.find({ house_id: req.params.houseId });
+    res.render("houses/show", { house, rooms });
 });
 
 router.get("/:houseId/edit", (req, res) => {

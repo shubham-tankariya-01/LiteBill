@@ -27,6 +27,15 @@ app.set("views", path.join(__dirname, "../client/views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Method override middleware for ?_method=PUT/DELETE
+app.use((req, res, next) => {
+    if (req.query && req.query._method) {
+        req.method = req.query._method.toUpperCase();
+    } else if (req.body && req.body._method) {
+        req.method = req.body._method.toUpperCase();
+    }
+    next();
+});
 // static files configuration
 app.use("/public", express.static(path.join(__dirname, "../client/public")));
 

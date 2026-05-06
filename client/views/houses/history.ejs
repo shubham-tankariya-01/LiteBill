@@ -1,0 +1,185 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="page-header">
+    <div>
+        <h1><i data-lucide="history" style="color: var(--accent-orange);"></i> Billing History</h1>
+        <p class="text-muted"><%= house.house_name %> | Quick overview of past cycles</p>
+    </div>
+    <div class="top-filters" style="display: flex; align-items: center; gap: 1rem;">
+        <div class="search-wrapper" style="position: relative; min-width: 300px;">
+            <i data-lucide="search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-light); z-index: 10;"></i>
+            <input type="text" id="historySearch" placeholder="Search by month or year..." 
+                   style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 12px; border: 1px solid var(--border-soft); font-family: var(--font-main); font-size: 0.85rem; background: white;">
+        </div>
+        <a href="/houses/<%= house._id %>" class="btn btn-outline">
+            <i data-lucide="arrow-left" style="width: 16px;"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- History Grid -->
+<div class="grid-layout" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+    <% if (cycles.length === 0) { %>
+        <div class="analytic-card" style="text-align: center; padding: 3rem; grid-column: 1 / -1;">
+            <i data-lucide="info" style="width: 48px; height: 48px; color: var(--text-light); margin-bottom: 1rem;"></i>
+            <h3>No History Found</h3>
+            <p>Complete a billing cycle to see history here.</p>
+        </div>
+    <% } else { %>
+        <% cycles.forEach((cycle, index) => { %>
+            <% const mainBill = mainBills.find(b => b.billing_cycle_id._id.toString() === cycle._id.toString()); %>
+            <% const isActive = !cycle.endDate; %>
+            
+            <div class="history-card analytic-card <%= isActive ? 'active-cycle' : 'completed-cycle' %>" style="display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; padding: 0; min-height: 280px; border: 1px solid var(--border-soft);">
+                
+                <!-- Card Header -->
+                <div style="padding: 1.5rem 1.5rem 1rem 1.5rem; position: relative; z-index: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                        <span class="badge" style="background: <%= isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(112, 178, 220, 0.1)' %>; color: <%= isActive ? '#10B981' : 'var(--accent-blue)' %>; padding: 0.4rem 0.8rem; font-size: 0.7rem;">
+                            <i data-lucide="<%= isActive ? 'zap' : 'calendar-check' %>" style="width: 12px; height: 12px; margin-right: 4px;"></i>
+                            <%= isActive ? 'Running' : 'Completed' %>
+                        </span>
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: <%= isActive ? '#10B981' : 'var(--accent-blue)' %>;"></div>
+                    </div>
+                    
+                    <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">
+                        <%= new Date(cycle.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                    </h3>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">
+                        to <%= cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present (Active)' %>
+                    </p>
+                </div>
+
+                <!-- Main Bill Highlights -->
+                <div style="padding: 0 1.5rem 1.5rem 1.5rem; flex-grow: 1; display: flex; align-items: flex-end;">
+                    <% if (mainBill) { %>
+                        <div style="display: flex; gap: 1.5rem; width: 100%;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 0.2rem;">Bill Amount</div>
+                                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;">₹<%= mainBill.total_amount.toLocaleString() %></div>
+                            </div>
+                            <div style="flex: 1; border-left: 1px solid var(--border-soft); padding-left: 1.5rem;">
+                                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 0.2rem;">Units</div>
+                                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;"><%= mainBill.total_units %></div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div style="width: 100%; background: #F8F9FA; padding: 1rem; border-radius: 12px; text-align: center; border: 1px dashed var(--border-soft);">
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Awaiting Readings</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Footer Action -->
+                <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-start;">
+                    <% if (isActive) { %>
+                        <a href="/houses/<%= house._id %>/main-bill/new" class="btn btn-history-action active-action">
+                            Submit Readings <i data-lucide="pen-line" style="width: 14px; height: 14px; stroke-width: 2.5px;"></i>
+                        </a>
+                    <% } else { %>
+                        <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-history-action">
+                            View Distribution <i data-lucide="arrow-right" style="width: 14px; height: 14px; stroke-width: 2.5px;"></i>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<style>
+    .history-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: white;
+    }
+    
+    .history-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Perfect left border that spans the entire height */
+    .history-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        z-index: 2;
+    }
+
+    .active-cycle::before {
+        background: #10B981;
+    }
+
+    .completed-cycle::before {
+        background: var(--accent-blue);
+    }
+
+    .btn-history-action {
+        font-size: 0.95rem;
+        padding: 0.4rem 1rem;
+        border: 2px solid var(--text-main);
+        background: transparent;
+        color: var(--text-main);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-history-action:hover {
+        background: var(--text-main);
+        color: white;
+        transform: scale(1.02);
+    }
+
+    .btn-history-action.active-action {
+        border-color: #10B981;
+        color: #10B981;
+    }
+
+    .btn-history-action.active-action:hover {
+        background: #10B981;
+        color: white;
+    }
+
+    .badge i {
+        display: inline-block;
+        vertical-align: middle;
+        margin-top: -2px;
+    }
+
+    #historySearch:focus {
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 0 3px rgba(254, 138, 92, 0.1);
+        outline: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('historySearch');
+        const cards = document.querySelectorAll('.history-card');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                cards.forEach(card => {
+                    // Search in the date header and the period text
+                    const header = card.querySelector('h3').textContent.toLowerCase();
+                    const period = card.querySelector('p').textContent.toLowerCase();
+                    
+                    if (header.includes(term) || period.includes(term)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>

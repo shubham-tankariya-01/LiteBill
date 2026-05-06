@@ -1,0 +1,20 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container" style="max-width: 600px; margin: 0 auto;">
+    <div class="analytic-card theme-room">
+        <h2 style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="bed-double" style="color: var(--accent-pink);"></i> Edit Room / Meter</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">Update the meter configuration for this unit.</p>
+
+        <form action="/rooms/<%= room._id %>?_method=PUT" method="POST">
+            <div class="form-group">
+                <label class="form-label" for="meter_name">Meter Name / Room Number</label>
+                <input type="text" id="meter_name" name="meter_name" class="form-control" value="<%= room.meter_name %>" required placeholder="e.g. Unit 101">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; background: var(--accent-pink);">Save Changes</button>
+                <a href="/houses/<%= room.house_id %>/rooms" class="btn btn-outline" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

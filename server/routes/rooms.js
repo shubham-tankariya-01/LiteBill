@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router({ mergeParams: true });
 import Room from "../models/Room.js";
 import House from "../models/House.js";
+import RoomBill from "../models/RoomBill.js";
 // Note: Mounted as app.use("/houses/:houseId/rooms", roomsHouseRouter)
 // and app.use("/rooms", roomsBaseRouter) in app.js
 
@@ -36,25 +37,68 @@ router.post("/", async (req, res) => {
 });
 
 // -- Routes under /rooms --
-router.get("/:roomId", (req, res) => {
-    res.render("rooms/show", { roomId: req.params.roomId });
+router.get("/:roomId", async (req, res) => {
+    try {
+        const room = await Room.findById(req.params.roomId);
+        if (!room) return res.status(404).send("Room not found");
+        
+        const roomBills = await RoomBill.find({ room_id: room._id })
+            .populate("billing_cycle_id")
+            .sort({ createdAt: -1 });
+
+        res.render("rooms/show", { room, roomId: room._id, roomBills });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
-router.get("/:roomId/edit", (req, res) => {
-    res.render("rooms/edit", { roomId: req.params.roomId });
+router.get("/:roomId/edit", async (req, res) => {
+    try {
+        const room = await Room.findById(req.params.roomId);
+        if (!room) return res.status(404).send("Room not found");
+        res.render("rooms/edit", { room });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
-router.put("/:roomId", (req, res) => {
-    res.redirect(`/rooms/${req.params.roomId}`);
+router.put("/:roomId", async (req, res) => {
+    try {
+        const { meter_name } = req.body;
+        const room = await Room.findByIdAndUpdate(req.params.roomId, { meter_name }, { new: true });
+        res.redirect(`/houses/${room.house_id}/rooms`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
-router.delete("/:roomId", (req, res) => {
-    // Cannot redirect to house easily without DB, so just go home
-    res.redirect("/dashboard");
+router.delete("/:roomId", async (req, res) => {
+    try {
+        const room = await Room.findByIdAndDelete(req.params.roomId);
+        res.redirect(`/houses/${room.house_id}/rooms`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
-router.get("/:roomId/analysis", (req, res) => {
-    res.render("rooms/analysis", { roomId: req.params.roomId });
+router.get("/:roomId/analysis", async (req, res) => {
+    try {
+        const room = await Room.findById(req.params.roomId);
+        if (!room) return res.status(404).send("Room not found");
+        
+        const roomBills = await RoomBill.find({ room_id: room._id })
+            .populate("billing_cycle_id")
+            .sort({ createdAt: 1 }); // Sort chronologically for charts
+
+        res.render("rooms/analysis", { room, roomId: req.params.roomId, roomBills });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
 export default router;

@@ -14,16 +14,15 @@ const houseSchema = new mongoose.Schema(
             trim: true,
         },
         active_billing_cycle :{
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "BillingCycle",
-            default : null
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "BillingCycle",
+            default: null
         },
         previous_billing_cycle :{
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "BillingCycle",
-            default : null
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "BillingCycle",
+            default: null
         }
-
     },
     { timestamps: true }
 );

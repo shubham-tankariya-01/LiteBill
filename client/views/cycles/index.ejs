@@ -12,11 +12,28 @@
         <div class="grid-layout">
             <% cycles.forEach(cycle=> { %>
                 <div class="analytic-card border-top-pink">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-pink-light);">Cycle: <%= cycle.startDate %> -
-                            <%= cycle.endDate %>
+                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-pink-light);">Cycle: <%= cycle.startDate.toLocaleDateString() %> -
+                        <% if (cycle.endDate) { %>
+                            <%= cycle.endDate.toLocaleDateString() %>
+                        <% } else { %>
+                            (Ongoing)
+                        <% } %>
                     </h3>
-                    <p class="text-muted" style="margin-bottom: 1.5rem;">Start Date -> End Date</p>
-                    <a href="/cycles/1" class="btn btn-outline" style="width: 100%;">View Cycle Dashboard</a>
+                    <div style="margin-bottom: 1.5rem;">
+                        <% if (cycleResults[cycle._id] && cycleResults[cycle._id].mainBill) { %>
+                            <p class="text-muted" style="margin-bottom: 0.25rem;">
+                                <strong>Main Bill:</strong> ₹<%= cycleResults[cycle._id].mainBill.total_amount %> 
+                                (<%= cycleResults[cycle._id].mainBill.total_units %> units)
+                            </p>
+                            <p class="text-muted" style="margin-bottom: 0;">
+                                <strong>Recovered:</strong> ₹<%= cycleResults[cycle._id].totalRoomAmount %> 
+                                (<%= cycleResults[cycle._id].roomBillsCount %> rooms)
+                            </p>
+                        <% } else { %>
+                            <p class="text-muted" style="margin-bottom: 0;">Status: Active / Ongoing</p>
+                        <% } %>
+                    </div>
+                    <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>" class="btn btn-outline" style="width: 100%;">View Cycle Dashboard</a>
                 </div>
                 <% }) %>
         </div>

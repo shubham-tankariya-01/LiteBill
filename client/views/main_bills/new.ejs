@@ -21,12 +21,12 @@
                     style="display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 0.5rem;">
                     <div style="flex: 1;">
                         <label class="form-label" for="start_date">Start Date</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control" required>
+                        <input type="date" id="start_date" name="start_date" class="form-control" value="<%= typeof cycleStartDate !== 'undefined' ? cycleStartDate : '' %>" readonly style="pointer-events: none; background-color: var(--bg-secondary, #f9f9f9); opacity: 0.8;" required>
                     </div>
                     <div style="flex: 1;">
 
-                        <label class="form-label" for="end_date">End Date</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control" required>
+                        <label class="form-label" for="end_date">Current Bill Date</label>
+                        <input type="date" id="end_date" name="end_date" class="form-control" value="<%= new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0] %>" required>
                     </div>
                 </div>
 

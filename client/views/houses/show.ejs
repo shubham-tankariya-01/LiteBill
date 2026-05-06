@@ -11,10 +11,9 @@
         <div style="display: flex; gap: 0.5rem;">
             <a href="/houses/<%= house._id %>/edit" class="btn btn-outline"><i data-lucide="settings-2"
                     style="width: 16px;"></i> Edit Configuration</a>
-            <form action="/houses/<%= house._id %>?_method=DELETE" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5;"><i
-                        data-lucide="trash-2" style="width: 16px;"></i></button>
-            </form>
+            <button type="button" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5;" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
+                <i data-lucide="trash-2" style="width: 16px;"></i>
+            </button>
         </div>
     </div>
 
@@ -50,9 +49,7 @@
             <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">View ongoing and past periods for
                 calculations.</p>
             <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                <a href="/houses/<%= house._id %>/cycles" class="btn btn-outline" style="flex: 1;">History</a>
-                <a href="/houses/<%= house._id %>/cycles/new" class="btn btn-blue"><i data-lucide="plus"
-                        style="width: 16px;"></i></a>
+                <a href="/houses/<%= house._id %>/history" class="btn btn-outline" style="width: 100%;">View History</a>
             </div>
         </div>
 

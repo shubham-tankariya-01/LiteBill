@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     // MODAL ELEMENTS
     const modal = document.getElementById("modal");
-    const openBtn = document.querySelector("[href='/houses/new']");
+    const openBtns = document.querySelectorAll("a[href='/houses/new'], button[data-href='/houses/new']");
     const closeBtn = document.getElementById("closeModalBtn");
 
     // STEP ELEMENTS
@@ -44,7 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 300);
     };
 
-    if (openBtn) openBtn.addEventListener("click", openModal);
+    if (openBtns.length > 0) {
+        openBtns.forEach(btn => btn.addEventListener("click", openModal));
+    }
     if (closeBtn) closeBtn.addEventListener("click", closeModal);
 
 

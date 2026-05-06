@@ -1,22 +1,8 @@
 import House from "../models/House.js";
 import RoomReading from "../models/RoomReading.js";
 import MainBill from "../models/MainBill.js";
-import BillingCycle from "../models/BillingCycle.js";
 
-/**
- * Calculates individual room bills based on a main bill and current readings.
- * 
- * Logic:
- * 1. Finds the current MainBill and the previous cycle's readings.
- * 2. Calculates raw consumption per room (current - previous).
- * 3. Distributes any unit difference (MainBill vs Total Rooms) EQUALLY among rooms.
- * 4. Calculates costs and performs a final rounding adjustment to match MainBill amount exactly.
- * 
- * @param {String} house_id - ID of the house
- * @param {String} cycle_id - ID of the current billing cycle
- * @param {Array} formatted_readings - Array of { room_id, reading_value }
- * @returns {Array} Array of RoomBill objects
- */
+
 export const calculate_Individual_Bill = async (house_id, cycle_id, formatted_readings) => {
     try {
         if (!formatted_readings || formatted_readings.length === 0) {
@@ -109,4 +95,4 @@ export const calculate_Individual_Bill = async (house_id, cycle_id, formatted_re
         console.error("Error in calculate_Individual_Bill:", error);
         throw error; // Let the route handle the error response
     }
-};
+};

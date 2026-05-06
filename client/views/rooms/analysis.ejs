@@ -9,10 +9,34 @@
         <a href="/rooms/<%= roomId %>" class="btn btn-outline">Back to Room</a>
     </div>
 
-    <div class="analytic-card" style="min-height: 300px; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border: none;">
-        <div style="text-align: center;">
-            <i data-lucide="bar-chart-2" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem;"></i>
-            <p class="text-muted">Chart rendering would go here.</p>
-        </div>
+    <div class="analytic-card" style="min-height: 300px; background: var(--bg-main); border: none; padding: 2rem;">
+        <% if (typeof roomBills !== 'undefined' && roomBills.length > 0) { %>
+            <% 
+                // Find maximum units consumed to scale the bars
+                let maxUnits = 0;
+                roomBills.forEach(b => { if(b.units_consumed > maxUnits) maxUnits = b.units_consumed; });
+                if (maxUnits === 0) maxUnits = 1; // avoid division by zero
+            %>
+            <div style="display: flex; align-items: flex-end; justify-content: space-around; height: 200px; gap: 1rem; border-bottom: 2px solid var(--border-soft); padding-bottom: 0.5rem;">
+                <% roomBills.forEach(bill => { %>
+                    <% const heightPercent = (bill.units_consumed / maxUnits) * 100; %>
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 60px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;"><%= bill.units_consumed %>U</div>
+                        <div style="width: 100%; background: linear-gradient(to top, var(--accent-pink), #fec5d7); border-radius: 4px 4px 0 0; height: <%= heightPercent %>%; min-height: 5px; transition: height 0.5s ease;"></div>
+                        <div style="font-size: 0.7rem; color: var(--text-main); margin-top: 0.5rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">
+                            <%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString(undefined, {month: 'short', year: '2-digit'}) : 'N/A' %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <p class="text-muted" style="font-size: 0.85rem;"><i data-lucide="info" style="width: 14px; margin-right: 4px;"></i> Chart displays units consumed per billing cycle.</p>
+            </div>
+        <% } else { %>
+            <div style="height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <i data-lucide="bar-chart-2" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <p class="text-muted">Not enough data to display analytics.</p>
+            </div>
+        <% } %>
     </div>
 </div>

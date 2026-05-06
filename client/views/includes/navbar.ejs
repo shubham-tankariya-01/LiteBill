@@ -1,48 +1,130 @@
 <nav class="navbar top-navbar">
     <div class="brand">
-        <a href="/" style="display: flex; align-items: center; gap: 0.5rem;">
+        <a href="/dashboard" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
             <i data-lucide="zap" style="color: var(--accent-orange);"></i>
-            <span
-                style="color: var(--text-main); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px;">LiteBill</span>
+            <span style="color: var(--text-main); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;">LiteBill</span>
         </a>
     </div>
 
     <div class="nav-links" id="navLinks">
-        <a href="/dashboard" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-        <a href="/houses" class="nav-item"><i data-lucide="home"></i> Properties</a>
-        <a href="/cycles" class="nav-item"><i data-lucide="calendar-clock"></i> Billing Cycles</a>
+        <a href="/dashboard" class="nav-item"><i data-lucide="layout-dashboard" style="color: var(--text-muted);"></i> Dashboard</a>
+        
+        <!-- Properties Dropdown -->
+        <div class="dropdown-container" style="position: relative;">
+            <a href="#" id="propertiesDropdownBtn" class="nav-item">
+                <i data-lucide="home" style="color: var(--text-muted);"></i> Properties <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i>
+            </a>
+            <div id="propertiesDropdown" class="nav-dropdown-menu hidden" style="left: 0; right: auto; transform-origin: top left;">
+                <div class="dropdown-header">Manage Properties</div>
+                <a href="/houses" class="dropdown-item">
+                    <i data-lucide="list" style="width: 14px; color: var(--accent-yellow);"></i>
+                    View All Properties
+                </a>
+                <a href="/houses/new" class="dropdown-item">
+                    <i data-lucide="plus-circle" style="width: 14px; color: #10B981;"></i>
+                    Add New Property
+                </a>
+                <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+                    <div class="dropdown-header" style="margin-top: 0.5rem; border-top: 1px solid var(--border-soft);">Quick Access</div>
+                    <% navHouses.slice(0, 3).forEach(house => { %>
+                        <a href="/houses/<%= house._id %>" class="dropdown-item" style="font-size: 0.85rem;">
+                            <i data-lucide="arrow-right" style="width: 12px; color: var(--text-light);"></i>
+                            <%= house.house_name %> Dashboard
+                        </a>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+
+        <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
+            <a href="/houses/<%= navHouses[0]._id %>/cycles" class="nav-item">
+                <i data-lucide="calendar-clock" style="color: var(--text-muted);"></i> Billing Cycles
+            </a>
+        <% } else if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
+            <div class="dropdown-container" style="position: relative;">
+                <a href="#" id="cyclesDropdownBtn" class="nav-item">
+                    <i data-lucide="calendar-clock" style="color: var(--text-muted);"></i> Billing Cycles <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i>
+                </a>
+                <div id="cyclesDropdown" class="nav-dropdown-menu hidden" style="left: 0; right: auto; transform-origin: top left;">
+                    <div class="dropdown-header">Billing Cycles</div>
+                    <% navHouses.forEach(house => { %>
+                        <a href="/houses/<%= house._id %>/cycles" class="dropdown-item">
+                            <i data-lucide="home" style="width: 14px; color: var(--accent-orange);"></i>
+                            <%= house.house_name %>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+        <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
+            <a href="/houses/<%= navHouses[0]._id %>/history" class="nav-item">
+                <i data-lucide="history" style="color: var(--text-muted);"></i> History
+            </a>
+        <% } else if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
+            <div class="dropdown-container" style="position: relative;">
+                <a href="#" id="historyDropdownBtn" class="nav-item">
+                    <i data-lucide="history" style="color: var(--text-muted);"></i> History <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i>
+                </a>
+                <div id="historyDropdown" class="nav-dropdown-menu hidden" style="left: 0; right: auto; transform-origin: top left;">
+                    <div class="dropdown-header">Billing History</div>
+                    <% navHouses.forEach(house => { %>
+                        <a href="/houses/<%= house._id %>/history" class="dropdown-item">
+                            <i data-lucide="home" style="width: 14px; color: var(--accent-orange);"></i>
+                            <%= house.house_name %>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
     </div>
 
     <div class="nav-actions" id="navActions">
+        
+        <!-- Add Menu Dropdown -->
+        <div class="dropdown-container" style="position: relative;">
+            <button id="navCreateBtn" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.5rem 1rem; border-color: var(--border-soft); background: white;">
+                <i data-lucide="plus" style="width: 14px; color: var(--text-main);"></i> Create <i data-lucide="chevron-down" style="width: 14px; margin-left: 4px;"></i>
+            </button>
+            <div id="navCreateDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
+                <div class="dropdown-header">Actions</div>
+                <a href="/houses/new" class="dropdown-item"><i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i> New Property</a>
+                <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+                    <a href="/houses/<%= navHouses[0]._id %>/rooms" class="dropdown-item"><i data-lucide="bed-double" style="width: 14px; color: var(--accent-pink);"></i> Manage Rooms</a>
+                <% } %>
+            </div>
+        </div>
+
         <% if (typeof navHouses !=='undefined' && navHouses.length===1) { %>
             <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="btn btn-primary"
-                style="font-size: 0.8rem; padding: 0.5rem 1rem;"><i data-lucide="pen-line" style="width: 14px;"></i>
-                Submit Readings</a>
-            <% } else if (typeof navHouses !=='undefined' && navHouses.length> 1) { %>
-                <div class="dropdown-container" style="position: relative;">
-                    <button id="navSubmitReadingsBtn" class="btn btn-primary"
-                        style="font-size: 0.8rem; padding: 0.5rem 1rem; cursor: pointer;"><i data-lucide="pen-line"
-                            style="width: 14px;"></i> Submit Readings <i data-lucide="chevron-down"
-                            style="width: 14px; margin-left: 0.25rem;"></i></button>
-                    <div id="navReadingsDropdown" class="nav-dropdown-menu hidden">
-                        <div class="dropdown-header">Select Property</div>
-                        <% navHouses.forEach(house=> { %>
-                            <a href="/houses/<%= house._id %>/main-bill/new" class="dropdown-item">
-                                <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i>
-                                <%= house.house_name %>
-                            </a>
-                            <% }) %>
-                    </div>
-                </div>
-                <% } else { %>
-                    <a href="/houses" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1rem;"
-                        title="Add a house first"><i data-lucide="pen-line" style="width: 14px;"></i> Submit
-                        Readings</a>
-                    <% } %>
-
-                        <a href="/user/profile" class="user-avatar">
-                            <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
+                style="font-size: 0.8rem; padding: 0.5rem 1.25rem; background: #10B981; border-color: #10B981;">
+                <i data-lucide="pen-line" style="width: 14px;"></i> Submit Readings
+            </a>
+        <% } else if (typeof navHouses !=='undefined' && navHouses.length> 1) { %>
+            <div class="dropdown-container" style="position: relative;">
+                <button id="navSubmitReadingsBtn" class="btn btn-primary"
+                    style="font-size: 0.8rem; padding: 0.5rem 1.25rem; background: #10B981; border-color: #10B981; cursor: pointer;">
+                    <i data-lucide="pen-line" style="width: 14px;"></i> Submit Readings <i data-lucide="chevron-down" style="width: 14px; margin-left: 4px;"></i>
+                </button>
+                <div id="navReadingsDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
+                    <div class="dropdown-header">Select Property</div>
+                    <% navHouses.forEach(house=> { %>
+                        <a href="/houses/<%= house._id %>/main-bill/new" class="dropdown-item">
+                            <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i>
+                            <%= house.house_name %>
                         </a>
+                    <% }) %>
+                </div>
+            </div>
+        <% } else { %>
+            <a href="/houses/new" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1.25rem; background: #10B981; border-color: #10B981;"
+                title="Add a house first">
+                <i data-lucide="plus" style="width: 14px;"></i> Add First Property
+            </a>
+        <% } %>
+
+        <a href="#" class="user-avatar" style="background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));">
+            <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
+        </a>
     </div>
 
     <button id="mobileMenuBtn" class="hamburger-btn">
@@ -52,21 +134,51 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // Dropdown toggle
-        const dropBtn = document.getElementById("navSubmitReadingsBtn");
-        const dropMenu = document.getElementById("navReadingsDropdown");
-        if (dropBtn && dropMenu) {
-            dropBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropMenu.classList.toggle("hidden");
-            });
-            document.addEventListener("click", (e) => {
-                if (!dropMenu.contains(e.target)) {
-                    dropMenu.classList.add("hidden");
-                }
-            });
-        }
+        // Dropdown toggle function
+        const setupDropdown = (btnId, menuId) => {
+            const btn = document.getElementById(btnId);
+            const menu = document.getElementById(menuId);
+            if (btn && menu) {
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    document.querySelectorAll('.nav-dropdown-menu').forEach(m => {
+                        if (m !== menu) {
+                            m.classList.add('hidden');
+                            m.style.top = ''; m.style.bottom = ''; m.style.marginTop = ''; m.style.marginBottom = '';
+                        }
+                    });
+                    
+                    if (menu.classList.contains("hidden")) {
+                        menu.classList.remove("hidden");
+                        const rect = btn.getBoundingClientRect();
+                        if ((window.innerHeight - rect.bottom) < 260) {
+                            menu.style.top = 'auto'; menu.style.bottom = '100%';
+                            menu.style.marginTop = '0'; menu.style.marginBottom = '0.75rem';
+                            menu.style.transformOrigin = 'bottom left';
+                        } else {
+                            menu.style.top = '100%'; menu.style.bottom = 'auto';
+                            menu.style.marginTop = '0.75rem'; menu.style.marginBottom = '0';
+                            menu.style.transformOrigin = 'top left';
+                        }
+                    } else {
+                        menu.classList.add("hidden");
+                    }
+                });
+                document.addEventListener("click", (e) => {
+                    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                        menu.classList.add("hidden");
+                    }
+                });
+            }
+        };
+
+        setupDropdown("cyclesDropdownBtn", "cyclesDropdown");
+        setupDropdown("navSubmitReadingsBtn", "navReadingsDropdown");
+        setupDropdown("historyDropdownBtn", "historyDropdown");
+        setupDropdown("propertiesDropdownBtn", "propertiesDropdown");
+        setupDropdown("navCreateBtn", "navCreateDropdown");
 
         // Hamburger toggle
         const hamburgerBtn = document.getElementById("mobileMenuBtn");
@@ -78,6 +190,11 @@
                 navActions.classList.toggle("show");
             });
         }
+        
+        // Re-initialize lucide icons inside the dynamically loaded scripts if needed
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     });
 </script>
 
@@ -85,17 +202,28 @@
     .nav-dropdown-menu {
         position: absolute;
         top: 100%;
-        right: 0;
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
         background: #fff;
-        border-radius: var(--radius-sm);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         border: 1px solid var(--border-soft);
-        min-width: 220px;
+        width: 240px;
+        max-height: 260px;
+        overflow-y: auto;
         z-index: 1000;
-        overflow: hidden;
-        animation: fadeInDown 0.2s ease forwards;
-        transform-origin: top right;
+        animation: fadeInDown 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    /* Custom Scrollbar for Dropdown */
+    .nav-dropdown-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+    .nav-dropdown-menu::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .nav-dropdown-menu::-webkit-scrollbar-thumb {
+        background-color: var(--border-soft);
+        border-radius: 10px;
     }
 
     .nav-dropdown-menu.hidden {
@@ -103,30 +231,32 @@
     }
 
     .dropdown-header {
-        padding: 0.75rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 700;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.7rem;
+        font-weight: 800;
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        background: #F4F6F5;
         border-bottom: 1px solid var(--border-soft);
-        background: #F8F9FA;
     }
 
     .dropdown-item {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.85rem 1rem;
+        padding: 0.85rem 1.25rem;
         font-size: 0.9rem;
         font-weight: 600;
         color: var(--text-main);
         text-decoration: none;
-        transition: background 0.2s ease, color 0.2s ease;
+        transition: all 0.2s ease;
     }
 
     .dropdown-item:hover {
-        background: rgba(251, 203, 69, 0.08);
+        background: rgba(254, 138, 92, 0.05);
+        color: var(--accent-orange);
+        padding-left: 1.5rem;
     }
 
     @keyframes fadeInDown {

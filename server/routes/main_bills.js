@@ -11,14 +11,19 @@ import Update_Billing_cycle from "../utils/Update_billing.js";
 router.get("/new", async (req, res) => {
     try {
         const { houseId } = req.params;
-        const house = await House.findById(houseId);
+        const house = await House.findById(houseId).populate('active_billing_cycle');
         
         // If the house is new and has no baseline, redirect to the readings setup
         if (!house || !house.previous_billing_cycle) {
             return res.redirect(`/houses/${houseId}/readings/new`);
         }
 
-        res.render("main_bills/new", { houseId });
+        let cycleStartDate = "";
+        if (house.active_billing_cycle && house.active_billing_cycle.startDate) {
+            cycleStartDate = house.active_billing_cycle.startDate.toISOString().split('T')[0];
+        }
+
+        res.render("main_bills/new", { houseId, cycleStartDate });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error checking house status");
@@ -28,30 +33,6 @@ router.get("/new", async (req, res) => {
 
 router.post("/", async (req, res) => {
     const { total_units, total_amount, end_date } = req.body;
-
-
-    // //completing the previous cycle
-    // try {
-    // const cycle_compleition = await Update_Billing_cycle(req.params.houseId , start_date);
-    // } catch(err) {
-    //     console.log("Error in Updating Billing Cycle : ", err);
-    //     return res.status(500).send("Error in Updating Billing Cycle ");
-    // }
-
-
-    // // Creating a new billing cycle
-    // const cycle = new BillingCycle({
-    //     house: req.params.houseId,
-    //     startDate: start_date,
-    // });
-    // const savedCycle = await cycle.save();
-    // console.log("SAVED CYCLE: ", savedCycle);
-
-
-    // //updating active Billing Cycle in House
-    // const House_active_cycle_updated = await House.findByIdAndUpdate(req.params.houseId , { $set: { active_billing_cycle: savedCycle._id } });
-    // console.log("UPDATED HOUSE: ", House_active_cycle_updated);
-
 
     // Creating a  main bill for active (previously created) cycle
 
@@ -73,14 +54,45 @@ router.post("/", async (req, res) => {
 
 // -- Routes under /main-bill --
 
-router.get("/:billId/edit", (req, res) => {
-    res.render("main_bills/edit", { billId: req.params.billId });
+router.get("/:billId/edit", async (req, res) => {
+    try {
+        const mainBill = await MainBill.findById(req.params.billId);
+        if (!mainBill) return res.status(404).send("Main Bill not found");
+        res.render("main_bills/edit", { mainBill });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
 
-router.put("/:billId", (req, res) => {
-    // Assuming redirect back to cycle, but would need to know cycleId in reality
-    res.redirect("/dashboard");
+router.put("/:billId", async (req, res) => {
+    try {
+        const { total_units, total_amount, bill_date } = req.body;
+        const mainBill = await MainBill.findByIdAndUpdate(
+            req.params.billId, 
+            { total_units, total_amount, bill_date }, 
+            { new: true }
+        );
+        res.redirect(`/houses/${mainBill.house_id}/history`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
+router.delete("/:billId", async (req, res) => {
+    try {
+        const mainBill = await MainBill.findByIdAndDelete(req.params.billId);
+        if (mainBill && mainBill.house_id) {
+            res.redirect(`/houses/${mainBill.house_id}/history`);
+        } else {
+            res.redirect("/houses");
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
 export default router;

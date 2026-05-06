@@ -1,0 +1,33 @@
+<!-- Delete House Confirmation Modal -->
+<div id="deleteHouseModal" class="modal hidden" style="z-index: 10000;">
+    <div class="modal-content analytic-card" style="border-top-color: #EF4444; max-width: 400px; text-align: center; padding: 2.5rem 2rem;">
+        <div style="width: 60px; height: 60px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+            <i data-lucide="alert-triangle" style="color: #EF4444; width: 32px; height: 32px;"></i>
+        </div>
+        
+        <h2 style="margin-bottom: 0.5rem; color: var(--text-main);">Delete Property?</h2>
+        <p class="text-muted" style="margin-bottom: 2rem; font-size: 0.9rem; line-height: 1.5;">
+            Are you sure you want to delete <strong id="deleteHouseName" style="color: var(--text-main);">this house</strong>? 
+            This action cannot be undone and will permanently erase all associated rooms and billing data.
+        </p>
+
+        <form id="deleteHouseForm" method="POST" action="">
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeDeleteHouseModal()">Cancel</button>
+                <button type="submit" class="btn" style="flex: 1; background: #EF4444; color: white; border-color: #EF4444;">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openDeleteHouseModal(houseId, houseName) {
+        document.getElementById('deleteHouseName').innerText = houseName;
+        document.getElementById('deleteHouseForm').action = `/houses/${houseId}?_method=DELETE`;
+        document.getElementById('deleteHouseModal').classList.remove('hidden');
+    }
+
+    function closeDeleteHouseModal() {
+        document.getElementById('deleteHouseModal').classList.add('hidden');
+    }
+</script>

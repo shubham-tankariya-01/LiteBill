@@ -122,9 +122,23 @@
             </a>
         <% } %>
 
-        <a href="#" class="user-avatar" style="background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));">
-            <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
-        </a>
+        <!-- User Avatar Dropdown -->
+        <div class="dropdown-container" style="position: relative;">
+            <a href="#" id="userAvatarBtn" class="user-avatar" style="background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));">
+                <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
+            </a>
+            <div id="userAvatarDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right; width: 200px;">
+                <div class="dropdown-header">My Account</div>
+                <a href="/auth/profile" class="dropdown-item">
+                    <i data-lucide="user" style="width: 14px; color: var(--accent-orange);"></i> My Profile
+                </a>
+                <form action="/auth/logout" method="POST" style="margin: 0;">
+                    <button type="submit" class="dropdown-item" style="width: 100%; border: none; background: none; cursor: pointer; font-family: var(--font-main); text-align: left; color: #EF4444;">
+                        <i data-lucide="log-out" style="width: 14px; color: #EF4444;"></i> Sign Out
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <button id="mobileMenuBtn" class="hamburger-btn">
@@ -179,6 +193,7 @@
         setupDropdown("historyDropdownBtn", "historyDropdown");
         setupDropdown("propertiesDropdownBtn", "propertiesDropdown");
         setupDropdown("navCreateBtn", "navCreateDropdown");
+        setupDropdown("userAvatarBtn", "userAvatarDropdown");
 
         // Hamburger toggle
         const hamburgerBtn = document.getElementById("mobileMenuBtn");

@@ -9,11 +9,13 @@ import House from "../models/House.js";
 // Note: Mounted as app.use("/houses/:houseId/cycles", houseCyclesRouter)
 // and app.use("/cycles", baseCyclesRouter) in app.js
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
     try {
         const { houseId } = req.params;
         const house = await House.findById(houseId);
-        const cycles = await BillingCycle.find({ house: houseId }).sort({ createdAt: -1 });
+        if (!house) return res.status(404).send('Resource not found');
+        const cycles = await BillingCycle.find({ house: houseId });
+        cycles.sort((a, b) => (a.endDate === null ? -1 : b.endDate === null ? 1 : b.startDate - a.startDate));
 
         const cycleResults = {};
         for (let cycle of cycles) {
@@ -32,30 +34,36 @@ router.get("/", async (req, res) => {
 
         res.render("cycles/index", { houseId, house, cycles, cycleResults });
     } catch (err) {
-        console.error("Error fetching cycles:", err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 
 // -- Routes under /cycles --
-router.get("/:cycleId", (req, res) => {
-    res.render("cycles/show", { cycleId: req.params.cycleId });
-});
-
-router.put("/:cycleId", async (req, res) => {
+router.get("/:cycleId", async (req, res, next) => {
     try {
-        const { endDate } = req.body;
-        const cycle = await BillingCycle.findByIdAndUpdate(req.params.cycleId, { endDate }, { new: true });
-        res.redirect(`/cycles/${req.params.cycleId}`);
+        const cycle = await BillingCycle.findById(req.params.cycleId);
+        if (!cycle) return res.status(404).send('Resource not found');
+        res.render("cycles/show", { cycleId: req.params.cycleId });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 
-router.delete("/:cycleId", async (req, res) => {
+router.put("/:cycleId", async (req, res, next) => {
+    try {
+        const { endDate } = req.body;
+        const cycle = await BillingCycle.findByIdAndUpdate(req.params.cycleId, { endDate }, { new: true });
+        if (!cycle) return res.status(404).send('Resource not found');
+        res.redirect(`/cycles/${req.params.cycleId}`);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete("/:cycleId", async (req, res, next) => {
     try {
         const cycle = await BillingCycle.findByIdAndDelete(req.params.cycleId);
+        if (!cycle) return res.status(404).send('Resource not found');
         // Note: consider deleting associated MainBills and RoomBills
         if (cycle && cycle.house) {
             res.redirect(`/houses/${cycle.house}/history`);
@@ -63,8 +71,7 @@ router.delete("/:cycleId", async (req, res) => {
             res.redirect("/houses");
         }
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 

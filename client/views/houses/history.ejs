@@ -17,6 +17,41 @@
     </div>
 </div>
 
+<!-- History Summary Bar -->
+<% if (cycles.length > 0) { %>
+<div class="analytic-card" style="margin-top: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 50%;">
+            <i data-lucide="bar-chart-2" style="color: #10B981; width: 20px; height: 20px;"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Cycles</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= historySummary.totalCycles %></div>
+        </div>
+    </div>
+    <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div style="padding: 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 50%;">
+            <i data-lucide="indian-rupee" style="color: var(--accent-blue); width: 20px; height: 20px;"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Billed</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">₹<%= historySummary.totalBilled.toLocaleString() %></div>
+        </div>
+    </div>
+    <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div style="padding: 0.5rem; background: rgba(245, 158, 11, 0.1); border-radius: 50%;">
+            <i data-lucide="calculator" style="color: var(--accent-orange); width: 20px; height: 20px;"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Average Bill</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">₹<%= historySummary.avgBillAmount.toLocaleString(undefined, {maximumFractionDigits: 0}) %></div>
+        </div>
+    </div>
+</div>
+<% } %>
+
 <!-- History Grid -->
 <div class="grid-layout" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
     <% if (cycles.length === 0) { %>
@@ -39,7 +74,14 @@
                             <i data-lucide="<%= isActive ? 'zap' : 'calendar-check' %>" style="width: 12px; height: 12px; margin-right: 4px;"></i>
                             <%= isActive ? 'Running' : 'Completed' %>
                         </span>
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: <%= isActive ? '#10B981' : 'var(--accent-blue)' %>;"></div>
+                        
+                        <% if (isActive) { %>
+                            <% const runDays = Math.floor((Date.now() - new Date(cycle.startDate)) / 86400000); %>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;"><i data-lucide="clock" style="width: 10px; height: 10px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> Running for <%= runDays %> days</span>
+                        <% } else { %>
+                            <% const cycleDays = Math.floor((new Date(cycle.endDate) - new Date(cycle.startDate)) / 86400000); %>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;"><i data-lucide="clock" style="width: 10px; height: 10px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> <%= cycleDays %>-day cycle</span>
+                        <% } %>
                     </div>
                     
                     <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">
@@ -56,7 +98,7 @@
                         <div style="display: flex; gap: 1.5rem; width: 100%;">
                             <div style="flex: 1;">
                                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 0.2rem;">Bill Amount</div>
-                                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;">₹<%= mainBill.total_amount.toLocaleString() %></div>
+                                <div class="bill-amount-text" style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;">₹<%= mainBill.total_amount.toLocaleString() %></div>
                             </div>
                             <div style="flex: 1; border-left: 1px solid var(--border-soft); padding-left: 1.5rem;">
                                 <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 0.2rem;">Units</div>
@@ -69,6 +111,13 @@
                         </div>
                     <% } %>
                 </div>
+
+                <% if (!isActive && cycleStats[cycle._id]) { %>
+                    <div style="padding: 0 1.5rem 1.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="badge" style="background: rgba(107, 114, 128, 0.1); color: var(--text-muted); font-size: 0.75rem;"><%= cycleStats[cycle._id].roomCount %> rooms billed</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">~₹<%= Math.round(cycleStats[cycle._id].avgRoomAmount).toLocaleString() %> avg/room</span>
+                    </div>
+                <% } %>
 
                 <!-- Footer Action -->
                 <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-start;">
@@ -172,8 +221,10 @@
                     // Search in the date header and the period text
                     const header = card.querySelector('h3').textContent.toLowerCase();
                     const period = card.querySelector('p').textContent.toLowerCase();
+                    const billAmountEl = card.querySelector('.bill-amount-text');
+                    const billAmount = billAmountEl ? billAmountEl.textContent.toLowerCase() : '';
                     
-                    if (header.includes(term) || period.includes(term)) {
+                    if (header.includes(term) || period.includes(term) || billAmount.includes(term)) {
                         card.style.display = 'flex';
                     } else {
                         card.style.display = 'none';

@@ -1,11 +1,13 @@
 <% layout('layouts/boilerplate') %>
     <div class="page-header">
-        <h1><i data-lucide="bed-double" style="color: var(--accent-pink);"></i> &nbsp;
-
-            <%= house.house_name %> &nbsp;
+        <div>
+            <h1><i data-lucide="bed-double" style="color: var(--accent-pink);"></i> &nbsp;
+                <%= house.house_name %> &nbsp;
                 <span style="color: var(--accent-pink);">All Meters</span>
-        </h1>
-        <a href="/houses/1/rooms/new" class="btn btn-primary" style="background: var(--accent-pink);"><i
+            </h1>
+            <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;"><%= rooms.length %> meters configured</p>
+        </div>
+        <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-primary" style="background: var(--accent-pink);"><i
                 data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Room</a>
     </div>
     <div class="grid-layout">
@@ -16,10 +18,33 @@
                         <%= room.meter_name %>
                     </h3>
                 </div>
-                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Allocated to:
+                <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Allocated to:
                     <%= house.house_name %>
                 </p>
-                <a href="/rooms/<%= room._id %>" class="btn btn-outline" style="width: 100%;">View Room Profile</a>
+                
+                <% const data = roomData[room._id.toString()]; %>
+                <div style="display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="indian-rupee" style="width: 12px; height: 12px;"></i>
+                        <span>Last bill: <%- data.latestBill ? '₹' + data.latestBill.amount : 'No bills yet' %></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="zap" style="width: 12px; height: 12px;"></i>
+                        <span>Last reading: <%- data.latestReading ? data.latestReading.reading_value + ' units' : 'No readings yet' %></span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                    <a href="/rooms/<%= room._id %>" class="btn btn-outline" style="flex: 1;">View Room Profile</a>
+                    <a href="/rooms/<%= room._id %>/edit" class="btn btn-outline" style="padding: 0.5rem;">
+                        <i data-lucide="settings-2" style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <form action="/rooms/<%= room._id %>?_method=DELETE" method="POST" style="display: inline; margin: 0;">
+                        <button type="submit" class="btn btn-outline" style="padding: 0.5rem; color: #EF4444; border-color: #FCA5A5; height: 100%;" onclick="return confirm('Are you sure you want to delete this meter and all its history?');">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
             <% }) %>
     </div>

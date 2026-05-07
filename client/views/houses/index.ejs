@@ -1,23 +1,42 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="page-header">
-        <h1><i data-lucide="home" style="color: var(--accent-yellow);"></i> My Houses</h1>
-        <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-            Add &nbsp; House</a>
-    </div>
+<div class="page-header">
+    <h1><i data-lucide="home" style="color: var(--accent-yellow);"></i> My Houses</h1>
+    <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add House</a>
+</div>
 
+<% if (houses.length === 0) { %>
+    <div class="analytic-card" style="text-align: center; padding: 4rem 2rem;">
+        <i data-lucide="home" style="width: 64px; height: 64px; color: var(--text-muted); opacity: 0.5; margin-bottom: 1.5rem;"></i>
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-main);">No properties added yet</h2>
+        <p class="text-muted" style="margin-bottom: 2rem;">Create your first property to start managing meters and generating bills.</p>
+        <a href="/houses/new" class="btn btn-primary" style="background: var(--accent-yellow); color: #000; border: none; font-weight: 600;"><i data-lucide="plus" style="width: 18px; height: 18px;"></i> Add Your First Property</a>
+    </div>
+<% } else { %>
     <div class="grid-layout">
-        <!-- Houses -->
-        <!-- Card 1 -->
-        <% houses.forEach(house=> { %>
+        <% houses.forEach(house => { 
+            const status = houseStatuses[house._id.toString()];
+            const formattedDate = status.lastBillDate ? new Date(status.lastBillDate).toLocaleDateString() : 'Never';
+        %>
             <div class="analytic-card theme-house">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <h3 style="margin: 0; color: var(--text-main);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; color: var(--text-main); font-size: 1.2rem;">
                         <%= house.house_name %>
                     </h3>
+                    
+                    <% if (!status.hasSetup) { %>
+                        <span class="badge" style="background: rgba(156, 163, 175, 0.15); color: #6B7280;">Not Set Up</span>
+                    <% } else if (!status.hasBillThisCycle) { %>
+                        <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange);">Awaiting Bill</span>
+                    <% } else { %>
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">Active</span>
+                    <% } %>
                 </div>
-                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Ref: <%= house._id %>
+                
+                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+                    <%= status.roomCount %> rooms &nbsp;·&nbsp; Last billed: <%= formattedDate %>
                 </p>
+                
                 <div style="display: flex; gap: 0.5rem; margin-top: auto;">
                     <a href="/houses/<%= house._id %>" class="btn btn-outline" style="flex: 1;">Enter Dashboard</a>
                     <button type="button" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5; padding: 0.5rem 1rem;" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
@@ -25,9 +44,8 @@
                     </button>
                 </div>
             </div>
-            <% }) %>
+        <% }) %>
     </div>
+<% } %>
 
-
-
-    <!-- House adding modal is now globally included in boilerplate.ejs -->
+<!-- House adding modal is now globally included in boilerplate.ejs -->

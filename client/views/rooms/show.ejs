@@ -10,9 +10,54 @@
     <div style="display: flex; gap: 0.5rem;">
         <a href="/rooms/<%= roomId %>/analysis" class="btn btn-outline" style="color: var(--accent-blue); border-color: var(--accent-blue);"><i data-lucide="bar-chart-2" style="width: 16px; height: 16px;"></i> Insights</a>
         <a href="/rooms/<%= roomId %>/edit" class="btn btn-outline"><i data-lucide="settings-2" style="width: 16px; height: 16px;"></i> Edit</a>
-        <form action="/rooms/<%= roomId %>?_method=DELETE" method="POST" style="display:inline;">
-            <button type="submit" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5;"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></button>
-        </form>
+        <button type="button" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5;" onclick="openDeleteRoomModal('<%= roomId %>', '<%= room.meter_name %>')">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+        </button>
+    </div>
+</div>
+
+<%
+    let totalBilled = 0;
+    let totalUnits = 0;
+    let billCount = 0;
+    let avgUnits = '0.0';
+
+    if (typeof roomBills !== 'undefined' && roomBills.length > 0) {
+        totalBilled = roomBills.reduce((s,b) => s + b.amount, 0);
+        totalUnits = roomBills.reduce((s,b) => s + b.units_consumed, 0);
+        billCount = roomBills.length;
+        avgUnits = (totalUnits / billCount).toFixed(1);
+    }
+%>
+<div class="analytic-card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 50%;">
+            <i data-lucide="indian-rupee" style="color: #10B981; width: 24px; height: 24px;"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Billed</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">₹<%= totalBilled.toLocaleString() %></div>
+        </div>
+    </div>
+    <div style="width: 1px; height: 40px; background: var(--border-soft);"></div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: 50%;">
+            <i data-lucide="zap" style="color: var(--accent-blue); width: 24px; height: 24px;"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Average Units</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);"><%= avgUnits %> <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/mo</span></div>
+        </div>
+    </div>
+    <div style="width: 1px; height: 40px; background: var(--border-soft);"></div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="padding: 0.75rem; background: rgba(209, 124, 148, 0.15); border-radius: 50%;">
+            <i data-lucide="file-text" style="color: var(--accent-pink); width: 24px; height: 24px;"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Bills Generated</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);"><%= billCount %></div>
+        </div>
     </div>
 </div>
 
@@ -44,10 +89,13 @@
                 <% }) %>
             </div>
         <% } else { %>
-            <!-- Placeholder for actual room bills list -->
-            <div style="padding: 1rem; background: var(--bg-body); border-radius: var(--radius-sm); text-align: center;">
-                <p class="text-muted" style="font-size: 0.9rem;">No bills available yet.</p>
+            <div style="padding: 3rem 1.5rem; background: var(--bg-body); border-radius: var(--radius-sm); text-align: center; border: 1px dashed var(--border-soft);">
+                <i data-lucide="file-text" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 1rem;"></i>
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-main);">No bills recorded yet</h3>
+                <p class="text-muted" style="font-size: 0.9rem; max-width: 300px; margin: 0 auto;">Bills will appear here once the first monthly cycle is completed.</p>
             </div>
         <% } %>
     </div>
 </div>
+
+<%- include('../includes/delete_room_modal') %>

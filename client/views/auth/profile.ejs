@@ -1,24 +1,87 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="analytic-card" style="max-width: 600px; margin: 0 auto;">
-    <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
-        <div style="width: 80px; height: 80px; background: var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="user" style="width: 40px; height: 40px; color: var(--text-muted);"></i>
+<div style="max-width: 600px; margin: 0 auto;">
+
+    <!-- Card 1: Account Info -->
+    <div class="analytic-card" style="border-top: 4px solid var(--accent-orange); margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem;">
+            <div style="width: 70px; height: 70px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink)); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="user" style="width: 32px; height: 32px; color: #fff;"></i>
+            </div>
+            <div>
+                <p style="font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin: 0;">+91 <%= user.mobile_number %></p>
+                <p class="text-muted" style="font-size: 0.875rem; margin: 0.2rem 0 0;">
+                    Member since <%= new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %>
+                </p>
+            </div>
         </div>
-        <div>
-            <h2>My Profile</h2>
-            <p class="text-muted">Manage your personal settings.</p>
-        </div>
+
+        <div style="border-top: 1px solid var(--border-soft); margin: 0 0 1.5rem;"></div>
+
+        <form action="/auth/logout" method="POST">
+            <button type="submit" class="btn btn-outline"
+                style="border-color: #EF4444; color: #EF4444; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Sign Out
+            </button>
+        </form>
     </div>
 
-    <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
-        <div style="margin-bottom: 1rem;">
-            <p class="text-muted" style="font-size: 0.875rem;">Mobile Number</p>
-            <p style="font-weight: 500;">+91 9999999999</p>
-        </div>
-        
-        <form action="/auth/logout" method="POST">
-            <button type="submit" class="btn btn-outline" style="border-color: var(--danger); color: var(--danger); margin-top: 1rem;">Sign Out</button>
+    <!-- Card 2: Change Password -->
+    <div class="analytic-card" style="border-top: 4px solid var(--accent-blue);">
+        <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+            <i data-lucide="lock" style="color: var(--accent-blue); width: 20px; height: 20px;"></i> Change Password
+        </h3>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10B981; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="check-circle" style="width: 16px; height: 16px; color: #10B981; flex-shrink: 0;"></i>
+                <span style="color: #10B981; font-size: 0.875rem; font-weight: 500;"><%= success %></span>
+            </div>
+        <% } %>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #EF4444; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: #EF4444; flex-shrink: 0;"></i>
+                <span style="color: #EF4444; font-size: 0.875rem; font-weight: 500;"><%= error %></span>
+            </div>
+        <% } %>
+
+        <form action="/auth/change-password" method="POST" id="changePasswordForm">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-control" required placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="form-control" required placeholder="••••••••" minlength="6">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" id="confirm_new_password" class="form-control" required placeholder="••••••••">
+                <p id="confirmNewError" style="font-size: 0.8rem; color: #EF4444; margin-top: 0.35rem; display: none;">
+                    Passwords do not match.
+                </p>
+            </div>
+
+            <button type="submit" class="btn btn-primary"
+                style="width: 100%; background: var(--accent-blue); border: none; padding: 0.85rem;">
+                Update Password
+            </button>
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        const newPwd = document.getElementById('new_password').value;
+        const confirm = document.getElementById('confirm_new_password').value;
+        const errEl = document.getElementById('confirmNewError');
+
+        if (newPwd !== confirm) {
+            e.preventDefault();
+            errEl.style.display = 'block';
+        } else {
+            errEl.style.display = 'none';
+        }
+    });
+</script>

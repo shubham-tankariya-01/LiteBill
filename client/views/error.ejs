@@ -1,0 +1,17 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="analytic-card border-top-pink" style="text-align: center; padding: 3rem;">
+    <i data-lucide="alert-triangle" style="width: 64px; height: 64px; color: var(--accent-pink); margin-bottom: 1.5rem;"></i>
+    <h1 style="color: var(--text-main); margin-bottom: 1rem;">Oops! Something went wrong.</h1>
+    <h3 style="color: #EF4444; margin-bottom: 2rem;"><%= message %></h3>
+    
+    <% if (error && error.stack) { %>
+        <div style="background: rgba(0,0,0,0.05); text-align: left; padding: 1.5rem; border-radius: 8px; overflow-x: auto;">
+            <pre style="color: var(--text-muted); font-size: 0.85rem; margin: 0;"><%= error.stack %></pre>
+        </div>
+    <% } %>
+    
+    <div style="margin-top: 2rem;">
+        <a href="/dashboard" class="btn btn-primary"><i data-lucide="home" style="width: 16px;"></i> Return Home</a>
+    </div>
+</div>

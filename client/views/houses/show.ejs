@@ -17,6 +17,44 @@
         </div>
     </div>
 
+    <%
+        let cycleStartDateStr = 'Not Started';
+        let daysElapsed = 0;
+        if (activeCycle && activeCycle.startDate) {
+            cycleStartDateStr = new Date(activeCycle.startDate).toLocaleDateString();
+            const diffTime = Math.abs(new Date() - new Date(activeCycle.startDate));
+            daysElapsed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+    %>
+    <div class="analytic-card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+            <div>
+                <p class="text-muted" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Current Cycle Start</p>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= cycleStartDateStr %></div>
+            </div>
+            <div>
+                <p class="text-muted" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Days Elapsed</p>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= daysElapsed %></div>
+            </div>
+            <div>
+                <p class="text-muted" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Meters Configured</p>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= rooms.length %></div>
+            </div>
+        </div>
+        
+        <div>
+            <% if (flowState === 'needs_setup') { %>
+                <span class="badge" style="background: rgba(156, 163, 175, 0.15); color: #6B7280; font-size: 0.9rem; padding: 0.5rem 1rem;">Not Set Up</span>
+            <% } else if (flowState === 'needs_bill') { %>
+                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); font-size: 0.9rem; padding: 0.5rem 1rem;">Awaiting Main Bill</span>
+            <% } else if (flowState === 'needs_readings') { %>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); font-size: 0.9rem; padding: 0.5rem 1rem;">Awaiting Meter Readings</span>
+            <% } else if (flowState === 'cycle_complete') { %>
+                <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); font-size: 0.9rem; padding: 0.5rem 1rem;">Cycle Complete</span>
+            <% } %>
+        </div>
+    </div>
+
     <div class="grid-layout">
         <div class="analytic-card theme-room">
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
@@ -53,13 +91,57 @@
             </div>
         </div>
 
-        <div class="analytic-card theme-bill" style="background: #10B981; border-color: #10B981;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #fff;">
-                <h3 style="color: #fff;"><i data-lucide="zap"></i> Fast Input</h3>
+        <% if (flowState === 'needs_setup') { %>
+        <div class="analytic-card theme-bill" style="background: var(--accent-orange); border-color: var(--accent-orange);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
+                <h3 style="color: #000;"><i data-lucide="wrench"></i> Setup Required</h3>
             </div>
-            <p style="color: rgba(255,255,255,0.9); margin-bottom: 1.5rem; font-size: 0.85rem;">Log meter readings for
-                all rooms instantly to start billing.</p>
-            <a href="/houses/<%= house._id %>/readings/new" class="btn"
-                style="background: #fff; color: #10B981; width: 100%; margin-top: auto;">Record Meter Readings</a>
+            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">Initialize the starting meter readings for all rooms.</p>
+            <a href="/houses/<%= house._id %>/readings/new" class="btn" style="background: #000; color: var(--accent-orange); width: 100%; margin-top: auto; border: none;">Complete Initial Setup</a>
+        </div>
+        <% } else if (flowState === 'needs_bill') { %>
+        <div class="analytic-card theme-bill" style="background: var(--accent-yellow); border-color: var(--accent-yellow);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
+                <h3 style="color: #000;"><i data-lucide="file-input"></i> Bill Missing</h3>
+            </div>
+            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">Enter the supplier's main utility bill before taking room readings.</p>
+            <a href="/houses/<%= house._id %>/main-bill/new" class="btn" style="background: #000; color: var(--accent-yellow); width: 100%; margin-top: auto; border: none;">Enter This Month's Main Bill</a>
+        </div>
+        <% } else if (flowState === 'needs_readings') { %>
+        <div class="analytic-card theme-bill" style="background: var(--accent-green); border-color: var(--accent-green);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
+                <h3 style="color: #000;"><i data-lucide="zap"></i> Fast Input</h3>
+            </div>
+            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">Log meter readings for all rooms instantly to calculate bills.</p>
+            <a href="/houses/<%= house._id %>/readings/new" class="btn" style="background: #000; color: var(--accent-green); width: 100%; margin-top: auto; border: none;">Record Meter Readings</a>
+        </div>
+        <% } else if (flowState === 'cycle_complete') { %>
+        <div class="analytic-card theme-bill" style="background: var(--accent-blue); border-color: var(--accent-blue);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
+                <h3 style="color: #000;"><i data-lucide="check-circle"></i> Cycle Finalized</h3>
+            </div>
+            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">This billing cycle has been fully calculated and closed.</p>
+            <a href="/cycles/<%= activeCycle._id %>/room-bills" class="btn" style="background: #000; color: var(--accent-blue); width: 100%; margin-top: auto; border: none;">View Current Bill Distribution</a>
+        </div>
+        <% } %>
+
+        <div class="analytic-card">
+            <h3 style="margin-bottom: 1rem;"><i data-lucide="history" style="color: var(--text-muted);"></i> Recent History</h3>
+            <% if (typeof recentMainBills !== 'undefined' && recentMainBills.length > 0) { %>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <% recentMainBills.forEach(mb => { %>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem;">
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);"><%= new Date(mb.bill_date).toLocaleDateString() %></div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);"><%= mb.total_units %> Units</div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--accent-green);">₹<%= mb.total_amount %></div>
+                        </div>
+                    <% }) %>
+                </div>
+                <a href="/houses/<%= house._id %>/history" style="display: block; text-align: center; font-size: 0.85rem; color: var(--accent-blue); margin-top: 1rem; text-decoration: none;">View full history &rarr;</a>
+            <% } else { %>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 0;">No completed cycles found yet.</p>
+            <% } %>
         </div>
     </div>

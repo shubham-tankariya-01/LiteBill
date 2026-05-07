@@ -4,35 +4,53 @@
         <div class="analytic-card border-top-yellow">
             <h2 style="color: var(--accent-yellow-light);">Supplier Main Bill</h2>
 
+            <% if (typeof error !== 'undefined' && error === 'main_bill_required') { %>
+                <div style="background-color: rgba(239, 68, 68, 0.1); color: #EF4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #EF4444; font-weight: 500;">
+                    <i data-lucide="alert-circle" style="display: inline-block; vertical-align: text-bottom; margin-right: 0.5rem; width: 18px;"></i>
+                    Please enter the main electricity bill before recording room readings.
+                </div>
+            <% } %>
+
+            <div style="background-color: rgba(112, 178, 220, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-blue); font-size: 0.9rem;">
+                <strong>Billing Period:</strong> <%= typeof cycleStartDate !== 'undefined' ? cycleStartDate : 'N/A' %> &rarr; Today &middot; <strong><%= typeof roomCount !== 'undefined' ? roomCount : 0 %></strong> rooms will be split automatically.
+            </div>
+
             <form action="/houses/<%= houseId %>/main-bill" method="POST">
                 <div class="form-group">
                     <label class="form-label" for="total_units">Total Units Generated/Used : </label>
                     <input type="number" step="0.01" id="total_units" name="total_units" class="form-control" required
                         placeholder="0.00">
+                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">Enter the total units shown on your electricity provider's physical bill.</p>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="total_amount">Total Bill Amount (₹) :</label>
                     <input type="number" step="0.01" id="total_amount" name="total_amount" class="form-control" required
                         placeholder="0.00">
+                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">Enter the exact rupee amount before any subsidies or adjustments.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cost per unit (Live Preview)</label>
+                    <input type="text" id="cost_per_unit" class="form-control" readonly placeholder="&mdash;" style="background: #f9fafb; font-weight: 600; color: var(--accent-blue);">
                 </div>
                 <label for="duration" style="color: var(--text-muted); font-weight: 700;">Billing Duration: </label>
                 <div class="form-group" id='duration'
                     style="display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 0.5rem;">
                     <div style="flex: 1;">
-                        <label class="form-label" for="start_date">Start Date</label>
+                        <label class="form-label" for="start_date">Cycle Start</label>
                         <input type="date" id="start_date" name="start_date" class="form-control" value="<%= typeof cycleStartDate !== 'undefined' ? cycleStartDate : '' %>" readonly style="pointer-events: none; background-color: var(--bg-secondary, #f9f9f9); opacity: 0.8;" required>
                     </div>
                     <div style="flex: 1;">
 
-                        <label class="form-label" for="end_date">Current Bill Date</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control" value="<%= new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0] %>" required>
+                        <label class="form-label" for="bill_date">Current Bill Date</label>
+                        <input type="date" id="bill_date" name="bill_date" class="form-control" value="<%= new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0] %>" required>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Save Main Bill</button>
-                    <a href="#" class="btn btn-outline" style="flex: 1;">Cancel</a>
+                    <a href="/houses/<%= houseId %>" class="btn btn-outline" style="flex: 1; text-align: center;">Cancel</a>
                 </div>
             </form>
         </div>
@@ -47,3 +65,24 @@
             color: var(--text-muted);
         }
     </style>
+
+    <script>
+        const totalUnitsInput = document.getElementById('total_units');
+        const totalAmountInput = document.getElementById('total_amount');
+        const costPerUnitInput = document.getElementById('cost_per_unit');
+
+        function updateCostPerUnit() {
+            const units = parseFloat(totalUnitsInput.value);
+            const amount = parseFloat(totalAmountInput.value);
+
+            if (!isNaN(units) && !isNaN(amount) && units > 0) {
+                const cost = amount / units;
+                costPerUnitInput.value = `₹${cost.toFixed(2)} per unit`;
+            } else {
+                costPerUnitInput.value = '—';
+            }
+        }
+
+        totalUnitsInput.addEventListener('input', updateCostPerUnit);
+        totalAmountInput.addEventListener('input', updateCostPerUnit);
+    </script>

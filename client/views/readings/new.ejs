@@ -4,38 +4,90 @@
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
             <div>
                 <h2>Record Room Readings</h2>
-                <p class="text-muted">Enter the current meter readings for all rooms. This will create a new Billing
-                    Cycle.</p>
+                <p class="text-muted">Enter the current meter readings for all rooms. This will create a new Billing Cycle.</p>
             </div>
             <i data-lucide="zap" style="color: var(--primary); width: 32px; height: 32px;"></i>
         </div>
 
-        <form action="/houses/<%= houseId %>/cycles/<%= cycleId %>/readings" method="POST">
+        <form id="readingsForm" action="/houses/<%= houseId %>/cycles/<%= cycleId %>/readings" method="POST">
 
             <% rooms.forEach(room=> { %>
                 <div class="analytic-card reading-input"
                     style="margin-bottom: 1.5rem; background: var(--bg-main); border: none;">
-                    <h4 style="margin-bottom: 1rem;">
+                    <h4 style="margin-bottom: 0.25rem;">
                         <%= room.meter_name %>
                     </h4>
-                    <div class="grid-layout">
+                    <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.85rem;">
+                        Previous reading: <%= previousReadings[room._id.toString()] ?? 'N/A' %> units
+                    </p>
+                    <div class="grid-layout" style="grid-template-columns: repeat(3, 1fr);">
                         <div class="form-group">
-                            <label class="form-label" for="reading_1">Current Reading</label>
-                            <input type="number" step="0.1" id="reading_1" name="readings[<%= room._id %>][units]"
-                                class="form-control" required placeholder="0.0">
+                            <label class="form-label" for="reading_<%= room._id %>">Current Reading</label>
+                            <input type="number" step="0.1" id="reading_<%= room._id %>" name="readings[<%= room._id %>][units]"
+                                class="form-control" required placeholder="0.0" oninput="calculateDifference('<%= room._id %>', <%= previousReadings[room._id.toString()] || 0 %>)">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="date_1">Reading Date</label>
-                            <input type="date" id="date_1" value="<%= new Date().toISOString().split('T')[0] %>"
+                            <label class="form-label">Units this cycle</label>
+                            <input type="text" id="diff_<%= room._id %>" class="form-control" readonly placeholder="0.0" style="background: #f9fafb; font-weight: 600;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="date_<%= room._id %>">Reading Date</label>
+                            <input type="date" id="date_<%= room._id %>" value="<%= new Date().toISOString().split('T')[0] %>"
                                 name="readings[<%= room._id %>][date]" class="form-control" required>
                         </div>
                     </div>
                 </div>
                 <% }) %>
 
-                    <div style="display: flex; gap: 1rem; margin-top: 2rem; max-width: 400px;">
+                    <div id="negativeWarning" class="hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; color: #EF4444; border-radius: 8px; margin-bottom: 1rem; padding: 1rem; font-size: 0.9rem;">
+                        <strong style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Invalid Readings Detected</strong>
+                        <span style="display: block; margin-top: 0.25rem;">One or more current readings are lower than their previous readings. Please correct them before submitting.</span>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; max-width: 400px;">
                         <button type="submit" class="btn btn-primary" style="flex: 1;">Submit & Start Cycle</button>
                         <a href="/houses/<%= houseId %>" class="btn btn-outline" style="flex: 1;">Cancel</a>
                     </div>
         </form>
     </div>
+
+<script>
+    function calculateDifference(roomId, prevValue) {
+        const input = document.getElementById(`reading_${roomId}`);
+        const diffInput = document.getElementById(`diff_${roomId}`);
+        const currentVal = parseFloat(input.value);
+        
+        if (isNaN(currentVal)) {
+            diffInput.value = '';
+            diffInput.style.color = 'var(--text-main)';
+            return;
+        }
+
+        const diff = currentVal - prevValue;
+        diffInput.value = diff > 0 ? '+' + diff.toFixed(1) : diff.toFixed(1);
+
+        if (diff < 0) {
+            diffInput.style.color = '#EF4444';
+        } else {
+            diffInput.style.color = '#10B981';
+        }
+    }
+
+    document.getElementById('readingsForm').addEventListener('submit', function(e) {
+        let hasNegative = false;
+        const diffInputs = document.querySelectorAll('input[id^="diff_"]');
+        diffInputs.forEach(input => {
+            const val = parseFloat(input.value);
+            if (!isNaN(val) && val < 0) {
+                hasNegative = true;
+            }
+        });
+
+        if (hasNegative) {
+            e.preventDefault();
+            document.getElementById('negativeWarning').classList.remove('hidden');
+        } else {
+            document.getElementById('negativeWarning').classList.add('hidden');
+        }
+    });
+</script>

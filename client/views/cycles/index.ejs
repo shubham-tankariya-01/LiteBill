@@ -1,40 +1,91 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="analytic-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <div>
-                <h2>Billing Cycles</h2>
-                <p class="text-muted">History of all billing periods for House ID: <%= houseId %>
-                </p>
-            </div>
-        </div>
-
-        <div class="grid-layout">
-            <% cycles.forEach(cycle=> { %>
-                <div class="analytic-card border-top-pink">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-pink-light);">Cycle: <%= cycle.startDate.toLocaleDateString() %> -
-                        <% if (cycle.endDate) { %>
-                            <%= cycle.endDate.toLocaleDateString() %>
-                        <% } else { %>
-                            (Ongoing)
-                        <% } %>
-                    </h3>
-                    <div style="margin-bottom: 1.5rem;">
-                        <% if (cycleResults[cycle._id] && cycleResults[cycle._id].mainBill) { %>
-                            <p class="text-muted" style="margin-bottom: 0.25rem;">
-                                <strong>Main Bill:</strong> ₹<%= cycleResults[cycle._id].mainBill.total_amount %> 
-                                (<%= cycleResults[cycle._id].mainBill.total_units %> units)
-                            </p>
-                            <p class="text-muted" style="margin-bottom: 0;">
-                                <strong>Recovered:</strong> ₹<%= cycleResults[cycle._id].totalRoomAmount %> 
-                                (<%= cycleResults[cycle._id].roomBillsCount %> rooms)
-                            </p>
-                        <% } else { %>
-                            <p class="text-muted" style="margin-bottom: 0;">Status: Active / Ongoing</p>
-                        <% } %>
-                    </div>
-                    <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>" class="btn btn-outline" style="width: 100%;">View Cycle Dashboard</a>
-                </div>
-                <% }) %>
-        </div>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h1 style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="refresh-cw" style="color: var(--accent-blue);"></i> Billing Cycles</h1>
+        <p class="text-muted" style="margin-top: 0.5rem;"><%= house.house_name %> | History of all billing periods</p>
     </div>
+    <a href="/houses/<%= houseId %>" class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;">
+        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="grid-layout">
+    <% cycles.forEach(cycle => { %>
+        <% const isActive = !cycle.endDate; %>
+        <% const res = cycleResults[cycle._id]; %>
+        <% const hasMainBill = res && res.mainBill; %>
+        
+        <% if (isActive) { %>
+            <% const runDays = Math.floor((Date.now() - new Date(cycle.startDate)) / 86400000); %>
+            <div class="analytic-card" style="border-left: 4px solid #10B981; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981; padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+                            <i data-lucide="zap" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px; margin-right: 4px;"></i>Active
+                        </span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                            <i data-lucide="clock" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> Running for <%= runDays %> days
+                        </span>
+                    </div>
+                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+                        Started <%= cycle.startDate.toLocaleDateString() %>
+                    </h3>
+                    <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">Rooms processed so far: <%= res ? res.roomBillsCount : 0 %></p>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <% if (!hasMainBill) { %>
+                        <a href="/houses/<%= houseId %>/main-bill/new" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                            Submit Main Bill <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                        </a>
+                    <% } else { %>
+                        <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background: #10B981; border-color: #10B981;">
+                            Record Readings <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } else { %>
+            <% const cycleDays = Math.floor((new Date(cycle.endDate) - new Date(cycle.startDate)) / 86400000); %>
+            <div class="analytic-card" style="border-left: 4px solid var(--accent-blue); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="badge" style="background: rgba(112, 178, 220, 0.1); color: var(--accent-blue); padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+                            <i data-lucide="calendar-check" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px; margin-right: 4px;"></i>Completed
+                        </span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                            <i data-lucide="clock" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> <%= cycleDays %>-day cycle
+                        </span>
+                    </div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
+                        <%= cycle.startDate.toLocaleDateString() %> &rarr; <%= cycle.endDate.toLocaleDateString() %>
+                    </h3>
+                    
+                    <% if (hasMainBill) { %>
+                        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">Total Billed</div>
+                                <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); line-height: 1;">₹<%= res.mainBill.total_amount.toLocaleString() %></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1rem; font-weight: 700; color: var(--text-main);"><%= res.mainBill.total_units %> Units</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">₹<%= (res.mainBill.total_amount / res.mainBill.total_units).toFixed(2) %>/unit</div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-soft);">
+                        <span class="badge" style="background: rgba(107, 114, 128, 0.1); color: var(--text-muted); font-size: 0.75rem;">
+                            <%= res ? res.roomBillsCount : 0 %> rooms billed
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-outline" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; border-color: var(--accent-blue); color: var(--accent-blue);">
+                        View Bill Distribution <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                    </a>
+                </div>
+            </div>
+        <% } %>
+    <% }) %>
+</div>

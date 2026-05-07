@@ -1,25 +1,94 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="container" style="max-width: 450px; margin-top: 4rem;">
-    <div class="analytic-card" style="text-align: center;">
-        <i data-lucide="zap" style="color: var(--primary); width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-        <h2 style="margin-bottom: 0.5rem;">Create Account</h2>
-        <p class="text-muted" style="margin-bottom: 2rem;">Sign up to start tracking bills.</p>
+<style>
+    @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .auth-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 80px);
+        padding: 2rem 1rem;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--bg-card);
+        border-radius: var(--radius-md);
+        padding: 2.5rem;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+        border-top: 4px solid var(--accent-orange);
+        animation: fadeSlideUp 0.4s ease forwards;
+    }
+</style>
 
-        <form action="/auth/signup" method="POST" style="text-align: left;">
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i data-lucide="zap" style="color: var(--accent-orange); width: 40px; height: 40px; margin-bottom: 1rem;"></i>
+            <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 0.35rem;">Create Account</h2>
+            <p class="text-muted" style="font-size: 0.9rem;">Start managing your property bills today.</p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #EF4444; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: #EF4444; flex-shrink: 0;"></i>
+                <span style="color: #EF4444; font-size: 0.875rem; font-weight: 500;"><%= error %></span>
+            </div>
+        <% } %>
+
+        <form action="/auth/signup" method="POST" id="signupForm">
             <div class="form-group">
                 <label class="form-label" for="mobile_number">Mobile Number</label>
-                <input type="text" id="mobile_number" name="mobile_number" class="form-control" required placeholder="Enter 10-digit number">
+                <input type="text" id="mobile_number" name="mobile_number" class="form-control"
+                    required placeholder="Enter 10-digit mobile number"
+                    value="<%= typeof mobileValue !== 'undefined' ? mobileValue : '' %>">
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label" for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" required placeholder="Create a password">
+                <input type="password" id="password" name="password" class="form-control"
+                    required placeholder="••••••••">
             </div>
-            
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign Up</button>
+
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                    required placeholder="••••••••">
+                <p id="confirmError" style="font-size: 0.8rem; color: #EF4444; margin-top: 0.35rem; display: none;">
+                    Passwords do not match.
+                </p>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 1.5rem;">
+                By signing up, you agree to manage your billing data responsibly.
+            </p>
+
+            <button type="submit" class="btn btn-primary"
+                style="width: 100%; background: var(--accent-orange); border: none; padding: 0.85rem; font-size: 1rem;">
+                Create Account
+            </button>
         </form>
-        
-        <p class="text-muted" style="margin-top: 2rem; font-size: 0.875rem;">Already have an account? <a href="/auth/login">Log In</a></p>
+
+        <p style="text-align: center; margin-top: 1.75rem; color: var(--text-muted); font-size: 0.875rem;">
+            Already have an account? <a href="/auth/login" style="color: var(--accent-orange); font-weight: 600;">Log In</a>
+        </p>
     </div>
 </div>
+
+<script>
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        const pwd = document.getElementById('password').value;
+        const confirm = document.getElementById('confirm_password').value;
+        const errEl = document.getElementById('confirmError');
+
+        if (pwd !== confirm) {
+            e.preventDefault();
+            errEl.style.display = 'block';
+        } else {
+            errEl.style.display = 'none';
+        }
+    });
+</script>

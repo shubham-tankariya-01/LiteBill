@@ -10,7 +10,7 @@
             </p>
         </div>
         <div class="top-filters">
-            <a href="/houses/<%= houseId %>" class="btn btn-outline"
+            <a href="<%= (typeof houseId !== 'undefined' && houseId) ? '/houses/' + houseId : '/houses' %>" class="btn btn-outline"
                 style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
                 <i data-lucide="arrow-left" style="width: 16px;"></i> Back to House
             </a>
@@ -77,7 +77,25 @@
                     style="display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="printer" style="width: 16px;"></i> Print Summary
                 </button>
+            </div>
 
+            <!-- Verification Row -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-soft); display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                    <span><strong>Room Bills Total:</strong> ₹<%= roomBillsTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+                    <span><strong>Difference:</strong> ₹<%= billDifference %></span>
+                </div>
+                <div>
+                    <% if (billDifference === "0.00") { %>
+                        <span style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; font-weight: 600; font-size: 0.9rem;">
+                            <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i> Verified Match
+                        </span>
+                    <% } else { %>
+                        <span style="display: flex; align-items: center; gap: 0.5rem; color: #EF4444; font-weight: 600; font-size: 0.9rem;">
+                            <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Mismatch
+                        </span>
+                    <% } %>
+                </div>
             </div>
         </div>
         <% } %>
@@ -142,3 +160,13 @@
                     </div>
                     <% }) %>
             </div>
+
+<style>
+    @media print {
+        nav.top-navbar { display: none !important; }
+        .page-header .btn, .top-filters, .btn { display: none !important; }
+        .analytic-card { box-shadow: none !important; border: 1px solid #ddd !important; page-break-inside: avoid; }
+        button { display: none !important; }
+        body { background: white; }
+    }
+</style>

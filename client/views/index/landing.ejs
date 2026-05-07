@@ -1,7 +1,8 @@
 <% layout('layouts/boilerplate') %>
 
-<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-    <div style="text-align: center; max-width: 500px;">
+<div style="max-width: 900px; margin: 0 auto; padding: 4rem 1rem; display: flex; flex-direction: column; gap: 6rem;">
+    <!-- Hero Section -->
+    <div style="text-align: center; max-width: 500px; margin: 0 auto;">
         <i data-lucide="zap" style="width: 48px; height: 48px; color: var(--accent-orange); margin-bottom: 1.5rem;"></i>
         <h1 style="font-size: 3rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 1rem;">LiteBill<span style="color: var(--accent-orange);">.</span></h1>
         <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.1rem;">Modern utility bill tracking inspired by aviation dashboards. Pure precision.</p>
@@ -9,6 +10,76 @@
         <div style="display: flex; gap: 1rem; justify-content: center;">
             <a href="/auth/login" class="btn btn-outline" style="min-width: 120px;">Log In</a>
             <a href="/auth/signup" class="btn btn-primary" style="min-width: 120px;">Get Started</a>
+        </div>
+    </div>
+
+    <!-- Section 1: How it works -->
+    <div style="text-align: center;">
+        <h2 style="font-size: 1.75rem; font-weight: 600; margin-bottom: 3rem;">How it works</h2>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 1.5rem;">
+            
+            <!-- Step 1 -->
+            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--accent-orange) 15%, transparent); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; position: relative;">
+                    <i data-lucide="home" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
+                    <div style="position: absolute; top: -5px; right: -5px; background: var(--accent-orange); color: #000; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">1</div>
+                </div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Add Property & Meters</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Register your house and define all sub-meters.</p>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; height: 72px; color: var(--text-muted); opacity: 0.5; padding: 0 0.5rem;">
+                <i data-lucide="arrow-right" style="width: 24px; height: 24px;"></i>
+            </div>
+
+            <!-- Step 2 -->
+            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--accent-orange) 15%, transparent); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; position: relative;">
+                    <i data-lucide="file-text" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
+                    <div style="position: absolute; top: -5px; right: -5px; background: var(--accent-orange); color: #000; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">2</div>
+                </div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Submit Monthly Bill</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Input the main supplier bill and room readings.</p>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; height: 72px; color: var(--text-muted); opacity: 0.5; padding: 0 0.5rem;">
+                <i data-lucide="arrow-right" style="width: 24px; height: 24px;"></i>
+            </div>
+
+            <!-- Step 3 -->
+            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--accent-orange) 15%, transparent); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; position: relative;">
+                    <i data-lucide="calculator" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
+                    <div style="position: absolute; top: -5px; right: -5px; background: var(--accent-orange); color: #000; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">3</div>
+                </div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Get Per-Room Split</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Instantly see exact cost breakdowns per room.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Section 2: Features -->
+    <div>
+        <div class="grid-layout">
+            <div class="analytic-card" style="text-align: center; padding: 2rem;">
+                <i data-lucide="pie-chart" style="color: var(--accent-green); margin-bottom: 1rem; width: 32px; height: 32px;"></i>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Automatic Bill Splitting</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Fairly distributes costs based on exact unit consumption.</p>
+            </div>
+
+            <div class="analytic-card" style="text-align: center; padding: 2rem;">
+                <i data-lucide="history" style="color: var(--accent-pink); margin-bottom: 1rem; width: 32px; height: 32px;"></i>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Full Billing History</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Access past cycles instantly without hunting for paper bills.</p>
+            </div>
+
+            <div class="analytic-card" style="text-align: center; padding: 2rem;">
+                <i data-lucide="building" style="color: var(--accent-yellow); margin-bottom: 1rem; width: 32px; height: 32px;"></i>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Multi-Property Support</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Manage multiple houses and all their meters from one account.</p>
+            </div>
         </div>
     </div>
 </div>

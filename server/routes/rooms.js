@@ -3,21 +3,34 @@ const router = express.Router({ mergeParams: true });
 import Room from "../models/Room.js";
 import House from "../models/House.js";
 import RoomBill from "../models/RoomBill.js";
-// Note: Mounted as app.use("/houses/:houseId/rooms", roomsHouseRouter)
+import RoomReading from "../models/RoomReading.js";
 // and app.use("/rooms", roomsBaseRouter) in app.js
 
 // -- Routes under /houses/:houseId/rooms --
-router.get("/", async (req, res) => {
-    const rooms = await Room.find({ house_id: req.params.houseId }).populate("house_id");
-    const house = await House.findById(req.params.houseId);
-    res.render("rooms/index", { rooms, house });
+router.get("/", async (req, res, next) => {
+    try {
+        const rooms = await Room.find({ house_id: req.params.houseId }).populate("house_id");
+        const house = await House.findById(req.params.houseId);
+        if (!house) return res.status(404).send('Resource not found');
+
+        const roomData = {};
+        for (let room of rooms) {
+            const latestBill = await RoomBill.findOne({ room_id: room._id }).sort({ createdAt: -1 });
+            const latestReading = await RoomReading.findOne({ room_id: room._id }).sort({ createdAt: -1 });
+            roomData[room._id.toString()] = { latestBill, latestReading };
+        }
+
+        res.render("rooms/index", { rooms, house, roomData });
+    } catch (err) {
+        next(err);
+    }
 });
 
 router.get("/new", (req, res) => {
     res.render("rooms/new", { houseId: req.params.houseId });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
     try {
         const { meters } = req.body;
         if (meters && meters.length > 0) {
@@ -31,16 +44,15 @@ router.post("/", async (req, res) => {
         }
         res.json({ message: "Success" });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server Error" });
+        next(err);
     }
 });
 
 // -- Routes under /rooms --
-router.get("/:roomId", async (req, res) => {
+router.get("/:roomId", async (req, res, next) => {
     try {
         const room = await Room.findById(req.params.roomId);
-        if (!room) return res.status(404).send("Room not found");
+        if (!room) return res.status(404).send('Resource not found');
         
         const roomBills = await RoomBill.find({ room_id: room._id })
             .populate("billing_cycle_id")
@@ -48,47 +60,52 @@ router.get("/:roomId", async (req, res) => {
 
         res.render("rooms/show", { room, roomId: room._id, roomBills });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 
-router.get("/:roomId/edit", async (req, res) => {
+router.get("/:roomId/edit", async (req, res, next) => {
     try {
         const room = await Room.findById(req.params.roomId);
-        if (!room) return res.status(404).send("Room not found");
+        if (!room) return res.status(404).send('Resource not found');
         res.render("rooms/edit", { room });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 
-router.put("/:roomId", async (req, res) => {
+router.put("/:roomId", async (req, res, next) => {
     try {
         const { meter_name } = req.body;
         const room = await Room.findByIdAndUpdate(req.params.roomId, { meter_name }, { new: true });
+        if (!room) return res.status(404).send('Resource not found');
         res.redirect(`/houses/${room.house_id}/rooms`);
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 
-router.delete("/:roomId", async (req, res) => {
-    try {
-        const room = await Room.findByIdAndDelete(req.params.roomId);
-        res.redirect(`/houses/${room.house_id}/rooms`);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
-    }
-});
-
-router.get("/:roomId/analysis", async (req, res) => {
+router.delete("/:roomId", async (req, res, next) => {
     try {
         const room = await Room.findById(req.params.roomId);
-        if (!room) return res.status(404).send("Room not found");
+        if (!room) return res.status(404).send('Resource not found');
+        
+        const houseId = room.house_id;
+        
+        await Room.findByIdAndDelete(req.params.roomId);
+        await RoomBill.deleteMany({ room_id: req.params.roomId });
+        await RoomReading.deleteMany({ room_id: req.params.roomId });
+
+        res.redirect(`/houses/${houseId}/rooms`);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get("/:roomId/analysis", async (req, res, next) => {
+    try {
+        const room = await Room.findById(req.params.roomId);
+        if (!room) return res.status(404).send('Resource not found');
         
         const roomBills = await RoomBill.find({ room_id: room._id })
             .populate("billing_cycle_id")
@@ -96,8 +113,7 @@ router.get("/:roomId/analysis", async (req, res) => {
 
         res.render("rooms/analysis", { room, roomId: req.params.roomId, roomBills });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        next(err);
     }
 });
 

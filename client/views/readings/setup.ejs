@@ -4,16 +4,33 @@
     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
         <div>
             <h2>Initial House Setup</h2>
-            <p class="text-muted">Since this is a new house, please enter the <strong>starting meter readings</strong> for all rooms. 
-            This will establish the baseline for future bills.</p>
         </div>
         <i data-lucide="settings" style="color: var(--primary); width: 32px; height: 32px;"></i>
     </div>
 
+    <div style="background: rgba(112, 178, 220, 0.08); border-left: 4px solid var(--accent-blue); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-blue); font-size: 1.1rem; margin-top: 0;">
+            <i data-lucide="info" style="width: 20px; height: 20px;"></i> One-Time Setup Required
+        </h4>
+        <p style="margin: 0; color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">
+            Enter the meter readings currently displayed on each physical meter. These values are your starting point — your first electricity bill will be calculated based on the difference between these readings and the next ones you enter. You will not be asked to do this again.
+        </p>
+    </div>
+    
+    <details style="margin-bottom: 2rem; background: var(--bg-body); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 0.75rem 1rem;">
+        <summary style="cursor: pointer; font-weight: 600; color: var(--text-muted); outline: none;">Why is this step needed?</summary>
+        <p style="margin-top: 0.75rem; margin-bottom: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+            Without a baseline reading, the system cannot calculate how many units each room consumed during your very first billing period. Think of this as synchronizing the app with the physical meter's current state.
+        </p>
+    </details>
+
     <form action="/houses/<%= houseId %>/readings/setup" method="POST">
         <% rooms.forEach(room => { %>
             <div class="analytic-card reading-input" style="margin-bottom: 1.5rem; background: var(--bg-main); border: none;">
-                <h4 style="margin-bottom: 1rem;"><%= room.meter_name %></h4>
+                <h4 style="margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0;">
+                    <i data-lucide="bed-double" style="width: 20px; height: 20px; color: var(--accent-pink);"></i> <%= room.meter_name %>
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; margin-top: 0;">Enter the value currently shown on the physical meter for this room.</p>
                 <div class="grid-layout">
                     <div class="form-group">
                         <label class="form-label">Opening Reading (Value currently on meter)</label>
@@ -24,6 +41,7 @@
                         <label class="form-label">Setup Date</label>
                         <input type="date" value="<%= new Date().toISOString().split('T')[0] %>"
                             name="readings[<%= room._id %>][date]" class="form-control" required>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; margin-bottom: 0;">Use today's date or the date you physically read the meters.</p>
                     </div>
                 </div>
             </div>

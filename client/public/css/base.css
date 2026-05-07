@@ -25,6 +25,8 @@
     /* Houses / Units */
     --accent-pink: #D17C94;
     /* Rooms / Config */
+    --danger: #EF4444;
+    --success: #10B981;
 
     /* Borders & Shadows */
     --border-soft: #EAECEB;

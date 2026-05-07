@@ -1,34 +1,48 @@
 import express from "express";
+import mongoose from "mongoose";
 const router = express.Router({ mergeParams: true });
 import Room from "../models/Room.js";
 import RoomReading from "../models/RoomReading.js";
 import RoomBill from "../models/RoomBill.js";
 import BillingCycle from "../models/BillingCycle.js";
 import House from "../models/House.js";
+import MainBill from "../models/MainBill.js";
 import { calculate_Individual_Bill } from "../utils/BillCounter.js";
 
-router.get("/new", async (req, res) => {
+router.get("/new", async (req, res, next) => {
   try {
-    const { houseId, cycleId } = req.params;
+    const { houseId } = req.params;
     const house = await House.findById(houseId);
-    if (!house) return res.status(404).send("House not found");
+    if (!house) return res.status(404).send('Resource not found');
 
     const rooms = await Room.find({ house_id: houseId });
 
-    // If house is new (no previous cycle), render setup view
-    if (!house.previous_billing_cycle) {
+    const cycleId = req.params.cycleId || house.active_billing_cycle;
+
+    // If house is new (no active cycle or no previous cycle), render setup view
+    if (!cycleId || !house.previous_billing_cycle) {
       return res.render("readings/setup", { houseId, rooms });
     }
 
-    res.render("readings/new", { houseId, cycleId, rooms });
+    const mainBill = await MainBill.findOne({ billing_cycle_id: cycleId });
+    if (!mainBill) {
+      return res.redirect(`/houses/${houseId}/main-bill/new?error=main_bill_required`);
+    }
+
+    const prevReadings = await RoomReading.find({ billing_cycle_id: house.previous_billing_cycle });
+    const previousReadings = {};
+    prevReadings.forEach(r => {
+      previousReadings[r.room_id.toString()] = r.reading_value;
+    });
+
+    res.render("readings/new", { houseId, cycleId, rooms, previousReadings });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error loading reading form");
+    next(err);
   }
 });
 
 // INITIAL SETUP: Establish baseline meter readings for a new house
-router.post("/setup", async (req, res) => {
+router.post("/setup", async (req, res, next) => {
   try {
     const { houseId } = req.params;
     const readingsInput = req.body.readings;
@@ -73,19 +87,35 @@ router.post("/setup", async (req, res) => {
 
     res.redirect(`/houses/${houseId}`);
   } catch (err) {
-    console.error("Setup Error:", err);
-    res.status(500).send("Setup failed: " + err.message);
+    next(err);
   }
 });
 
 
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
+  const { houseId, cycleId } = req.params;
+
+  // Safeguard: Verify the cycle is not already closed
+  const currentCycle = await BillingCycle.findById(cycleId);
+  if (!currentCycle) return res.status(404).send('Resource not found');
+  if (currentCycle.endDate) {
+    return res.redirect(`/cycles/${cycleId}/room-bills`);
+  }
+
+  // Safeguard: Verify readings haven't already been submitted
+  const existingReading = await RoomReading.findOne({ billing_cycle_id: cycleId });
+  if (existingReading) {
+    return res.redirect(`/cycles/${cycleId}/room-bills`);
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { houseId, cycleId } = req.params;
     const readingsInput = req.body.readings;
 
     if (!readingsInput) {
-      return res.status(400).json({ error: "Readings undefined" });
+      throw new Error("Readings undefined");
     }
 
     // 1. Format and Validate Readings
@@ -107,21 +137,27 @@ router.post("/", async (req, res) => {
     );
 
     // 2. Insert readings
-    await RoomReading.insertMany(formattedReadings);
+    try {
+      await RoomReading.insertMany(formattedReadings, { session });
+    } catch (err) {
+      if (err.code === 11000) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.redirect(`/cycles/${cycleId}/room-bills`);
+      }
+      throw err;
+    }
 
     // 3. Calculate Room Bills
     const roomBills = await calculate_Individual_Bill(houseId, cycleId, formattedReadings);
 
     // 4. Save Room Bills
-    await RoomBill.insertMany(roomBills);
+    await RoomBill.insertMany(roomBills, { session });
 
     // 5. Finalize Current Cycle
-    const currentCycle = await BillingCycle.findById(cycleId);
-    if (!currentCycle) throw new Error("Current cycle not found");
-
     const latestReadingDate = new Date(Math.max(...formattedReadings.map(r => r.reading_date)));
     currentCycle.endDate = latestReadingDate;
-    await currentCycle.save();
+    await currentCycle.save({ session });
 
     // 6. Transition to New Cycle
     const nextDay = new Date(latestReadingDate);
@@ -131,19 +167,27 @@ router.post("/", async (req, res) => {
       house: houseId,
       startDate: nextDay
     });
-    const savedNewCycle = await newCycle.save();
+    const savedNewCycle = await newCycle.save({ session });
+
+    if (!savedNewCycle || !savedNewCycle._id) {
+      throw new Error("Failed to initialize the new billing cycle properly.");
+    }
 
     // 7. Update House pointers
     await House.findByIdAndUpdate(houseId, { 
       active_billing_cycle: savedNewCycle._id,
       previous_billing_cycle: currentCycle._id
-    });
+    }, { session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.redirect(`/cycles/${cycleId}/room-bills`);
 
   } catch (err) {
-    console.error("Billing Process Error:", err);
-    res.status(500).send(err.message);
+    await session.abortTransaction();
+    session.endSession();
+    next(err);
   }
 });
 

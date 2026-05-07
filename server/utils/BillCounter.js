@@ -23,14 +23,19 @@ export const calculate_Individual_Bill = async (house_id, cycle_id, formatted_re
         const house = await House.findById(house_id).select("previous_billing_cycle");
         const previous_cycle_id = house ? house.previous_billing_cycle : null;
 
+        if (!previous_cycle_id) {
+            throw new Error("Cannot calculate bills: no previous billing cycle found. Ensure house setup was completed before running calculations.");
+        }
 
         // 3. Fetch all previous readings in one go for efficiency
         let previous_readings_map = {};
-        if (previous_cycle_id) {
-            const prev_readings = await RoomReading.find({ billing_cycle_id: previous_cycle_id });
-            prev_readings.forEach(r => {
-                previous_readings_map[r.room_id.toString()] = r.reading_value;
-            });
+        const prev_readings = await RoomReading.find({ billing_cycle_id: previous_cycle_id });
+        prev_readings.forEach(r => {
+            previous_readings_map[r.room_id.toString()] = r.reading_value;
+        });
+
+        if (Object.keys(previous_readings_map).length === 0) {
+            console.warn(`Warning: Previous cycle ${previous_cycle_id} exists but has no readings stored. This indicates setup readings were not saved correctly.`);
         }
 
         // 4. Calculate Raw Consumption and Total
@@ -87,6 +92,12 @@ export const calculate_Individual_Bill = async (house_id, cycle_id, formatted_re
                 amount_diff = Math.round((amount_diff - adjustment_step) * 100) / 100;
                 i++;
             }
+        }
+
+        // 8. Final Validation Step
+        const final_sum = calculated_room_bills.reduce((acc, bill) => acc + bill.amount, 0);
+        if (Math.abs(main_total_amount - final_sum) > 0.01) {
+            throw new Error(`Critical calculation error: Sum of room bills (${final_sum}) does not match main bill amount (${main_total_amount}).`);
         }
 
         return calculated_room_bills;

@@ -12,6 +12,9 @@ import House from "./models/House.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ejsMate from "ejs-mate";
+import session from "express-session";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { isLoggedIn } from "./middleware/isLoggedIn.js";
 
 // constants
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +29,12 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../client/views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback_secret_keyboard_cat',
+    resave: false,
+    saveUninitialized: false
+}));
 
 // Method override middleware for ?_method=PUT/DELETE
 app.use((req, res, next) => {
@@ -69,6 +78,10 @@ async function main() {
 // end
 
 // Routes =========================================================
+
+// Protect routes
+app.use(isLoggedIn);
+
 app.use("/", indexRoute);
 app.use("/houses/:houseId/rooms", roomsRoute);
 app.use("/rooms", roomsRoute);
@@ -82,6 +95,9 @@ app.use("/cycles/:cycleId/room-bills", roomBillsRoute);
 app.use("/houses", housesRoute);
 app.use("/auth", authRoute);
 app.use("/user", authRoute);
+
+// Error Handler Middleware
+app.use(errorHandler);
 
 //connecting to the server port...
 app.listen(port, (req, res) => {

@@ -1,87 +1,231 @@
 <% layout('layouts/boilerplate') %>
 
-<div style="max-width: 600px; margin: 0 auto;">
+<div style="max-width: 1000px; margin: 0 auto; padding-bottom: 3rem;">
+    <!-- Header -->
+    <div style="margin-bottom: 2.5rem;">
+        <h1 style="margin: 0 0 0.5rem 0; font-size: 2.25rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem;">
+            <i data-lucide="user" style="color: var(--accent-orange);"></i> Your Profile
+        </h1>
+        <p class="text-secondary" style="font-size: 1rem; margin: 0;">Manage your account settings and security preferences.</p>
+    </div>
 
-    <!-- Card 1: Account Info -->
-    <div class="analytic-card" style="border-top: 4px solid var(--accent-orange); margin-bottom: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem;">
-            <div style="width: 70px; height: 70px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink)); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i data-lucide="user" style="width: 32px; height: 32px; color: #fff;"></i>
-            </div>
-            <div>
-                <p style="font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin: 0;">+91 <%= user.mobile_number %></p>
-                <p class="text-muted" style="font-size: 0.875rem; margin: 0.2rem 0 0;">
-                    Member since <%= new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %>
-                </p>
+    <!-- Alert Messages -->
+    <% if (error) { %>
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--accent-red);">
+            <i data-lucide="alert-circle" style="width: 20px;"></i>
+            <span style="font-weight: 600;"><%= error %></span>
+        </div>
+    <% } %>
+    <% if (success) { %>
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--accent-green);">
+            <i data-lucide="check-circle" style="width: 20px;"></i>
+            <span style="font-weight: 600;"><%= success %></span>
+        </div>
+    <% } %>
+
+    <div class="split-layout" style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: stretch;">
+        
+        <!-- Left Panel: Profile Info -->
+        <div style="flex: 1; min-width: 300px;">
+            <div class="card-raised" style="height: 100%; border-top: 4px solid var(--accent-orange); display: flex; flex-direction: column;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, #FF6B35 0%, #8B5CF6 100%); margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);">
+                        <span style="font-size: 2.5rem; font-weight: 800; color: #fff;">
+                            <%= user.mobile_number ? user.mobile_number.toString().charAt(0) : 'U' %>
+                        </span>
+                    </div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem 0;">+91 <%= user.mobile_number %></h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                        Member since <%= new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %>
+                    </p>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <h3 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem;">Account Statistics</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
+                                <i data-lucide="home" style="width: 18px; color: var(--accent-yellow);"></i>
+                                <span style="font-weight: 600;">Properties</span>
+                            </div>
+                            <span style="font-weight: 800; font-size: 1.1rem;"><%= stats.propertiesCount %></span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
+                                <i data-lucide="bed-double" style="width: 18px; color: var(--accent-purple);"></i>
+                                <span style="font-weight: 600;">Configured Meters</span>
+                            </div>
+                            <span style="font-weight: 800; font-size: 1.1rem;"><%= stats.roomsCount %></span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
+                                <i data-lucide="file-text" style="width: 18px; color: var(--accent-blue);"></i>
+                                <span style="font-weight: 600;">Main Bills Tracked</span>
+                            </div>
+                            <span style="font-weight: 800; font-size: 1.1rem;"><%= stats.billsCount %></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div style="border-top: 1px solid var(--border-soft); margin: 0 0 1.5rem;"></div>
+        <!-- Right Panel: Security -->
+        <div style="flex: 1.5; min-width: 350px;">
+            <div class="card-raised" style="height: 100%; border-top: 4px solid var(--accent-blue);">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="shield-check" style="color: var(--accent-blue);"></i> Security Settings
+                </h2>
 
-        <form action="/auth/logout" method="POST">
-            <button type="submit" class="btn btn-outline"
-                style="border-color: #EF4444; color: #EF4444; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Sign Out
-            </button>
-        </form>
+                <form action="/auth/change-password" method="POST" id="passwordForm">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label class="form-label" for="current_password">Current Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="current_password" name="current_password" class="form-input" style="padding-right: 3rem;" required>
+                            <button type="button" class="pwd-toggle" data-target="current_password" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0;">
+                                <i data-lucide="eye" style="width: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label class="form-label" for="new_password">New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="new_password" name="new_password" class="form-input" style="padding-right: 3rem;" required minlength="6">
+                            <button type="button" class="pwd-toggle" data-target="new_password" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0;">
+                                <i data-lucide="eye" style="width: 18px;"></i>
+                            </button>
+                        </div>
+                        <!-- Strength indicator -->
+                        <div style="display: flex; gap: 4px; margin-top: 0.5rem;" id="strength-bars">
+                            <div style="height: 4px; flex: 1; border-radius: 2px; background: var(--border-soft); transition: background 0.3s;" class="str-bar"></div>
+                            <div style="height: 4px; flex: 1; border-radius: 2px; background: var(--border-soft); transition: background 0.3s;" class="str-bar"></div>
+                            <div style="height: 4px; flex: 1; border-radius: 2px; background: var(--border-soft); transition: background 0.3s;" class="str-bar"></div>
+                        </div>
+                        <p id="strength-text" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 600;">Enter a password</p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label class="form-label" for="confirm_password">Confirm New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="confirm_password" class="form-input" style="padding-right: 3rem;" required minlength="6">
+                            <button type="button" class="pwd-toggle" data-target="confirm_password" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0;">
+                                <i data-lucide="eye" style="width: 18px;"></i>
+                            </button>
+                        </div>
+                        <p id="match-error" style="font-size: 0.8rem; color: var(--accent-red); margin-top: 0.5rem; display: none; font-weight: 600;">Passwords do not match.</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; background: var(--accent-blue); color: #000; font-weight: 800;">Update Password &rarr;</button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <!-- Card 2: Change Password -->
-    <div class="analytic-card" style="border-top: 4px solid var(--accent-blue);">
-        <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-            <i data-lucide="lock" style="color: var(--accent-blue); width: 20px; height: 20px;"></i> Change Password
-        </h3>
+    <!-- Danger Zone -->
+    <div class="card-raised" style="border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%);">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.5rem 0;">Danger Zone</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Actions taken here may be irreversible. Please proceed with caution.</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding-top: 1.5rem; border-top: 1px solid rgba(239, 68, 68, 0.2);">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <button type="submit" class="btn btn-secondary" style="border-color: var(--text-muted); color: var(--text-primary);">
+                    <i data-lucide="log-out" style="width: 16px;"></i> Sign Out of LiteBill
+                </button>
+            </form>
 
-        <% if (typeof success !== 'undefined' && success) { %>
-            <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10B981; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="check-circle" style="width: 16px; height: 16px; color: #10B981; flex-shrink: 0;"></i>
-                <span style="color: #10B981; font-size: 0.875rem; font-weight: 500;"><%= success %></span>
-            </div>
-        <% } %>
-
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #EF4444; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: #EF4444; flex-shrink: 0;"></i>
-                <span style="color: #EF4444; font-size: 0.875rem; font-weight: 500;"><%= error %></span>
-            </div>
-        <% } %>
-
-        <form action="/auth/change-password" method="POST" id="changePasswordForm">
-            <div class="form-group">
-                <label class="form-label">Current Password</label>
-                <input type="password" name="current_password" class="form-control" required placeholder="••••••••">
-            </div>
-            <div class="form-group">
-                <label class="form-label">New Password</label>
-                <input type="password" id="new_password" name="new_password" class="form-control" required placeholder="••••••••" minlength="6">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Confirm New Password</label>
-                <input type="password" id="confirm_new_password" class="form-control" required placeholder="••••••••">
-                <p id="confirmNewError" style="font-size: 0.8rem; color: #EF4444; margin-top: 0.35rem; display: none;">
-                    Passwords do not match.
-                </p>
-            </div>
-
-            <button type="submit" class="btn btn-primary"
-                style="width: 100%; background: var(--accent-blue); border: none; padding: 0.85rem;">
-                Update Password
+            <button type="button" class="btn btn-outline" style="border-color: var(--accent-red); color: var(--accent-red);" onclick="alert('Account deletion is currently unavailable. Please contact support.')">
+                <i data-lucide="trash-2" style="width: 16px;"></i> Delete Account
             </button>
-        </form>
+        </div>
     </div>
 </div>
 
 <script>
-    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
-        const newPwd = document.getElementById('new_password').value;
-        const confirm = document.getElementById('confirm_new_password').value;
-        const errEl = document.getElementById('confirmNewError');
+    document.addEventListener('DOMContentLoaded', () => {
+        // Password toggles
+        document.querySelectorAll('.pwd-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = e.currentTarget.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.setAttribute('data-lucide', 'eye-off');
+                } else {
+                    input.type = 'password';
+                    icon.setAttribute('data-lucide', 'eye');
+                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            });
+        });
 
-        if (newPwd !== confirm) {
-            e.preventDefault();
-            errEl.style.display = 'block';
-        } else {
-            errEl.style.display = 'none';
+        // Password strength and validation
+        const newPwd = document.getElementById('new_password');
+        const confPwd = document.getElementById('confirm_password');
+        const form = document.getElementById('passwordForm');
+        const matchError = document.getElementById('match-error');
+        const bars = document.querySelectorAll('.str-bar');
+        const strText = document.getElementById('strength-text');
+
+        function checkStrength(val) {
+            let strength = 0;
+            if (val.length >= 6) strength++;
+            if (val.match(/[A-Z]/) || val.match(/[0-9]/)) strength++;
+            if (val.length >= 10 && val.match(/[^A-Za-z0-9]/)) strength++;
+
+            bars.forEach(b => b.style.background = 'var(--border-soft)');
+            
+            if (val.length === 0) {
+                strText.textContent = 'Enter a password';
+                strText.style.color = 'var(--text-muted)';
+                return;
+            }
+
+            if (strength >= 1) {
+                bars[0].style.background = 'var(--accent-red)';
+                strText.textContent = 'Weak';
+                strText.style.color = 'var(--accent-red)';
+            }
+            if (strength >= 2) {
+                bars[0].style.background = 'var(--accent-yellow)';
+                bars[1].style.background = 'var(--accent-yellow)';
+                strText.textContent = 'Good';
+                strText.style.color = 'var(--accent-yellow)';
+            }
+            if (strength >= 3) {
+                bars.forEach(b => b.style.background = 'var(--accent-green)');
+                strText.textContent = 'Strong';
+                strText.style.color = 'var(--accent-green)';
+            }
         }
+
+        newPwd.addEventListener('input', (e) => {
+            checkStrength(e.target.value);
+            if (confPwd.value) checkMatch();
+        });
+
+        confPwd.addEventListener('input', checkMatch);
+
+        function checkMatch() {
+            if (confPwd.value !== newPwd.value) {
+                matchError.style.display = 'block';
+                confPwd.style.borderColor = 'var(--accent-red)';
+                return false;
+            } else {
+                matchError.style.display = 'none';
+                confPwd.style.borderColor = 'var(--border)';
+                return true;
+            }
+        }
+
+        form.addEventListener('submit', (e) => {
+            if (!checkMatch()) {
+                e.preventDefault();
+            }
+        });
     });
 </script>

@@ -145,4 +145,32 @@ document.addEventListener("DOMContentLoaded", () => {
             submitBtn.disabled = false;
         }
     });
+
+    // GLOBAL MODAL EVENT LISTENERS
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal:not(.hidden)');
+            modals.forEach(m => {
+                const closeBtn = m.querySelector('.modal-close-btn');
+                if (closeBtn) {
+                    closeBtn.click();
+                } else {
+                    m.classList.add('hidden');
+                    document.body.classList.remove('modal-open');
+                }
+            });
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            const closeBtn = e.target.querySelector('.modal-close-btn');
+            if (closeBtn) {
+                closeBtn.click();
+            } else {
+                e.target.classList.add('hidden');
+                document.body.classList.remove('modal-open');
+            }
+        }
+    });
 });

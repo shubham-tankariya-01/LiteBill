@@ -1,46 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    /* Flat Page Aviation-inspired Palette */
-    --bg-body: #F4F6F5;
-    /* Very light soft grey for the whole page */
-    --bg-card: #FFFFFF;
-    /* Pure white for cards */
-    --bg-nav: #FFFFFF;
-    /* White top nav */
+    /* Midnight Ledger Theme */
+    --bg-body: #0F1117;
+    --surface: #1A1D27;
+    --surface-raised: #222636;
+    --border: #2E3147;
+    --border-soft: #2E3147; /* Fallback for existing class */
+    --text-primary: #F0F2FF;
+    --text-main: #F0F2FF; /* Fallback for existing class */
+    --text-secondary: #8B8FA8;
+    --text-muted: #8B8FA8; /* Fallback for existing class */
+    --text-dim: #4A4E6A;
 
-    /* Text */
-    --text-main: #1D211F;
-    --text-muted: #7E8684;
-    --text-light: #B4BCBA;
+    --accent-orange: #FF6B35;
+    --accent-blue: #4D9FEC;
+    --accent-green: #2DD4BF;
+    --accent-purple: #8B5CF6;
+    --accent-yellow: #FBBF24;
+    --accent-red: #EF4444;
+    --danger: #EF4444; /* Fallback */
+    --success: #2DD4BF; /* Fallback */
 
-    /* Dynamic Page Accents */
-    --accent-orange: #FE8A5C;
-    /* General */
-    --accent-blue: #70B2DC;
-    /* Cycles / Timeline */
-    --accent-green: #AEE2C2;
-    /* Bills / Money */
-    --accent-yellow: #FBCB45;
-    /* Houses / Units */
-    --accent-pink: #D17C94;
-    /* Rooms / Config */
-    --danger: #EF4444;
-    --success: #10B981;
+    --gradient-hero: linear-gradient(135deg, #FF6B35 0%, #8B5CF6 100%);
+    --font-main: 'Inter', sans-serif;
 
-    /* Borders & Shadows */
-    --border-soft: #EAECEB;
-    --shadow-faint: 0px 4px 15px rgba(0, 0, 0, 0.02);
-    --shadow-nav: 0px 4px 20px rgba(254, 138, 92, 0.05);
-
-    /* Edges */
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --radius-pill: 9999px;
-
-    /* Fonts */
-    --font-main: 'Plus Jakarta Sans', sans-serif;
+    --radius-card: 12px;
+    --radius-md: 12px; /* Fallback */
+    --radius-input: 8px;
+    --radius-sm: 8px; /* Fallback */
+    --radius-pill: 999px;
+    --radius-btn: 6px;
+    
+    --shadow-faint: 0 4px 24px rgba(0,0,0,0.4); /* Fallback */
 }
 
 * {
@@ -51,25 +43,358 @@
 
 body {
     background-color: var(--bg-body);
-    color: var(--text-main);
+    color: var(--text-primary);
     font-family: var(--font-main);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
 
+a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+h1, h2, h3, h4 {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
 /* ==================================================== 
-   LAYOUT: Top Navbar & Main Container 
+   MICRO-ANIMATIONS
+==================================================== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(45, 212, 191, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
+}
+
+/* ==================================================== 
+   CARD SYSTEM (Glass-morphism)
+==================================================== */
+.card, .analytic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    backdrop-filter: blur(8px);
+    padding: 1.5rem;
+    animation: fadeUp 0.3s ease forwards;
+}
+
+/* Stagger card animations */
+.card:nth-child(1), .analytic-card:nth-child(1) { animation-delay: 50ms; }
+.card:nth-child(2), .analytic-card:nth-child(2) { animation-delay: 100ms; }
+.card:nth-child(3), .analytic-card:nth-child(3) { animation-delay: 150ms; }
+.card:nth-child(4), .analytic-card:nth-child(4) { animation-delay: 200ms; }
+.card:nth-child(5), .analytic-card:nth-child(5) { animation-delay: 250ms; }
+
+.card-raised {
+    background: var(--surface-raised);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    backdrop-filter: blur(8px);
+    padding: 1.5rem;
+}
+
+.card-accent {
+    border-left: 2px solid var(--card-accent-color, var(--accent-orange));
+    box-shadow: inset 0 2px 10px rgba(255,255,255,0.02);
+}
+
+/* Existing theme borders */
+.border-top-yellow { border-top: 4px solid var(--accent-yellow); }
+.border-top-pink { border-top: 4px solid var(--accent-purple); } /* Mapped to purple for Midnight Ledger */
+
+/* ==================================================== 
+   GRID SYSTEM
+==================================================== */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(50% - 1rem), 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(33.333% - 1rem), 1fr)); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(25% - 1rem), 1fr)); gap: 1.5rem; }
+.grid-auto, .grid-layout { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+    gap: 1.5rem; 
+}
+
+/* Breakpoints will be handled at the bottom of the file */
+
+/* ==================================================== 
+   BADGE / CHIP SYSTEM
+==================================================== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.badge-green { background: rgba(45, 212, 191, 0.12); color: var(--accent-green); }
+.badge-blue { background: rgba(77, 159, 236, 0.12); color: var(--accent-blue); }
+.badge-orange { background: rgba(255, 107, 53, 0.12); color: var(--accent-orange); }
+.badge-purple { background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); }
+.badge-red { background: rgba(239, 68, 68, 0.12); color: var(--accent-red); }
+.badge-dim { background: rgba(74, 78, 106, 0.12); color: var(--text-secondary); }
+
+/* ==================================================== 
+   BUTTON SYSTEM
+==================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--radius-btn);
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-main);
+    min-height: 44px; /* Touch target minimum */
+}
+
+.btn-primary {
+    background: var(--accent-orange);
+    color: #fff;
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.btn-secondary, .btn-outline {
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+.btn-secondary:hover, .btn-outline:hover {
+    background: var(--surface);
+    border-color: var(--text-secondary);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+}
+.btn-ghost:hover {
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.btn-danger {
+    background: var(--accent-red);
+    color: #fff;
+}
+.btn-danger:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.btn-icon {
+    padding: 0.7rem;
+    border-radius: var(--radius-btn);
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Mapped classes from old design */
+.btn-blue { background: var(--accent-blue); color: #fff; }
+.btn-green { background: var(--accent-green); color: #fff; }
+
+/* ==================================================== 
+   FORM CONTROLS
+==================================================== */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    background-color: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input);
+    transition: all 0.2s ease;
+    min-height: 44px; /* Touch target minimum */
+}
+
+.form-control:focus, .form-input:focus {
+    outline: none;
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.15);
+}
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* ==================================================== 
+   STAT / METRIC COMPONENTS
+==================================================== */
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.stat-trend {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+/* ==================================================== 
+   TABLE STYLES
+==================================================== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 600px; /* Ensure horizontal scroll on small screens */
+}
+
+.data-table thead th {
+    background: var(--surface-raised);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.data-table tbody td {
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* ==================================================== 
+   LOADING SKELETON SYSTEM
+==================================================== */
+.skeleton {
+    background: var(--surface-raised);
+    background-image: linear-gradient(90deg, var(--surface-raised) 0px, var(--border) 40px, var(--surface-raised) 80px);
+    background-size: 1000px;
+    animation: shimmer 2s infinite linear forwards;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 14px;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-text:last-child {
+    margin-bottom: 0;
+    width: 80%;
+}
+
+.skeleton-card {
+    height: 120px;
+    width: 100%;
+    border-radius: var(--radius-card);
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* ==================================================== 
+   EXISTING LAYOUT PRESERVATION (Navbar & Main Container)
 ==================================================== */
 .top-navbar {
-    background-color: var(--bg-nav);
+    background-color: var(--surface);
     padding: 1rem 3rem;
     display: flex;
     justify-content: space-between !important;
     align-items: center;
-    border-bottom: 2px solid var(--accent-orange);
-    box-shadow: var(--shadow-nav);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     position: sticky;
+    top: 0;
     z-index: 100;
+    backdrop-filter: blur(10px);
 }
 
 .nav-links {
@@ -81,20 +406,15 @@ body {
 .nav-item {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 0.4rem;
     transition: color 0.2s;
 }
 
-.nav-item i {
-    width: 16px;
-    height: 16px;
-}
-
 .nav-item:hover {
-    color: var(--text-main);
+    color: var(--text-primary);
 }
 
 .nav-actions {
@@ -107,7 +427,7 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--text-main);
+    background: var(--surface-raised);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -116,12 +436,9 @@ body {
 .main-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 3rem 2rem;
+    padding: 7rem 2rem 3rem 2rem; /* Added extra top padding for fixed navbar offset */
 }
 
-/* ==================================================== 
-   TOP HEADER IN PAGES
-==================================================== */
 .page-header {
     display: flex;
     align-items: center;
@@ -131,327 +448,155 @@ body {
 
 .page-header h1 {
     font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-main);
+    font-weight: 800;
+    color: var(--text-primary);
     letter-spacing: -0.5px;
     margin: 0;
 }
 
-/* ==================================================== 
-   CARDS 
-==================================================== */
-.grid-layout {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.reading-input {
-    max-width: 1000px;
-    margin: 0 auto;
-    border: 2px solid var(--accent-orange);
-}
-
-.analytic-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-faint);
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.analytic-card h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.analytic-card i {
-    width: 18px;
-    height: 18px;
-}
-
-/* Specific Accent themes for cards */
-.theme-house {
-    border-top: 4px solid var(--accent-yellow);
-}
-
-.theme-house h3 i {
-    color: var(--accent-yellow);
-}
-
-.theme-room {
-    border-top: 4px solid var(--accent-pink);
-}
-
-.theme-room h3 i {
-    color: var(--accent-pink);
-}
-
-.theme-cycle {
-    border-top: 4px solid var(--accent-blue);
-}
-
-.theme-cycle h3 i {
-    color: var(--accent-blue);
-}
-
-.theme-bill {
-    border-top: 4px solid #10B981;
-}
-
-/* Slightly stronger green for reading ease */
-.theme-bill h3 i {
-    color: #10B981;
-}
-
-/* ==================================================== 
-   FORMS & BUTTONS
-==================================================== */
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    font-family: var(--font-main);
-    font-size: 0.95rem;
-    color: var(--text-main);
-    background-color: #F8F9FA;
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--text-muted);
-    background-color: #FFF;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.7rem 1.4rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: var(--radius-pill);
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-main);
-}
-
-.btn:active {
-    transform: scale(0.97);
-}
-
-.btn-primary {
-    background: var(--text-main);
-    color: #fff;
-}
-
-.btn-primary:hover {
-    filter: brightness(1.2);
-}
-
-.btn-orange {
-    background: var(--accent-orange);
-    color: #fff;
-}
-
-.btn-orange:hover {
-    filter: brightness(1.1);
-}
-
-.btn-blue {
-    background: var(--accent-blue);
-    color: #fff;
-}
-
-.btn-green {
-    background: #10B981;
-    color: #fff;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 2px solid var(--text-main);
-    color: var(--text-main);
-}
-
-.btn-outline:hover {
-    background: var(--bg-body);
-}
-
-a {
-    text-decoration: none;
-    color: var(--text-main);
-}
-
-h1,
-h2,
-h3,
-h4 {
-    color: var(--text-main);
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-p {
-    color: var(--text-muted);
-}
-
-/* Badges */
-.badge {
-    display: flex;
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--radius-pill);
-    font-size: 0.75rem;
-    font-weight: 600;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ==================================================== 
-   RESPONSIVE DESIGN (Minimalist Layout Handlers)
-==================================================== */
+/* Responsive navbar */
 .hamburger-btn {
     display: none;
     background: transparent;
     border: none;
     cursor: pointer;
     padding: 0.5rem;
+    color: var(--text-primary);
+    min-width: 44px;
+    min-height: 44px;
 }
 
+/* ==================================================== 
+   RESPONSIVE DESIGN SYSTEM
+==================================================== */
 
+/* TABLET (768px - 1024px) */
+@media (max-width: 1024px) {
+    .grid-3, .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .main-container { padding: 2rem 1.5rem; }
+}
 
-
-@media (max-width: 820px) {
-
-    /* Navbar collapses into a clean mobile drawer */
-    .hamburger-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+/* MOBILE (< 768px) */
+@media (max-width: 768px) {
+    /* Grids & Layouts */
+    .grid-2, .grid-3, .grid-4, .grid-auto, .grid-layout, .split-layout {
+        grid-template-columns: 1fr !important;
+        flex-direction: column !important;
     }
 
-    .nav-links,
-    .nav-actions {
-        display: none;
+    /* Dashboard Quick Actions (2x2 grid instead of 1 col if possible, but 1 col is safer. We will use a 2-col grid for specific small actions if needed) */
+    .quick-actions-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem;
+    }
+
+    /* Top Navbar -> Left Drawer */
+    .hamburger-btn { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        z-index: 1001;
+    }
+    
+    .nav-links, .nav-actions {
+        display: none; 
+        flex-direction: column; 
+        align-items: flex-start; 
+        width: 100%; 
+        gap: 1rem;
+    }
+    
+    .nav-links.show, .nav-actions.show { 
+        display: flex; 
+        animation: fadeUp 0.3s ease forwards; 
+    }
+    
+    .nav-wrapper-mobile {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background: var(--surface-raised);
+        border-right: 1px solid var(--border);
         flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-        gap: 1rem;
+        padding: 5rem 1.5rem 2rem 1.5rem;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: 10px 0 25px rgba(0,0,0,0.5);
     }
-
-    .nav-links.show,
-    .nav-actions.show {
+    
+    .nav-wrapper-mobile.open {
+        left: 0;
         display: flex;
-        animation: fadeInDown 0.3s ease forwards;
     }
 
-    .nav-actions {
-        border-top: 1px solid var(--border-soft);
-        padding-top: 1.5rem;
+    .nav-actions { border-top: 1px solid var(--border); padding-top: 1.5rem; }
+    .top-navbar { padding: 1rem 1.5rem; flex-wrap: wrap; }
+    .main-container { padding: 1.5rem 1rem; }
+    
+    .page-header { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 1rem; 
+        margin-bottom: 2rem; 
     }
-
-    .top-navbar {
-        padding: 1rem 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    /* Structural down-scaling */
-    .main-container {
-        padding: 1.5rem 1rem;
-    }
-
-    .page-header {
+    
+    .page-header > div:last-child {
+        width: 100%;
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .page-header div[style*="display: flex"] {
-        flex-wrap: wrap;
-        width: 100%;
-    }
-
-    /* Typography precision */
-    h1 {
-        font-size: 1.5rem !important;
-    }
-
-    h2,
-    h3,
-    h4 {
-        font-size: 1.15rem;
-    }
-
-    .text-muted {
-        font-size: 0.8rem !important;
-    }
-
-    /* Component adjustments */
-    .btn {
-        width: 100%;
-        justify-content: center;
-        padding: 0.75rem 1.25rem;
-        font-size: 0.9rem;
-    }
-
-    .grid-layout {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .form-control {
-        padding: 0.75rem;
-        font-size: 0.9rem;
-    }
-
-    .analytic-card {
-        padding: 1.25rem 1rem;
-        max-width: 100%;
-    }
-
-    .badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.5rem;
-    }
-
-    /* Safely wrap inner card navs */
-    .analytic-card>div[style*="justify-content: space-between"] {
-        flex-wrap: wrap;
         gap: 0.5rem;
     }
-
-    .analytic-card>div[style*="display: flex"] {
-        flex-wrap: wrap;
+    
+    .page-header .btn {
         width: 100%;
+    }
+
+    /* Modals -> Bottom Sheet */
+    .modal {
+        align-items: flex-end; /* Align to bottom */
+        padding: 0;
+    }
+    
+    .modal-content-new, .modal-content {
+        max-width: 100% !important;
+        width: 100%;
+        border-radius: 24px 24px 0 0 !important;
+        border-bottom: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        padding: 2rem 1.5rem 3rem 1.5rem !important; /* Extra bottom padding for safe area */
+        transform: translateY(100%) !important;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+    
+    .modal:not(.hidden) .modal-content-new, .modal:not(.hidden) .modal-content {
+        transform: translateY(0) !important;
+    }
+    
+    /* Touch Target Fixes */
+    input[type="checkbox"], input[type="radio"] {
+        min-width: 24px;
+        min-height: 24px;
+    }
+    
+    .remove-meter-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* No hover only states: apply hover styling by default or remove hover dependency */
+    .card-raised:hover, .history-card:hover, .btn:hover {
+        transform: none !important;
+    }
+    
+    .btn:active {
+        transform: scale(0.98) !important;
+        filter: brightness(0.9);
     }
 }

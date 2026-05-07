@@ -1,160 +1,330 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="analytic-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <div>
-            <h2>Room Analytics (<%= room.meter_name %>)</h2>
-            <p class="text-muted">Consumption trends and financial history.</p>
+<!-- Header -->
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
+            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
+            <span>/</span> 
+            <a href="/rooms/<%= roomId %>" style="color: var(--text-dim); text-decoration: none;"><%= room.meter_name %></a>
+            <span>/</span>
+            <span style="color: var(--accent-blue);">Analytics</span>
         </div>
-        <a href="/rooms/<%= roomId %>" class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Back to Room</a>
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
+            <i data-lucide="bar-chart-2" style="color: var(--accent-blue); width: 32px; height: 32px;"></i> Analytics Dashboard
+        </h1>
+    </div>
+    <a href="/rooms/<%= roomId %>" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Back to Room</a>
+</div>
+
+<% if (typeof roomBills !== 'undefined' && roomBills.length > 0) { %>
+    <% 
+        const totalCycles = roomBills.length;
+        const highestBill = roomBills.reduce((max, b) => b.amount > max.amount ? b : max, roomBills[0]);
+        const lowestBill = roomBills.reduce((min, b) => b.amount < min.amount ? b : min, roomBills[0]);
+        const avgUnits = (roomBills.reduce((s,b) => s+b.units_consumed, 0)/roomBills.length).toFixed(1);
+        
+        let maxUnits = 0;
+        roomBills.forEach(b => { if(b.units_consumed > maxUnits) maxUnits = b.units_consumed; });
+        if (maxUnits === 0) maxUnits = 1;
+
+        let maxAmount = 0;
+        roomBills.forEach(b => { if(b.amount > maxAmount) maxAmount = b.amount; });
+        if (maxAmount === 0) maxAmount = 1;
+        
+        let totalAmount = 0;
+        let totalUnitsAll = 0;
+        roomBills.forEach(b => {
+            totalAmount += b.amount;
+            totalUnitsAll += b.units_consumed;
+        });
+
+        // Ensure chronological order for charts (oldest to newest)
+        const sortedBills = [...roomBills].sort((a,b) => {
+            const dateA = a.billing_cycle_id && a.billing_cycle_id.startDate ? new Date(a.billing_cycle_id.startDate) : new Date(0);
+            const dateB = b.billing_cycle_id && b.billing_cycle_id.startDate ? new Date(b.billing_cycle_id.startDate) : new Date(0);
+            return dateA - dateB;
+        });
+    %>
+
+    <!-- Summary Row -->
+    <div class="grid-4" style="margin-bottom: 2rem;">
+        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Total Cycles</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary);"><%= totalCycles %></div>
+        </div>
+        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Highest Bill</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-red);">₹<%= highestBill.amount.toLocaleString() %></div>
+        </div>
+        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Lowest Bill</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-green);">₹<%= lowestBill.amount.toLocaleString() %></div>
+        </div>
+        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Average Units</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-blue);"><%= avgUnits %></div>
+        </div>
     </div>
 
-    <% if (typeof roomBills !== 'undefined' && roomBills.length > 0) { %>
-        <% 
-            const totalCycles = roomBills.length;
-            const highestBill = roomBills.reduce((max, b) => b.amount > max.amount ? b : max, roomBills[0]);
-            const lowestBill = roomBills.reduce((min, b) => b.amount < min.amount ? b : min, roomBills[0]);
-            const avgUnits = (roomBills.reduce((s,b) => s+b.units_consumed, 0)/roomBills.length).toFixed(1);
+    <!-- Charts Section -->
+    <div class="grid-layout" style="margin-bottom: 2.5rem;">
+        <!-- Units Chart -->
+        <div class="card-raised" style="padding: 2rem;">
+            <h3 style="margin: 0 0 2rem 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="zap" style="color: var(--accent-purple);"></i> Units Consumed
+            </h3>
             
-            let maxUnits = 0;
-            roomBills.forEach(b => { if(b.units_consumed > maxUnits) maxUnits = b.units_consumed; });
-            if (maxUnits === 0) maxUnits = 1; // avoid division by zero
-
-            let maxAmount = 0;
-            roomBills.forEach(b => { if(b.amount > maxAmount) maxAmount = b.amount; });
-            if (maxAmount === 0) maxAmount = 1;
-            
-            let totalAmount = 0;
-            let totalUnitsAll = 0;
-            roomBills.forEach(b => {
-                totalAmount += b.amount;
-                totalUnitsAll += b.units_consumed;
-            });
-        %>
-
-        <!-- Summary Stats Row -->
-        <div class="analytic-card" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.5rem; background: var(--bg-main);">
-            <div style="flex: 1; text-align: center; border-right: 1px solid var(--border-soft); min-width: 120px;">
-                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">Cycles Billed</div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);"><%= totalCycles %></div>
-            </div>
-            <div style="flex: 1; text-align: center; border-right: 1px solid var(--border-soft); min-width: 120px;">
-                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">Highest Bill</div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: #EF4444;">₹<%= highestBill.amount.toLocaleString() %></div>
-            </div>
-            <div style="flex: 1; text-align: center; border-right: 1px solid var(--border-soft); min-width: 120px;">
-                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">Lowest Bill</div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: #10B981;">₹<%= lowestBill.amount.toLocaleString() %></div>
-            </div>
-            <div style="flex: 1; text-align: center; min-width: 120px;">
-                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">Avg Units</div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-blue);"><%= avgUnits %> <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/mo</span></div>
-            </div>
-        </div>
-
-        <div class="analytic-card" style="margin-bottom: 2rem; background: var(--bg-main); border: none; padding: 2rem;">
-            <!-- Units Chart -->
-            <div style="margin-bottom: 3rem;">
-                <h3 style="margin-bottom: 1.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="zap" style="color: var(--accent-pink); width: 18px;"></i> Unit Consumption Trend</h3>
-                <div style="display: flex; height: 220px; position: relative; padding-left: 50px;">
-                    <!-- Y-axis -->
-                    <div style="position: absolute; left: 0; top: 0; bottom: 20px; width: 45px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 5px; border-right: 1px solid var(--border-soft); font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">
-                        <div><%= (maxUnits).toFixed(0) %> U</div>
-                        <div><%= (maxUnits * 0.75).toFixed(0) %> U</div>
-                        <div><%= (maxUnits * 0.5).toFixed(0) %> U</div>
-                        <div><%= (maxUnits * 0.25).toFixed(0) %> U</div>
-                        <div>0 U</div>
-                    </div>
-                    
-                    <!-- Chart Bars -->
-                    <div style="display: flex; align-items: flex-end; justify-content: space-around; width: 100%; height: 200px; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-soft);">
-                        <% roomBills.forEach(bill => { %>
-                            <% const heightPercent = (bill.units_consumed / maxUnits) * 100; %>
-                            <div style="display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 60px;">
-                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;"><%= bill.units_consumed %>U</div>
-                                <div style="width: 100%; max-width: 40px; background: linear-gradient(to top, var(--accent-pink), #fec5d7); border-radius: 4px 4px 0 0; height: <%= heightPercent %>%; min-height: 5px; transition: height 0.5s ease;"></div>
-                                <div style="font-size: 0.7rem; color: var(--text-main); margin-top: 0.5rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">
-                                    <%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString(undefined, {month: 'short', year: '2-digit'}) : 'N/A' %>
-                                </div>
-                            </div>
-                        <% }) %>
-                    </div>
+            <div class="custom-chart" style="height: 250px; display: flex; position: relative; padding-left: 40px; padding-bottom: 30px;">
+                <!-- Grid Lines & Y-Axis -->
+                <div class="chart-y-axis">
+                    <span><%= maxUnits.toFixed(0) %> U</span>
+                    <span><%= (maxUnits * 0.75).toFixed(0) %></span>
+                    <span><%= (maxUnits * 0.5).toFixed(0) %></span>
+                    <span><%= (maxUnits * 0.25).toFixed(0) %></span>
+                    <span>0</span>
                 </div>
-            </div>
-
-            <!-- Amount Chart -->
-            <div style="margin-bottom: 1rem;">
-                <h3 style="margin-bottom: 1.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="indian-rupee" style="color: #10B981; width: 18px;"></i> Bill Amount Trend</h3>
-                <div style="display: flex; height: 220px; position: relative; padding-left: 50px;">
-                    <!-- Y-axis -->
-                    <div style="position: absolute; left: 0; top: 0; bottom: 20px; width: 45px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 5px; border-right: 1px solid var(--border-soft); font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">
-                        <div>₹<%= (maxAmount).toFixed(0) %></div>
-                        <div>₹<%= (maxAmount * 0.75).toFixed(0) %></div>
-                        <div>₹<%= (maxAmount * 0.5).toFixed(0) %></div>
-                        <div>₹<%= (maxAmount * 0.25).toFixed(0) %></div>
-                        <div>₹0</div>
-                    </div>
-                    
-                    <!-- Chart Bars -->
-                    <div style="display: flex; align-items: flex-end; justify-content: space-around; width: 100%; height: 200px; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-soft);">
-                        <% roomBills.forEach(bill => { %>
-                            <% const heightPercent = (bill.amount / maxAmount) * 100; %>
-                            <div style="display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 60px;">
-                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">₹<%= Math.round(bill.amount) %></div>
-                                <div style="width: 100%; max-width: 40px; background: linear-gradient(to top, #10B981, #6EE7B7); border-radius: 4px 4px 0 0; height: <%= heightPercent %>%; min-height: 5px; transition: height 0.5s ease;"></div>
-                                <div style="font-size: 0.7rem; color: var(--text-main); margin-top: 0.5rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">
-                                    <%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString(undefined, {month: 'short', year: '2-digit'}) : 'N/A' %>
-                                </div>
+                <div class="chart-grid">
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                </div>
+                
+                <!-- Bars -->
+                <div class="chart-bars">
+                    <% sortedBills.forEach(bill => { 
+                        const pct = Math.max((bill.units_consumed / maxUnits) * 100, 2);
+                        const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'short'}) : '?';
+                    %>
+                        <div class="chart-bar-wrap group">
+                            <!-- Tooltip -->
+                            <div class="chart-tooltip">
+                                <strong><%= bill.units_consumed %> Units</strong><br>
+                                <span style="color: var(--text-dim); font-size: 0.75rem;"><%= label %></span>
                             </div>
-                        <% }) %>
-                    </div>
+                            
+                            <!-- Bar -->
+                            <div class="chart-bar" style="height: <%= pct %>%; background: linear-gradient(180deg, var(--accent-purple) 0%, rgba(139,92,246,0.2) 100%);"></div>
+                            
+                            <!-- X-Axis Label -->
+                            <div class="chart-x-label"><%= label %></div>
+                        </div>
+                    <% }) %>
                 </div>
             </div>
         </div>
 
-        <!-- Data Table -->
-        <div class="analytic-card" style="padding: 0; overflow: hidden; border: 1px solid var(--border-soft);">
-            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-soft); background: var(--bg-main);">
-                <h3 style="margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="table" style="color: var(--accent-blue); width: 18px;"></i> Detailed History</h3>
-            </div>
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
-                    <thead>
-                        <tr style="background: var(--bg-card); color: var(--text-muted); border-bottom: 2px solid var(--border-soft);">
-                            <th style="padding: 1rem 1.5rem; font-weight: 600;">Period</th>
-                            <th style="padding: 1rem; font-weight: 600;">Prev Reading</th>
-                            <th style="padding: 1rem; font-weight: 600;">Curr Reading</th>
-                            <th style="padding: 1rem; font-weight: 600;">Units Consumed</th>
-                            <th style="padding: 1rem 1.5rem; text-align: right; font-weight: 600;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% roomBills.forEach((bill, i) => { %>
-                            <tr style="background: <%= i % 2 === 0 ? 'var(--bg-body)' : 'var(--bg-card)' %>; border-bottom: 1px solid var(--border-soft);">
-                                <td style="padding: 1rem 1.5rem;"><%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString(undefined, {month: 'short', year: 'numeric'}) : 'N/A' %></td>
-                                <td style="padding: 1rem;"><%= bill.previous_reading %></td>
-                                <td style="padding: 1rem;"><%= bill.current_reading %></td>
-                                <td style="padding: 1rem; font-weight: 600;"><%= bill.units_consumed %></td>
-                                <td style="padding: 1rem 1.5rem; text-align: right; font-weight: 700; color: var(--text-main);">₹<%= bill.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
-                            </tr>
-                        <% }) %>
-                        <tr style="background: var(--text-main); color: white;">
-                            <td style="padding: 1rem 1.5rem; font-weight: 700;" colspan="3">Total Portfolio Generated</td>
-                            <td style="padding: 1rem; font-weight: 700;"><%= totalUnitsAll %> Units</td>
-                            <td style="padding: 1rem 1.5rem; text-align: right; font-weight: 800;">₹<%= totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Amount Chart -->
+        <div class="card-raised" style="padding: 2rem;">
+            <h3 style="margin: 0 0 2rem 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="indian-rupee" style="color: var(--accent-green);"></i> Bill Amount
+            </h3>
+            
+            <div class="custom-chart" style="height: 250px; display: flex; position: relative; padding-left: 50px; padding-bottom: 30px;">
+                <!-- Grid Lines & Y-Axis -->
+                <div class="chart-y-axis">
+                    <span>₹<%= maxAmount.toFixed(0) %></span>
+                    <span><%= (maxAmount * 0.75).toFixed(0) %></span>
+                    <span><%= (maxAmount * 0.5).toFixed(0) %></span>
+                    <span><%= (maxAmount * 0.25).toFixed(0) %></span>
+                    <span>0</span>
+                </div>
+                <div class="chart-grid">
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                </div>
+                
+                <!-- Bars -->
+                <div class="chart-bars">
+                    <% sortedBills.forEach(bill => { 
+                        const pct = Math.max((bill.amount / maxAmount) * 100, 2);
+                        const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'short'}) : '?';
+                    %>
+                        <div class="chart-bar-wrap group">
+                            <!-- Tooltip -->
+                            <div class="chart-tooltip tooltip-green">
+                                <strong>₹<%= bill.amount %></strong><br>
+                                <span style="color: var(--text-dim); font-size: 0.75rem;"><%= label %></span>
+                            </div>
+                            
+                            <!-- Bar -->
+                            <div class="chart-bar" style="height: <%= pct %>%; background: linear-gradient(180deg, var(--accent-green) 0%, rgba(45,212,191,0.2) 100%); border-radius: 4px;"></div>
+                            
+                            <!-- X-Axis Label -->
+                            <div class="chart-x-label"><%= label %></div>
+                        </div>
+                    <% }) %>
+                </div>
             </div>
         </div>
+    </div>
 
-    <% } else { %>
-        <div class="analytic-card" style="min-height: 300px; background: var(--bg-main); border: none; padding: 2rem;">
-            <div style="height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                <i data-lucide="bar-chart-2" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; opacity: 0.5;"></i>
-                <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">No Data Available</h3>
-                <p class="text-muted">Not enough data to display analytics yet. Complete a billing cycle to unlock trends.</p>
-            </div>
+    <!-- Data Table -->
+    <div class="card-raised" style="padding: 0; overflow: hidden;">
+        <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);">
+            <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="table" style="color: var(--text-muted);"></i> Historical Data
+            </h3>
         </div>
-    <% } %>
-</div>
+        
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="cursor: pointer;">Period <i data-lucide="chevron-down" style="width: 12px; display: inline;"></i></th>
+                        <th>Prev Reading</th>
+                        <th>Curr Reading</th>
+                        <th>Units Consumed</th>
+                        <th style="text-align: right; cursor: pointer;">Amount <i data-lucide="chevron-down" style="width: 12px; display: inline;"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% [...roomBills].reverse().forEach(bill => { %>
+                        <tr>
+                            <td style="font-weight: 600;"><%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'long', year: 'numeric'}) : 'N/A' %></td>
+                            <td><%= bill.previous_reading %></td>
+                            <td><%= bill.current_reading %></td>
+                            <td><%= bill.units_consumed %> <span style="color: var(--text-dim); font-size: 0.8rem;">U</span></td>
+                            <td style="text-align: right; font-weight: 700; color: var(--text-primary);">₹<%= bill.amount.toLocaleString() %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+                <tfoot style="border-top: 2px solid var(--border);">
+                    <tr>
+                        <td colspan="3" style="font-weight: 700; padding: 1.5rem;">Lifetime Aggregates</td>
+                        <td style="font-weight: 800; color: var(--accent-blue);"><%= totalUnitsAll %> U</td>
+                        <td style="text-align: right; font-weight: 800; color: var(--accent-green); font-size: 1.1rem;">₹<%= totalAmount.toLocaleString() %></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+<% } else { %>
+    <div class="card-raised" style="padding: 5rem 2rem; text-align: center;">
+        <i data-lucide="bar-chart-2" style="width: 64px; height: 64px; color: var(--border); margin-bottom: 1.5rem;"></i>
+        <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">No Data Available</h2>
+        <p class="text-secondary" style="max-width: 400px; margin: 0 auto;">There is not enough data to generate analytics yet. Complete at least one billing cycle to unlock trends and insights.</p>
+    </div>
+<% } %>
+
+<style>
+    /* Custom Chart CSS */
+    .chart-y-axis {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 30px;
+        width: 35px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        z-index: 2;
+    }
+    
+    .chart-grid {
+        position: absolute;
+        left: 45px;
+        right: 0;
+        top: 0;
+        bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        z-index: 1;
+    }
+    
+    .grid-line {
+        height: 1px;
+        width: 100%;
+        background: var(--border);
+        border-bottom: 1px dashed transparent;
+    }
+    
+    .chart-bars {
+        flex: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        gap: 0.5rem;
+        height: 100%;
+        position: relative;
+        z-index: 3;
+        margin-left: 10px;
+    }
+    
+    .chart-bar-wrap {
+        flex: 1;
+        max-width: 50px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        position: relative;
+    }
+    
+    .chart-bar {
+        width: 100%;
+        border-radius: 4px 4px 0 0;
+        animation: growUp 1s ease forwards;
+        transform-origin: bottom;
+        transition: opacity 0.2s;
+        cursor: pointer;
+    }
+    
+    .chart-bar-wrap:hover .chart-bar {
+        opacity: 0.8;
+    }
+    
+    .chart-x-label {
+        position: absolute;
+        bottom: -25px;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .chart-tooltip {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        background: var(--surface-raised);
+        border: 1px solid var(--accent-purple);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #fff;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+        pointer-events: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        z-index: 10;
+        text-align: center;
+    }
+    
+    .tooltip-green {
+        border-color: var(--accent-green);
+    }
+    
+    .chart-bar-wrap:hover .chart-tooltip {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    @keyframes growUp {
+        from { transform: scaleY(0); }
+        to { transform: scaleY(1); }
+    }
+</style>

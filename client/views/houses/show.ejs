@@ -1,147 +1,172 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="page-header">
-        <div>
-            <h1 style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="home"
-                    style="color: var(--accent-yellow);"></i>
-                <%= house.house_name %>
-            </h1>
-            <p style="color: var(--text-muted); margin-top: 0.5rem;">User ID Reference: System Owner</p>
-        </div>
+<!-- Header -->
+<div style="margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+        <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
+        <span>/</span> 
+        <span style="color: var(--accent-yellow);"><%= house.house_name %></span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
+            <i data-lucide="home" style="color: var(--accent-yellow); width: 32px; height: 32px;"></i> <%= house.house_name %>
+        </h1>
         <div style="display: flex; gap: 0.5rem;">
-            <a href="/houses/<%= house._id %>/edit" class="btn btn-outline"><i data-lucide="settings-2"
-                    style="width: 16px;"></i> Edit Configuration</a>
-            <button type="button" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5;" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
-                <i data-lucide="trash-2" style="width: 16px;"></i>
+            <a href="/houses/<%= house._id %>/edit" class="btn btn-ghost"><i data-lucide="settings-2"></i> Edit</a>
+            <button type="button" class="btn btn-icon btn-ghost" style="color: var(--accent-red);" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
+                <i data-lucide="trash-2"></i>
             </button>
         </div>
     </div>
+</div>
 
-    <%
-        let cycleStartDateStr = 'Not Started';
-        let daysElapsed = 0;
-        if (activeCycle && activeCycle.startDate) {
-            cycleStartDateStr = new Date(activeCycle.startDate).toLocaleDateString();
-            const diffTime = Math.abs(new Date() - new Date(activeCycle.startDate));
-            daysElapsed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        }
-    %>
-    <div class="analytic-card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
-            <div>
-                <p class="text-muted" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Current Cycle Start</p>
-                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= cycleStartDateStr %></div>
-            </div>
-            <div>
-                <p class="text-muted" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Days Elapsed</p>
-                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= daysElapsed %></div>
-            </div>
-            <div>
-                <p class="text-muted" style="margin: 0 0 0.25rem 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Meters Configured</p>
-                <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= rooms.length %></div>
-            </div>
+<%
+    let cycleStartDateStr = 'Not Started';
+    let daysElapsed = 0;
+    let progressPct = 0;
+    if (activeCycle && activeCycle.startDate) {
+        cycleStartDateStr = new Date(activeCycle.startDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+        const diffTime = Math.abs(new Date() - new Date(activeCycle.startDate));
+        daysElapsed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        progressPct = Math.min((daysElapsed / 30) * 100, 100);
+    }
+
+    let badgeClass = 'badge-dim';
+    let badgeText = 'Unknown';
+    let flowGradient = 'linear-gradient(135deg, rgba(74,78,106,0.15) 0%, rgba(26,29,39,1) 100%)';
+    let flowIcon = 'info';
+    let flowTitle = '';
+    let flowDesc = '';
+    let flowBtn = '';
+    let flowLink = '';
+
+    if (flowState === 'needs_setup') {
+        badgeClass = 'badge-dim'; badgeText = 'Setup Required';
+        flowGradient = 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(26,29,39,1) 100%)';
+        flowIcon = 'wrench'; flowTitle = 'Initial Setup Required';
+        flowDesc = 'Enter the starting meter readings for all rooms to establish a baseline. You only do this once.';
+        flowBtn = 'Setup Meters &rarr;'; flowLink = `/houses/${house._id}/readings/new`;
+    } else if (flowState === 'needs_bill') {
+        badgeClass = 'badge-yellow'; badgeText = 'Awaiting Bill';
+        flowGradient = 'linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(26,29,39,1) 100%)';
+        flowIcon = 'receipt'; flowTitle = 'Enter This Month\'s Supplier Bill';
+        flowDesc = 'You need to input the main electricity bill from the utility company before recording room meters.';
+        flowBtn = 'Submit Main Bill &rarr;'; flowLink = `/houses/${house._id}/main-bill/new`;
+    } else if (flowState === 'needs_readings') {
+        badgeClass = 'badge-green'; badgeText = 'Awaiting Readings';
+        flowGradient = 'linear-gradient(135deg, rgba(45,212,191,0.15) 0%, rgba(26,29,39,1) 100%)';
+        flowIcon = 'zap'; flowTitle = 'Record Meter Readings';
+        flowDesc = 'Log meter readings for all rooms. The system will instantly calculate the final distributed bills.';
+        flowBtn = 'Record Readings &rarr;'; flowLink = `/houses/${house._id}/readings/new`;
+    } else if (flowState === 'cycle_complete') {
+        badgeClass = 'badge-blue'; badgeText = 'Cycle Complete';
+        flowGradient = 'linear-gradient(135deg, rgba(77,159,236,0.15) 0%, rgba(26,29,39,1) 100%)';
+        flowIcon = 'check-circle'; flowTitle = 'Cycle Finalized';
+        flowDesc = 'All readings recorded and bills generated. The bills are ready for distribution to your tenants.';
+        flowBtn = 'View Distributed Bills &rarr;'; flowLink = activeCycle ? `/cycles/${activeCycle._id}/room-bills` : '#';
+    }
+%>
+
+<!-- Cycle Status Bar -->
+<div class="card-raised" style="margin-bottom: 2rem; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;">
+    <div style="flex-shrink: 0;">
+        <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Cycle Started</div>
+        <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"><%= cycleStartDateStr %></div>
+    </div>
+    
+    <div style="flex-grow: 1; min-width: 250px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+            <span style="color: var(--text-primary);">Day <%= daysElapsed %></span>
+            <span style="color: var(--text-secondary);">~30 days estimated</span>
         </div>
-        
+        <div style="height: 8px; background: var(--surface); border-radius: 4px; overflow: hidden; width: 100%;">
+            <div style="height: 100%; width: <%= progressPct %>%; background: var(--accent-blue); border-radius: 4px; transition: width 1s ease;"></div>
+        </div>
+    </div>
+    
+    <div style="flex-shrink: 0;">
+        <span class="badge <%= badgeClass %>" style="font-size: 0.85rem; padding: 0.5rem 1rem;"><%= badgeText %></span>
+    </div>
+</div>
+
+<!-- Action Card based on flowState -->
+<div class="card-raised" style="background: <%= flowGradient %>; border: 1px solid var(--border); margin-bottom: 2.5rem; position: relative; overflow: hidden;">
+    <!-- Background Icon Decoration -->
+    <i data-lucide="<%= flowIcon %>" style="position: absolute; right: -20px; top: -20px; width: 160px; height: 160px; color: rgba(255,255,255,0.03); transform: rotate(-15deg);"></i>
+    
+    <div style="position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 1.5rem;">
+        <div style="width: 56px; height: 56px; border-radius: 16px; background: var(--surface-raised); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">
+            <i data-lucide="<%= flowIcon %>" style="width: 28px; height: 28px; color: var(--text-primary);"></i>
+        </div>
         <div>
-            <% if (flowState === 'needs_setup') { %>
-                <span class="badge" style="background: rgba(156, 163, 175, 0.15); color: #6B7280; font-size: 0.9rem; padding: 0.5rem 1rem;">Not Set Up</span>
-            <% } else if (flowState === 'needs_bill') { %>
-                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); font-size: 0.9rem; padding: 0.5rem 1rem;">Awaiting Main Bill</span>
-            <% } else if (flowState === 'needs_readings') { %>
-                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); font-size: 0.9rem; padding: 0.5rem 1rem;">Awaiting Meter Readings</span>
-            <% } else if (flowState === 'cycle_complete') { %>
-                <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); font-size: 0.9rem; padding: 0.5rem 1rem;">Cycle Complete</span>
-            <% } %>
+            <h2 style="margin: 0 0 0.5rem 0; font-size: 1.4rem; font-weight: 800; color: var(--text-primary);"><%= flowTitle %></h2>
+            <p style="margin: 0 0 1.5rem 0; color: var(--text-secondary); font-size: 1rem; max-width: 600px;"><%= flowDesc %></p>
+            <a href="<%= flowLink %>" class="btn btn-primary" style="padding: 0.8rem 1.5rem; font-size: 0.95rem; background: var(--text-primary); color: #000; font-weight: 800;"><%- flowBtn %></a>
+        </div>
+    </div>
+</div>
+
+<!-- Grid 3 Info Cards -->
+<div class="grid-3">
+    <!-- Meters Card -->
+    <div class="card-raised card-accent" style="--card-accent-color: var(--accent-purple); display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="bed-double" style="color: var(--accent-purple);"></i>
+                <h3 style="margin: 0; font-size: 1.1rem;">Meters Configured</h3>
+            </div>
+            <div style="font-size: 1.75rem; font-weight: 800;"><%= rooms.length %></div>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem;">Manage individual unit setups, tenant details, and capacities.</p>
+        <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+            <a href="/houses/<%= house._id %>/rooms" class="btn btn-secondary" style="flex: 1; font-size: 0.85rem;">View All &rarr;</a>
+            <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-outline" style="border-color: var(--border); color: var(--text-primary);"><i data-lucide="plus"></i></a>
         </div>
     </div>
 
-    <div class="grid-layout">
-        <div class="analytic-card theme-room">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                <h3><i data-lucide="bed-double"></i> House meters</h3>
-                <span class="badge" style="background: rgba(209, 124, 148, 0.15); color: var(--accent-pink);">
-                    <% if(rooms.length> 0){ %>
-                        <% if(rooms.length>1){ %>
-                            <%= rooms.length %> &nbsp; Meters
-                                <% } else { %>
-                                    <%= rooms.length %> &nbsp; Meter
-                                        <% } %>
-                                            <% } else { %>
-                                                No Meters Configured
-                                                <% } %>
-                </span>
-            </div>
-            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Manage individual unit setups and
-                capacities.</p>
-            <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                <a href="/houses/<%= house._id %>/rooms" class="btn btn-outline" style="flex: 1;">View All</a>
-                <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-primary"
-                    style="background: var(--accent-pink);"><i data-lucide="plus" style="width: 16px;"></i></a>
+    <!-- Billing Cycles Card -->
+    <div class="card-raised card-accent" style="--card-accent-color: var(--accent-blue); display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="calendar-clock" style="color: var(--accent-blue);"></i>
+                <h3 style="margin: 0; font-size: 1.1rem;">Billing Cycles</h3>
             </div>
         </div>
+        <div style="margin-bottom: 2rem;">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">Active Period</div>
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 1.1rem;"><%= activeCycle ? 'Currently Running' : 'None Active' %></div>
+        </div>
+        <div style="margin-top: auto;">
+            <a href="/houses/<%= house._id %>/history" class="btn btn-secondary" style="width: 100%; font-size: 0.85rem;">View History &rarr;</a>
+        </div>
+    </div>
 
-        <div class="analytic-card theme-cycle">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                <h3><i data-lucide="calendar-clock"></i> Billing Cycles</h3>
-            </div>
-            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">View ongoing and past periods for
-                calculations.</p>
-            <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                <a href="/houses/<%= house._id %>/history" class="btn btn-outline" style="width: 100%;">View History</a>
+    <!-- Recent Bills Card -->
+    <div class="card-raised card-accent" style="--card-accent-color: var(--accent-green); display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="history" style="color: var(--accent-green);"></i>
+                <h3 style="margin: 0; font-size: 1.1rem;">Recent Bills</h3>
             </div>
         </div>
-
-        <% if (flowState === 'needs_setup') { %>
-        <div class="analytic-card theme-bill" style="background: var(--accent-orange); border-color: var(--accent-orange);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
-                <h3 style="color: #000;"><i data-lucide="wrench"></i> Setup Required</h3>
-            </div>
-            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">Initialize the starting meter readings for all rooms.</p>
-            <a href="/houses/<%= house._id %>/readings/new" class="btn" style="background: #000; color: var(--accent-orange); width: 100%; margin-top: auto; border: none;">Complete Initial Setup</a>
-        </div>
-        <% } else if (flowState === 'needs_bill') { %>
-        <div class="analytic-card theme-bill" style="background: var(--accent-yellow); border-color: var(--accent-yellow);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
-                <h3 style="color: #000;"><i data-lucide="file-input"></i> Bill Missing</h3>
-            </div>
-            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">Enter the supplier's main utility bill before taking room readings.</p>
-            <a href="/houses/<%= house._id %>/main-bill/new" class="btn" style="background: #000; color: var(--accent-yellow); width: 100%; margin-top: auto; border: none;">Enter This Month's Main Bill</a>
-        </div>
-        <% } else if (flowState === 'needs_readings') { %>
-        <div class="analytic-card theme-bill" style="background: var(--accent-green); border-color: var(--accent-green);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
-                <h3 style="color: #000;"><i data-lucide="zap"></i> Fast Input</h3>
-            </div>
-            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">Log meter readings for all rooms instantly to calculate bills.</p>
-            <a href="/houses/<%= house._id %>/readings/new" class="btn" style="background: #000; color: var(--accent-green); width: 100%; margin-top: auto; border: none;">Record Meter Readings</a>
-        </div>
-        <% } else if (flowState === 'cycle_complete') { %>
-        <div class="analytic-card theme-bill" style="background: var(--accent-blue); border-color: var(--accent-blue);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: #000;">
-                <h3 style="color: #000;"><i data-lucide="check-circle"></i> Cycle Finalized</h3>
-            </div>
-            <p style="color: rgba(0,0,0,0.8); margin-bottom: 1.5rem; font-size: 0.85rem;">This billing cycle has been fully calculated and closed.</p>
-            <a href="/cycles/<%= activeCycle._id %>/room-bills" class="btn" style="background: #000; color: var(--accent-blue); width: 100%; margin-top: auto; border: none;">View Current Bill Distribution</a>
-        </div>
-        <% } %>
-
-        <div class="analytic-card">
-            <h3 style="margin-bottom: 1rem;"><i data-lucide="history" style="color: var(--text-muted);"></i> Recent History</h3>
+        <div style="flex: 1;">
             <% if (typeof recentMainBills !== 'undefined' && recentMainBills.length > 0) { %>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <% recentMainBills.forEach(mb => { %>
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem;">
+                    <% recentMainBills.slice(0,3).forEach(mb => { %>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
                             <div>
-                                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);"><%= new Date(mb.bill_date).toLocaleDateString() %></div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted);"><%= mb.total_units %> Units</div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);"><%= new Date(mb.bill_date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) %></div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= mb.total_units %> U</div>
                             </div>
-                            <div style="font-weight: 700; color: var(--accent-green);">₹<%= mb.total_amount %></div>
+                            <div style="font-weight: 700; color: var(--accent-green); font-size: 0.95rem;">₹<%= mb.total_amount %></div>
                         </div>
                     <% }) %>
                 </div>
-                <a href="/houses/<%= house._id %>/history" style="display: block; text-align: center; font-size: 0.85rem; color: var(--accent-blue); margin-top: 1rem; text-decoration: none;">View full history &rarr;</a>
             <% } else { %>
-                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 0;">No completed cycles found yet.</p>
+                <div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <p class="text-secondary" style="font-size: 0.85rem; text-align: center;">No completed cycles found yet.</p>
+                </div>
             <% } %>
         </div>
     </div>
+</div>

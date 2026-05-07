@@ -1,288 +1,606 @@
 <nav class="navbar top-navbar">
     <div class="brand">
-        <a href="/dashboard" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
-            <i data-lucide="zap" style="color: var(--accent-orange);"></i>
-            <span style="color: var(--text-main); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;">LiteBill</span>
+        <a href="/dashboard" class="logo-link">
+            <i data-lucide="zap" class="logo-icon"></i>
+            <span class="logo-text">LiteBill</span>
         </a>
     </div>
 
-    <div class="nav-links" id="navLinks">
-        <a href="/dashboard" class="nav-item"><i data-lucide="layout-dashboard" style="color: var(--text-muted);"></i> Dashboard</a>
+    <div class="nav-links-center desktop-only" id="desktopNavLinks">
+        <a href="/dashboard" class="nav-item-center">Dashboard</a>
         
-        <!-- Properties Dropdown -->
-        <div class="dropdown-container" style="position: relative;">
-            <a href="#" id="propertiesDropdownBtn" class="nav-item">
-                <i data-lucide="home" style="color: var(--text-muted);"></i> Properties <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i>
-            </a>
-            <div id="propertiesDropdown" class="nav-dropdown-menu hidden" style="left: 0; right: auto; transform-origin: top left;">
-                <div class="dropdown-header">Manage Properties</div>
-                <a href="/houses" class="dropdown-item">
-                    <i data-lucide="list" style="width: 14px; color: var(--accent-yellow);"></i>
-                    View All Properties
-                </a>
-                <a href="/houses/new" class="dropdown-item">
-                    <i data-lucide="plus-circle" style="width: 14px; color: #10B981;"></i>
-                    Add New Property
-                </a>
+        <div class="dropdown-container">
+            <a href="#" id="navPropsBtn" class="nav-item-center">Properties <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i></a>
+            <div id="navPropsDropdown" class="nav-dropdown-menu hidden">
+                <a href="/houses" class="dropdown-item"><i data-lucide="list"></i> View All Properties</a>
+                <a href="/houses/new" class="dropdown-item"><i data-lucide="plus-circle"></i> Add New Property</a>
                 <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-                    <div class="dropdown-header" style="margin-top: 0.5rem; border-top: 1px solid var(--border-soft);">Quick Access</div>
-                    <% navHouses.slice(0, 3).forEach(house => { %>
-                        <a href="/houses/<%= house._id %>" class="dropdown-item" style="font-size: 0.85rem;">
-                            <i data-lucide="arrow-right" style="width: 12px; color: var(--text-light);"></i>
-                            <%= house.house_name %> Dashboard
-                        </a>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-header">Quick Access</div>
+                    <% navHouses.slice(0, 4).forEach(house => { %>
+                        <a href="/houses/<%= house._id %>" class="dropdown-item"><i data-lucide="arrow-right"></i> <%= house.house_name %></a>
                     <% }) %>
                 <% } %>
             </div>
         </div>
 
-        <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/cycles" class="nav-item">
-                <i data-lucide="calendar-clock" style="color: var(--text-muted);"></i> Billing Cycles
-            </a>
-        <% } else if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
-            <div class="dropdown-container" style="position: relative;">
-                <a href="#" id="cyclesDropdownBtn" class="nav-item">
-                    <i data-lucide="calendar-clock" style="color: var(--text-muted);"></i> Billing Cycles <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i>
-                </a>
-                <div id="cyclesDropdown" class="nav-dropdown-menu hidden" style="left: 0; right: auto; transform-origin: top left;">
-                    <div class="dropdown-header">Billing Cycles</div>
-                    <% navHouses.forEach(house => { %>
-                        <a href="/houses/<%= house._id %>/cycles" class="dropdown-item">
-                            <i data-lucide="home" style="width: 14px; color: var(--accent-orange);"></i>
-                            <%= house.house_name %>
-                        </a>
-                    <% }) %>
-                </div>
+        <div class="dropdown-container">
+            <a href="#" id="navBillingBtn" class="nav-item-center">Billing <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i></a>
+            <div id="navBillingDropdown" class="nav-dropdown-menu hidden">
+                <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+                    <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="dropdown-item"><i data-lucide="pen-line"></i> Submit Readings</a>
+                    <a href="/houses/<%= navHouses[0]._id %>/history" class="dropdown-item"><i data-lucide="history"></i> Billing History</a>
+                    <a href="/houses/<%= navHouses[0]._id %>/cycles" class="dropdown-item"><i data-lucide="calendar-clock"></i> View Cycles</a>
+                <% } else { %>
+                    <a href="/houses/new" class="dropdown-item"><i data-lucide="home"></i> Add Property First</a>
+                <% } %>
             </div>
-        <% } %>
-        <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/history" class="nav-item">
-                <i data-lucide="history" style="color: var(--text-muted);"></i> History
-            </a>
-        <% } else if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
-            <div class="dropdown-container" style="position: relative;">
-                <a href="#" id="historyDropdownBtn" class="nav-item">
-                    <i data-lucide="history" style="color: var(--text-muted);"></i> History <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i>
-                </a>
-                <div id="historyDropdown" class="nav-dropdown-menu hidden" style="left: 0; right: auto; transform-origin: top left;">
-                    <div class="dropdown-header">Billing History</div>
-                    <% navHouses.forEach(house => { %>
-                        <a href="/houses/<%= house._id %>/history" class="dropdown-item">
-                            <i data-lucide="home" style="width: 14px; color: var(--accent-orange);"></i>
-                            <%= house.house_name %>
-                        </a>
-                    <% }) %>
-                </div>
-            </div>
+        </div>
+
+        <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+            <a href="/houses/<%= navHouses[0]._id %>/history" class="nav-item-center">History</a>
         <% } %>
     </div>
 
-    <div class="nav-actions" id="navActions">
+    <div class="nav-actions-right">
+        <button id="searchBtn" class="btn-icon btn-ghost"><i data-lucide="search"></i></button>
         
-        <!-- Add Menu Dropdown -->
-        <div class="dropdown-container" style="position: relative;">
-            <button id="navCreateBtn" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.5rem 1rem; border-color: var(--border-soft); background: white;">
-                <i data-lucide="plus" style="width: 14px; color: var(--text-main);"></i> Create <i data-lucide="chevron-down" style="width: 14px; margin-left: 4px;"></i>
+        <div class="dropdown-container desktop-only">
+            <button id="quickAddBtn" class="btn btn-primary btn-quick-add">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Quick Add
             </button>
-            <div id="navCreateDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
-                <div class="dropdown-header">Actions</div>
-                <a href="/houses/new" class="dropdown-item"><i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i> New Property</a>
+            <div id="quickAddDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
+                <a href="/houses/new" class="dropdown-item"><i data-lucide="home"></i> New House</a>
                 <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-                    <a href="/houses/<%= navHouses[0]._id %>/rooms" class="dropdown-item"><i data-lucide="bed-double" style="width: 14px; color: var(--accent-pink);"></i> Manage Rooms</a>
+                    <a href="/houses/<%= navHouses[0]._id %>/rooms/new" class="dropdown-item"><i data-lucide="bed-double"></i> New Room</a>
+                    <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="dropdown-item"><i data-lucide="receipt"></i> Submit Bill</a>
                 <% } %>
             </div>
         </div>
 
-        <% if (typeof navHouses !=='undefined' && navHouses.length===1) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="btn btn-primary"
-                style="font-size: 0.8rem; padding: 0.5rem 1.25rem; background: #10B981; border-color: #10B981;">
-                <i data-lucide="pen-line" style="width: 14px;"></i> Submit Readings
-            </a>
-        <% } else if (typeof navHouses !=='undefined' && navHouses.length> 1) { %>
-            <div class="dropdown-container" style="position: relative;">
-                <button id="navSubmitReadingsBtn" class="btn btn-primary"
-                    style="font-size: 0.8rem; padding: 0.5rem 1.25rem; background: #10B981; border-color: #10B981; cursor: pointer;">
-                    <i data-lucide="pen-line" style="width: 14px;"></i> Submit Readings <i data-lucide="chevron-down" style="width: 14px; margin-left: 4px;"></i>
-                </button>
-                <div id="navReadingsDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
-                    <div class="dropdown-header">Select Property</div>
-                    <% navHouses.forEach(house=> { %>
-                        <a href="/houses/<%= house._id %>/main-bill/new" class="dropdown-item">
-                            <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i>
-                            <%= house.house_name %>
-                        </a>
-                    <% }) %>
-                </div>
-            </div>
-        <% } else { %>
-            <a href="/houses/new" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.5rem 1.25rem; background: #10B981; border-color: #10B981;"
-                title="Add a house first">
-                <i data-lucide="plus" style="width: 14px;"></i> Add First Property
-            </a>
-        <% } %>
+        <button class="btn-icon btn-ghost notification-btn desktop-only">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge">2</span>
+        </button>
 
-        <!-- User Avatar Dropdown -->
-        <div class="dropdown-container" style="position: relative;">
-            <a href="#" id="userAvatarBtn" class="user-avatar" style="background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));">
-                <i data-lucide="user" style="width: 18px; color: #FFF;"></i>
+        <div class="dropdown-container desktop-only">
+            <a href="#" id="navUserBtn" class="user-avatar-gradient">
+                <%= (typeof user !== 'undefined' && user.mobile_number) ? user.mobile_number[0] : 'U' %>
             </a>
-            <div id="userAvatarDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right; width: 200px;">
-                <div class="dropdown-header">My Account</div>
-                <a href="/auth/profile" class="dropdown-item">
-                    <i data-lucide="user" style="width: 14px; color: var(--accent-orange);"></i> My Profile
-                </a>
+            <div id="navUserDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
+                <a href="/auth/profile" class="dropdown-item"><i data-lucide="user"></i> My Profile</a>
+                <a href="/auth/profile" class="dropdown-item"><i data-lucide="lock"></i> Change Password</a>
+                <div class="dropdown-divider"></div>
                 <form action="/auth/logout" method="POST" style="margin: 0;">
-                    <button type="submit" class="dropdown-item" style="width: 100%; border: none; background: none; cursor: pointer; font-family: var(--font-main); text-align: left; color: #EF4444;">
-                        <i data-lucide="log-out" style="width: 14px; color: #EF4444;"></i> Sign Out
+                    <button type="submit" class="dropdown-item" style="color: var(--accent-red); width: 100%; text-align: left; background: none; border: none; font-family: inherit; font-size: 0.9rem;">
+                        <i data-lucide="log-out" style="color: var(--accent-red);"></i> Sign Out
                     </button>
                 </form>
             </div>
         </div>
+        
+        <button id="mobileMenuTrigger" class="btn-icon btn-ghost mobile-only" style="margin-left: 0.5rem;">
+            <i data-lucide="menu"></i>
+        </button>
     </div>
-
-    <button id="mobileMenuBtn" class="hamburger-btn">
-        <i data-lucide="menu" style="width: 24px; color: var(--text-main);"></i>
-    </button>
 </nav>
 
+<!-- Command Palette -->
+<div id="commandPalette" class="command-palette hidden">
+    <div class="command-palette-backdrop" id="commandPaletteBackdrop"></div>
+    <div class="command-palette-content">
+        <div class="command-search-wrapper">
+            <i data-lucide="search" class="command-search-icon"></i>
+            <input type="text" id="commandInput" class="command-input" placeholder="Search houses, rooms, billing cycles... (Esc to close)">
+            <div class="command-badge">ESC</div>
+        </div>
+        <div class="command-results">
+            <div class="command-section">
+                <div class="command-section-title">Quick Actions</div>
+                <a href="/houses/new" class="command-item"><i data-lucide="plus-circle"></i> Add New Property</a>
+                <a href="/auth/profile" class="command-item"><i data-lucide="user"></i> Profile Settings</a>
+            </div>
+            <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+            <div class="command-section">
+                <div class="command-section-title">Your Properties</div>
+                <% navHouses.forEach(h => { %>
+                    <a href="/houses/<%= h._id %>" class="command-item"><i data-lucide="home"></i> <%= h.house_name %></a>
+                <% }) %>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Drawer -->
+<div id="mobileDrawer" class="mobile-drawer hidden">
+    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
+    <div class="mobile-drawer-content">
+        <div class="mobile-drawer-header">
+            <div class="logo-link">
+                <i data-lucide="zap" class="logo-icon"></i>
+                <span class="logo-text">LiteBill</span>
+            </div>
+            <button id="mobileMenuClose" class="btn-icon btn-ghost"><i data-lucide="x"></i></button>
+        </div>
+        <div class="mobile-drawer-links">
+            <a href="/dashboard" class="mobile-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="/houses" class="mobile-nav-item"><i data-lucide="home"></i> Properties</a>
+            <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+                <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="mobile-nav-item"><i data-lucide="receipt"></i> Submit Readings</a>
+                <a href="/houses/<%= navHouses[0]._id %>/history" class="mobile-nav-item"><i data-lucide="history"></i> History</a>
+            <% } %>
+        </div>
+        <div class="mobile-drawer-footer">
+            <a href="/auth/profile" class="mobile-nav-item" style="border-bottom: none;"><i data-lucide="user"></i> My Profile</a>
+            <form action="/auth/logout" method="POST" style="margin: 0; margin-top: 1rem;">
+                <button type="submit" class="btn btn-danger" style="width: 100%;">Sign Out</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Navbar Core */
+    .top-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: rgba(15,17,23,0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+    }
+
+    /* Logo Section */
+    .logo-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    .logo-icon {
+        color: var(--accent-orange);
+        transition: transform 0.3s ease;
+    }
+    .logo-link:hover .logo-icon {
+        transform: rotate(15deg) scale(1.1);
+    }
+    .logo-text {
+        font-weight: 800;
+        font-size: 1.25rem;
+        background: var(--gradient-hero);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Center Links */
+    .nav-links-center {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .nav-item-center {
+        font-weight: 500;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 1.1rem 0;
+        transition: color 0.2s ease;
+    }
+    .nav-item-center:hover, .nav-item-center.active {
+        color: var(--text-primary);
+    }
+    .nav-item-center::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: var(--accent-orange);
+        transition: width 0.3s ease;
+        border-radius: 2px 2px 0 0;
+    }
+    .nav-item-center.active::after, .nav-item-center:hover::after {
+        width: 100%;
+    }
+
+    /* Right Actions */
+    .nav-actions-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .btn-quick-add {
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.8rem;
+    }
+    .notification-btn {
+        position: relative;
+    }
+    .notification-badge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: var(--accent-red);
+        color: #fff;
+        font-size: 0.6rem;
+        font-weight: 700;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(15,17,23,1);
+    }
+    .user-avatar-gradient {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--gradient-hero);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+    }
+    .user-avatar-gradient:hover {
+        transform: scale(1.05);
+    }
+
+    /* Dropdowns */
+    .dropdown-container {
+        position: relative;
+    }
+    .nav-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        margin-top: 0.5rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        width: 220px;
+        padding: 0.5rem;
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        pointer-events: none;
+    }
+    .nav-dropdown-menu.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+    .nav-dropdown-menu.hidden {
+        display: none !important;
+    }
+    .dropdown-header {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background 0.15s ease;
+    }
+    .dropdown-item i {
+        width: 16px;
+        height: 16px;
+        color: var(--text-secondary);
+    }
+    .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .dropdown-item:hover i {
+        color: var(--accent-orange);
+    }
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0.5rem 0;
+    }
+
+    /* Command Palette */
+    .command-palette {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        padding-top: 10vh;
+    }
+    .command-palette.hidden {
+        display: none;
+    }
+    .command-palette-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .command-palette-content {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+        overflow: hidden;
+        animation: fadeUp 0.2s ease forwards;
+        margin: 0 1rem;
+        height: fit-content;
+    }
+    .command-search-wrapper {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .command-search-icon {
+        color: var(--text-secondary);
+        width: 20px;
+        height: 20px;
+        margin-right: 1rem;
+    }
+    .command-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 500;
+        font-family: var(--font-main);
+    }
+    .command-input:focus {
+        outline: none;
+    }
+    .command-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--text-dim);
+        font-weight: 700;
+    }
+    .command-results {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.5rem;
+    }
+    .command-section {
+        margin-bottom: 0.5rem;
+    }
+    .command-section-title {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-dim);
+        text-transform: uppercase;
+    }
+    .command-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        transition: background 0.1s ease;
+    }
+    .command-item i {
+        width: 16px;
+        height: 16px;
+        color: var(--text-secondary);
+    }
+    .command-item:hover, .command-item.active {
+        background: var(--surface-raised);
+    }
+
+    /* Mobile Drawer */
+    .mobile-only {
+        display: none;
+    }
+    .mobile-drawer {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+    }
+    .mobile-drawer.hidden {
+        display: none;
+    }
+    .mobile-drawer-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+    }
+    .mobile-drawer-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 80%;
+        max-width: 320px;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mobile-drawer.open .mobile-drawer-content {
+        transform: translateX(0);
+    }
+    .mobile-drawer-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .mobile-drawer-links {
+        flex: 1;
+        padding: 1rem 0;
+        overflow-y: auto;
+    }
+    .mobile-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .mobile-nav-item i {
+        color: var(--text-secondary);
+    }
+    .mobile-drawer-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface-raised);
+    }
+
+    @media (max-width: 768px) {
+        .desktop-only { display: none !important; }
+        .mobile-only { display: inline-flex; }
+        .top-navbar { padding: 0 1rem; }
+    }
+</style>
+
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Dropdown toggle function
+
+
+        // Dropdown toggle logic
         const setupDropdown = (btnId, menuId) => {
             const btn = document.getElementById(btnId);
             const menu = document.getElementById(menuId);
-            if (btn && menu) {
-                btn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    document.querySelectorAll('.nav-dropdown-menu').forEach(m => {
-                        if (m !== menu) {
-                            m.classList.add('hidden');
-                            m.style.top = ''; m.style.bottom = ''; m.style.marginTop = ''; m.style.marginBottom = '';
-                        }
-                    });
-                    
-                    if (menu.classList.contains("hidden")) {
-                        menu.classList.remove("hidden");
-                        const rect = btn.getBoundingClientRect();
-                        if ((window.innerHeight - rect.bottom) < 260) {
-                            menu.style.top = 'auto'; menu.style.bottom = '100%';
-                            menu.style.marginTop = '0'; menu.style.marginBottom = '0.75rem';
-                            menu.style.transformOrigin = 'bottom left';
-                        } else {
-                            menu.style.top = '100%'; menu.style.bottom = 'auto';
-                            menu.style.marginTop = '0.75rem'; menu.style.marginBottom = '0';
-                            menu.style.transformOrigin = 'top left';
-                        }
-                    } else {
-                        menu.classList.add("hidden");
+            if (!btn || !menu) return;
+
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close others
+                document.querySelectorAll('.nav-dropdown-menu').forEach(m => {
+                    if (m !== menu) {
+                        m.classList.remove('show');
+                        setTimeout(() => m.classList.add('hidden'), 200);
                     }
                 });
-                document.addEventListener("click", (e) => {
-                    if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                        menu.classList.add("hidden");
-                    }
-                });
-            }
+                
+                if (menu.classList.contains("hidden") || !menu.classList.contains("show")) {
+                    menu.classList.remove("hidden");
+                    // slight delay to allow display:block to apply before animating opacity
+                    setTimeout(() => menu.classList.add("show"), 10);
+                } else {
+                    menu.classList.remove("show");
+                    setTimeout(() => menu.classList.add("hidden"), 200);
+                }
+            });
         };
 
-        setupDropdown("cyclesDropdownBtn", "cyclesDropdown");
-        setupDropdown("navSubmitReadingsBtn", "navReadingsDropdown");
-        setupDropdown("historyDropdownBtn", "historyDropdown");
-        setupDropdown("propertiesDropdownBtn", "propertiesDropdown");
-        setupDropdown("navCreateBtn", "navCreateDropdown");
-        setupDropdown("userAvatarBtn", "userAvatarDropdown");
+        setupDropdown("navPropsBtn", "navPropsDropdown");
+        setupDropdown("navBillingBtn", "navBillingDropdown");
+        setupDropdown("quickAddBtn", "quickAddDropdown");
+        setupDropdown("navUserBtn", "navUserDropdown");
 
-        // Hamburger toggle
-        const hamburgerBtn = document.getElementById("mobileMenuBtn");
-        const navLinks = document.getElementById("navLinks");
-        const navActions = document.getElementById("navActions");
-        if (hamburgerBtn && navLinks && navActions) {
-            hamburgerBtn.addEventListener("click", () => {
-                navLinks.classList.toggle("show");
-                navActions.classList.toggle("show");
+        // Close dropdowns on outside click
+        document.addEventListener("click", (e) => {
+            document.querySelectorAll('.nav-dropdown-menu.show').forEach(menu => {
+                const btnId = menu.id.replace('Dropdown', 'Btn');
+                const btn = document.getElementById(btnId);
+                if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+                    menu.classList.remove("show");
+                    setTimeout(() => menu.classList.add("hidden"), 200);
+                }
             });
-        }
+        });
+
+        // Command Palette Logic
+        const cmdPalette = document.getElementById('commandPalette');
+        const cmdInput = document.getElementById('commandInput');
         
-        // Re-initialize lucide icons inside the dynamically loaded scripts if needed
+        const openCmd = () => {
+            cmdPalette.classList.remove('hidden');
+            setTimeout(() => cmdInput.focus(), 100);
+        };
+        const closeCmd = () => {
+            cmdPalette.classList.add('hidden');
+            cmdInput.value = '';
+        };
+
+        document.getElementById('searchBtn')?.addEventListener('click', openCmd);
+        document.getElementById('commandPaletteBackdrop')?.addEventListener('click', closeCmd);
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                cmdPalette.classList.contains('hidden') ? openCmd() : closeCmd();
+            }
+            if (e.key === 'Escape' && !cmdPalette.classList.contains('hidden')) {
+                closeCmd();
+            }
+        });
+
+        // Mobile Drawer Logic
+        const mobileDrawer = document.getElementById('mobileDrawer');
+        const openMobileMenu = () => {
+            mobileDrawer.classList.remove('hidden');
+            // small delay to allow transition
+            setTimeout(() => mobileDrawer.classList.add('open'), 10);
+        };
+        const closeMobileMenu = () => {
+            mobileDrawer.classList.remove('open');
+            setTimeout(() => mobileDrawer.classList.add('hidden'), 300);
+        };
+
+        document.getElementById('mobileMenuTrigger')?.addEventListener('click', openMobileMenu);
+        document.getElementById('mobileMenuClose')?.addEventListener('click', closeMobileMenu);
+        document.getElementById('mobileDrawerBackdrop')?.addEventListener('click', closeMobileMenu);
+
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
     });
 </script>
-
-<style>
-    .nav-dropdown-menu {
-        position: absolute;
-        top: 100%;
-        margin-top: 0.75rem;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--border-soft);
-        width: 240px;
-        max-height: 260px;
-        overflow-y: auto;
-        z-index: 1000;
-        animation: fadeInDown 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-
-    /* Custom Scrollbar for Dropdown */
-    .nav-dropdown-menu::-webkit-scrollbar {
-        width: 6px;
-    }
-    .nav-dropdown-menu::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .nav-dropdown-menu::-webkit-scrollbar-thumb {
-        background-color: var(--border-soft);
-        border-radius: 10px;
-    }
-
-    .nav-dropdown-menu.hidden {
-        display: none;
-    }
-
-    .dropdown-header {
-        padding: 0.85rem 1.25rem;
-        font-size: 0.7rem;
-        font-weight: 800;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        background: #F4F6F5;
-        border-bottom: 1px solid var(--border-soft);
-    }
-
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.85rem 1.25rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--text-main);
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-
-    .dropdown-item:hover {
-        background: rgba(254, 138, 92, 0.05);
-        color: var(--accent-orange);
-        padding-left: 1.5rem;
-    }
-
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-</style>

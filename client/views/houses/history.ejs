@@ -1,235 +1,276 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header">
+<!-- Header -->
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1><i data-lucide="history" style="color: var(--accent-orange);"></i> Billing History</h1>
-        <p class="text-muted"><%= house.house_name %> | Quick overview of past cycles</p>
-    </div>
-    <div class="top-filters" style="display: flex; align-items: center; gap: 1rem;">
-        <div class="search-wrapper" style="position: relative; min-width: 300px;">
-            <i data-lucide="search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 16px; color: var(--text-light); z-index: 10;"></i>
-            <input type="text" id="historySearch" placeholder="Search by month or year..." 
-                   style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 12px; border: 1px solid var(--border-soft); font-family: var(--font-main); font-size: 0.85rem; background: white;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
+            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
+            <span>/</span> 
+            <a href="/houses/<%= house._id %>" style="color: var(--text-dim); text-decoration: none;"><%= house.house_name %></a>
+            <span>/</span>
+            <span style="color: var(--accent-orange);">History</span>
         </div>
-        <a href="/houses/<%= house._id %>" class="btn btn-outline">
-            <i data-lucide="arrow-left" style="width: 16px;"></i> Back to Dashboard
-        </a>
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
+            <i data-lucide="history" style="color: var(--accent-orange); width: 32px; height: 32px;"></i> Billing History
+        </h1>
+    </div>
+    <a href="/houses/<%= house._id %>" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<% if (cycles.length > 0) { %>
+<!-- Summary Header Row -->
+<div class="grid-3" style="margin-bottom: 2rem;">
+    <div class="card-raised" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="bar-chart-2" style="color: var(--accent-blue);"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Cycles</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= historySummary.totalCycles %></div>
+        </div>
+    </div>
+    
+    <div class="card-raised" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="indian-rupee" style="color: var(--accent-green);"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Amount Billed</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= historySummary.totalBilled.toLocaleString() %></div>
+        </div>
+    </div>
+    
+    <div class="card-raised" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="calculator" style="color: var(--accent-yellow);"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Avg Bill / Cycle</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= historySummary.avgBillAmount.toLocaleString(undefined, {maximumFractionDigits: 0}) %></div>
+        </div>
     </div>
 </div>
 
-<!-- History Summary Bar -->
-<% if (cycles.length > 0) { %>
-<div class="analytic-card" style="margin-top: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem;">
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 50%;">
-            <i data-lucide="bar-chart-2" style="color: #10B981; width: 20px; height: 20px;"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Cycles</div>
-            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);"><%= historySummary.totalCycles %></div>
-        </div>
+<!-- Search and Filter Bar -->
+<div class="card-raised" style="margin-bottom: 2rem; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div style="position: relative; min-width: 250px; flex: 1;">
+        <i data-lucide="search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-dim);"></i>
+        <input type="text" id="historySearch" placeholder="Search by month or year..." class="form-input" style="padding-left: 2.75rem; background: var(--bg-body); border-color: var(--border-soft);">
     </div>
-    <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <div style="padding: 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 50%;">
-            <i data-lucide="indian-rupee" style="color: var(--accent-blue); width: 20px; height: 20px;"></i>
+    
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <div class="filter-pills" style="display: flex; background: var(--bg-body); border: 1px solid var(--border-soft); border-radius: 8px; overflow: hidden; margin-right: 1rem;">
+            <button class="filter-pill active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="active">Active</button>
+            <button class="filter-pill" data-filter="completed">Completed</button>
         </div>
-        <div>
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Billed</div>
-            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">₹<%= historySummary.totalBilled.toLocaleString() %></div>
-        </div>
-    </div>
-    <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <div style="padding: 0.5rem; background: rgba(245, 158, 11, 0.1); border-radius: 50%;">
-            <i data-lucide="calculator" style="color: var(--accent-orange); width: 20px; height: 20px;"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Average Bill</div>
-            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">₹<%= historySummary.avgBillAmount.toLocaleString(undefined, {maximumFractionDigits: 0}) %></div>
-        </div>
+        
+        <select id="sortDropdown" class="form-input" style="width: auto; background: var(--bg-body); cursor: pointer;">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="highest">Highest bill</option>
+        </select>
     </div>
 </div>
 <% } %>
 
-<!-- History Grid -->
-<div class="grid-layout" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
-    <% if (cycles.length === 0) { %>
-        <div class="analytic-card" style="text-align: center; padding: 3rem; grid-column: 1 / -1;">
-            <i data-lucide="info" style="width: 48px; height: 48px; color: var(--text-light); margin-bottom: 1rem;"></i>
-            <h3>No History Found</h3>
-            <p>Complete a billing cycle to see history here.</p>
+<!-- Cycle Cards Grid -->
+<% if (cycles.length === 0) { %>
+    <div class="card-raised" style="text-align: center; padding: 5rem 2rem; max-width: 600px; margin: 0 auto;">
+        <div style="width: 80px; height: 80px; background: rgba(254, 138, 92, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i data-lucide="history" style="width: 40px; height: 40px; color: var(--accent-orange);"></i>
         </div>
-    <% } else { %>
-        <% cycles.forEach((cycle, index) => { %>
-            <% const mainBill = mainBills.find(b => b.billing_cycle_id._id.toString() === cycle._id.toString()); %>
-            <% const isActive = !cycle.endDate; %>
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">No History Found</h2>
+        <p class="text-secondary" style="margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+            Once you complete a billing cycle, its detailed invoice and distribution history will appear here.
+        </p>
+    </div>
+<% } else { %>
+    <div class="grid-layout" id="historyGrid" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
+        <% cycles.forEach((cycle) => { 
+            const mainBill = mainBills.find(b => b.billing_cycle_id._id.toString() === cycle._id.toString());
+            const isActive = !cycle.endDate;
+            const statusClass = isActive ? 'status-active' : 'status-completed';
             
-            <div class="history-card analytic-card <%= isActive ? 'active-cycle' : 'completed-cycle' %>" style="display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; padding: 0; min-height: 280px; border: 1px solid var(--border-soft);">
+            const start = new Date(cycle.startDate);
+            const end = cycle.endDate ? new Date(cycle.endDate) : new Date();
+            const daysRunning = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+            
+            const startDateStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const endDateStr = cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present';
+            
+            const billAmount = mainBill ? mainBill.total_amount : 0;
+            const stats = cycleStats[cycle._id.toString()] || { roomCount: 0, avgRoomAmount: 0 };
+        %>
+            <div class="card-raised history-card <%= statusClass %>" data-date="<%= start.getTime() %>" data-amount="<%= billAmount %>" style="display: flex; flex-direction: column; padding: 0; overflow: hidden; border-left: 4px solid <%= isActive ? 'var(--accent-green)' : 'var(--border)' %>;">
                 
                 <!-- Card Header -->
-                <div style="padding: 1.5rem 1.5rem 1rem 1.5rem; position: relative; z-index: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                        <span class="badge" style="background: <%= isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(112, 178, 220, 0.1)' %>; color: <%= isActive ? '#10B981' : 'var(--accent-blue)' %>; padding: 0.4rem 0.8rem; font-size: 0.7rem;">
-                            <i data-lucide="<%= isActive ? 'zap' : 'calendar-check' %>" style="width: 12px; height: 12px; margin-right: 4px;"></i>
-                            <%= isActive ? 'Running' : 'Completed' %>
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-soft); <%= isActive ? 'background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);' : '' %>">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <span class="badge" style="background: <%= isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)' %>; color: <%= isActive ? 'var(--accent-green)' : 'var(--text-secondary)' %>; font-weight: 700;">
+                            <% if (isActive) { %>
+                                <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite;"></span>
+                            <% } else { %>
+                                <span style="display: inline-block; width: 6px; height: 6px; background: var(--text-dim); border-radius: 50%; margin-right: 4px;"></span>
+                            <% } %>
+                            <%= isActive ? 'Active' : 'Completed' %>
                         </span>
                         
-                        <% if (isActive) { %>
-                            <% const runDays = Math.floor((Date.now() - new Date(cycle.startDate)) / 86400000); %>
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;"><i data-lucide="clock" style="width: 10px; height: 10px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> Running for <%= runDays %> days</span>
-                        <% } else { %>
-                            <% const cycleDays = Math.floor((new Date(cycle.endDate) - new Date(cycle.startDate)) / 86400000); %>
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;"><i data-lucide="clock" style="width: 10px; height: 10px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> <%= cycleDays %>-day cycle</span>
-                        <% } %>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
+                            <i data-lucide="clock" style="width: 12px;"></i> <%= daysRunning %> Days
+                        </div>
                     </div>
                     
-                    <h3 style="margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">
-                        <%= new Date(cycle.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
-                    </h3>
-                    <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">
-                        to <%= cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present (Active)' %>
-                    </p>
+                    <h3 class="cycle-title" style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"><%= startDateStr %></h3>
+                    <p style="margin: 0; color: var(--text-dim); font-size: 0.85rem;">to <%= endDateStr %></p>
                 </div>
 
-                <!-- Main Bill Highlights -->
-                <div style="padding: 0 1.5rem 1.5rem 1.5rem; flex-grow: 1; display: flex; align-items: flex-end;">
+                <!-- Card Body -->
+                <div style="padding: 1.5rem; flex-grow: 1;">
                     <% if (mainBill) { %>
-                        <div style="display: flex; gap: 1.5rem; width: 100%;">
+                        <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
                             <div style="flex: 1;">
-                                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 0.2rem;">Bill Amount</div>
-                                <div class="bill-amount-text" style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;">₹<%= mainBill.total_amount.toLocaleString() %></div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Bill Amount</div>
+                                <div class="bill-amount" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= billAmount.toLocaleString() %></div>
                             </div>
                             <div style="flex: 1; border-left: 1px solid var(--border-soft); padding-left: 1.5rem;">
-                                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 0.2rem;">Units</div>
-                                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;"><%= mainBill.total_units %></div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Avg per Room</div>
+                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-blue);">₹<%= Math.round(stats.avgRoomAmount).toLocaleString() %></div>
                             </div>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                            <i data-lucide="users" style="width: 14px;"></i> <%= stats.roomCount %> rooms billed
+                        </div>
+                    <% } else if (isActive) { %>
+                        <div style="background: rgba(251, 191, 36, 0.1); padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed rgba(251, 191, 36, 0.3);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-yellow); font-weight: 700; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                                <i data-lucide="file-input" style="width: 16px;"></i> Supplier Bill Required
+                            </div>
+                            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Enter the main bill to proceed.</p>
+                        </div>
                     <% } else { %>
-                        <div style="width: 100%; background: #F8F9FA; padding: 1rem; border-radius: 12px; text-align: center; border: 1px dashed var(--border-soft);">
-                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Awaiting Readings</p>
+                        <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">No bill data recorded for this cycle.</p>
                         </div>
                     <% } %>
                 </div>
 
-                <% if (!isActive && cycleStats[cycle._id]) { %>
-                    <div style="padding: 0 1.5rem 1.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span class="badge" style="background: rgba(107, 114, 128, 0.1); color: var(--text-muted); font-size: 0.75rem;"><%= cycleStats[cycle._id].roomCount %> rooms billed</span>
-                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">~₹<%= Math.round(cycleStats[cycle._id].avgRoomAmount).toLocaleString() %> avg/room</span>
-                    </div>
-                <% } %>
-
                 <!-- Footer Action -->
-                <div style="padding: 1rem 1.5rem; background: #FAFAFA; border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-start;">
+                <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-soft); background: rgba(255,255,255,0.01);">
                     <% if (isActive) { %>
-                        <a href="/houses/<%= house._id %>/main-bill/new" class="btn btn-history-action active-action">
-                            Submit Readings <i data-lucide="pen-line" style="width: 14px; height: 14px; stroke-width: 2.5px;"></i>
-                        </a>
+                        <% if (!mainBill) { %>
+                            <a href="/houses/<%= house._id %>/main-bill/new" class="btn btn-secondary" style="width: 100%; border-color: var(--accent-yellow); color: var(--accent-yellow);">Enter Supplier Bill &rarr;</a>
+                        <% } else { %>
+                            <a href="/houses/<%= house._id %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-secondary" style="width: 100%; border-color: var(--accent-green); color: var(--accent-green);">Submit Readings &rarr;</a>
+                        <% } %>
                     <% } else { %>
-                        <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-history-action">
-                            View Distribution <i data-lucide="arrow-right" style="width: 14px; height: 14px; stroke-width: 2.5px;"></i>
-                        </a>
+                        <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-secondary" style="width: 100%;">View Distribution &rarr;</a>
                     <% } %>
                 </div>
             </div>
         <% }) %>
-    <% } %>
-</div>
+    </div>
+<% } %>
 
 <style>
-    .history-card {
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        background: white;
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.5); opacity: 0.5; }
+        100% { transform: scale(1); opacity: 1; }
     }
     
+    .history-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
     .history-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
-
-    /* Perfect left border that spans the entire height */
-    .history-card::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 6px;
-        z-index: 2;
-    }
-
-    .active-cycle::before {
-        background: #10B981;
-    }
-
-    .completed-cycle::before {
-        background: var(--accent-blue);
-    }
-
-    .btn-history-action {
-        font-size: 0.95rem;
-        padding: 0.4rem 1rem;
-        border: 2px solid var(--text-main);
+    
+    .filter-pill {
         background: transparent;
-        color: var(--text-main);
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        border: none;
+        padding: 0.5rem 1rem;
+        color: var(--text-secondary);
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
     }
-
-    .btn-history-action:hover {
-        background: var(--text-main);
-        color: white;
-        transform: scale(1.02);
+    .filter-pill:hover {
+        color: var(--text-primary);
     }
-
-    .btn-history-action.active-action {
-        border-color: #10B981;
-        color: #10B981;
-    }
-
-    .btn-history-action.active-action:hover {
-        background: #10B981;
-        color: white;
-    }
-
-    .badge i {
-        display: inline-block;
-        vertical-align: middle;
-        margin-top: -2px;
-    }
-
-    #historySearch:focus {
-        border-color: var(--accent-orange);
-        box-shadow: 0 0 0 3px rgba(254, 138, 92, 0.1);
-        outline: none;
+    .filter-pill.active {
+        background: var(--surface-raised);
+        color: var(--text-primary);
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('historySearch');
-        const cards = document.querySelectorAll('.history-card');
+        const filterPills = document.querySelectorAll('.filter-pill');
+        const sortDropdown = document.getElementById('sortDropdown');
+        const grid = document.getElementById('historyGrid');
+        
+        if (!grid) return;
+        
+        let currentFilter = 'all';
+        let currentSort = 'newest';
+        
+        function applyFilters() {
+            const term = searchInput ? searchInput.value.toLowerCase() : '';
+            const cards = Array.from(grid.querySelectorAll('.history-card'));
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.cycle-title').textContent.toLowerCase();
+                const isMatchSearch = title.includes(term);
+                
+                const isMatchFilter = 
+                    currentFilter === 'all' || 
+                    (currentFilter === 'active' && card.classList.contains('status-active')) ||
+                    (currentFilter === 'completed' && card.classList.contains('status-completed'));
+                
+                if (isMatchSearch && isMatchFilter) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Apply sorting
+            const visibleCards = cards.filter(c => c.style.display !== 'none');
+            
+            visibleCards.sort((a, b) => {
+                if (currentSort === 'newest') {
+                    return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
+                } else if (currentSort === 'oldest') {
+                    return parseFloat(a.dataset.date) - parseFloat(b.dataset.date);
+                } else if (currentSort === 'highest') {
+                    return parseFloat(b.dataset.amount) - parseFloat(a.dataset.amount);
+                }
+            });
+            
+            visibleCards.forEach(card => grid.appendChild(card));
+        }
         
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                cards.forEach(card => {
-                    // Search in the date header and the period text
-                    const header = card.querySelector('h3').textContent.toLowerCase();
-                    const period = card.querySelector('p').textContent.toLowerCase();
-                    const billAmountEl = card.querySelector('.bill-amount-text');
-                    const billAmount = billAmountEl ? billAmountEl.textContent.toLowerCase() : '';
-                    
-                    if (header.includes(term) || period.includes(term) || billAmount.includes(term)) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+            searchInput.addEventListener('input', applyFilters);
+        }
+        
+        filterPills.forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                filterPills.forEach(p => p.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.dataset.filter;
+                applyFilters();
+            });
+        });
+        
+        if (sortDropdown) {
+            sortDropdown.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                applyFilters();
             });
         }
     });

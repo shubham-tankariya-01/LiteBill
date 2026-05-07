@@ -1,0 +1,44 @@
+<!-- 
+  Reusable Empty State Component
+  Accepts:
+  - icon: String (lucide icon name, e.g., 'folder-open')
+  - title: String (heading text)
+  - description: String (subtitle/description text)
+  - ctaText: String (optional, text for action button)
+  - ctaLink: String (optional, href for action button)
+  - ctaClass: String (optional, extra classes for button like 'btn-primary')
+  - ctaIcon: String (optional, lucide icon name for button)
+  - ctaAction: String (optional, onclick handler for button if no link)
+-->
+
+<div class="card-raised" style="text-align: center; padding: 4rem 2rem; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+        <i data-lucide="<%= typeof icon !== 'undefined' ? icon : 'inbox' %>" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
+    </div>
+    
+    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.5rem 0;">
+        <%= typeof title !== 'undefined' ? title : 'No items found' %>
+    </h3>
+    
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0 0 2rem 0; line-height: 1.5; max-width: 80%;">
+        <%= typeof description !== 'undefined' ? description : 'There is currently no data to display here.' %>
+    </p>
+
+    <% if (typeof ctaText !== 'undefined') { %>
+        <% if (typeof ctaLink !== 'undefined') { %>
+            <a href="<%= ctaLink %>" class="btn <%= typeof ctaClass !== 'undefined' ? ctaClass : 'btn-primary' %>" style="padding-left: 1.5rem; padding-right: 1.5rem;">
+                <% if (typeof ctaIcon !== 'undefined') { %>
+                    <i data-lucide="<%= ctaIcon %>" style="width: 16px; margin-right: 0.5rem;"></i>
+                <% } %>
+                <%= ctaText %>
+            </a>
+        <% } else if (typeof ctaAction !== 'undefined') { %>
+            <button onclick="<%= ctaAction %>" class="btn <%= typeof ctaClass !== 'undefined' ? ctaClass : 'btn-primary' %>" style="padding-left: 1.5rem; padding-right: 1.5rem;">
+                <% if (typeof ctaIcon !== 'undefined') { %>
+                    <i data-lucide="<%= ctaIcon %>" style="width: 16px; margin-right: 0.5rem;"></i>
+                <% } %>
+                <%= ctaText %>
+            </button>
+        <% } %>
+    <% } %>
+</div>

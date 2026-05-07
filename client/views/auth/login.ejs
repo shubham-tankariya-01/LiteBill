@@ -1,70 +1,331 @@
 <% layout('layouts/boilerplate') %>
 
 <style>
-    @keyframes fadeSlideUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to   { opacity: 1; transform: translateY(0); }
+    /* Hide default navbar and main container padding for full-bleed auth pages */
+    .top-navbar { display: none !important; }
+    .main-container { padding: 0 !important; max-width: 100% !important; }
+
+    /* Layout */
+    .auth-split-layout {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
     }
-    .auth-wrapper {
+
+    /* Left Panel */
+    .auth-left-panel {
+        flex: 1;
+        background: var(--gradient-hero);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 4rem;
+        color: #fff;
+        overflow: hidden;
+    }
+
+    .auth-left-content {
+        animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .auth-logo-large {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 3rem;
+    }
+
+    .auth-tagline {
+        font-size: 2.75rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 2rem;
+        max-width: 450px;
+    }
+
+    .auth-features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 3rem;
+    }
+
+    .auth-features li {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.15rem;
+        font-weight: 500;
+        margin-bottom: 1.25rem;
+    }
+
+    .auth-features i {
+        background: rgba(255,255,255,0.2);
+        padding: 0.35rem;
+        border-radius: 50%;
+        color: #fff;
+    }
+
+    .auth-testimonial {
+        background: rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        border-radius: var(--radius-card);
+        border: 1px solid rgba(255,255,255,0.1);
+        max-width: 450px;
+        animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.2s;
+        opacity: 0;
+    }
+
+    /* Right Panel */
+    .auth-right-panel {
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: calc(100vh - 80px);
-        padding: 2rem 1rem;
+        background: var(--bg-body);
+        padding: 2rem;
     }
-    .auth-card {
+
+    .auth-form-container {
         width: 100%;
-        max-width: 420px;
-        background: var(--bg-card);
-        border-radius: var(--radius-md);
-        padding: 2.5rem;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.06);
-        border-top: 4px solid var(--accent-orange);
-        animation: fadeSlideUp 0.4s ease forwards;
+        max-width: 400px;
+    }
+
+    .mobile-logo {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 2.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+    
+    .mobile-logo i {
+        color: var(--accent-orange);
+    }
+
+    /* Form Styles */
+    .auth-heading {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .auth-subheading {
+        color: var(--text-secondary);
+        margin-bottom: 2.5rem;
+        font-size: 0.95rem;
+    }
+
+    .input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-prefix {
+        position: absolute;
+        left: 1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.95rem;
+        pointer-events: none;
+    }
+
+    .input-with-prefix {
+        padding-left: 3rem !important;
+    }
+
+    .input-toggle-btn {
+        position: absolute;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .input-toggle-btn:hover {
+        color: var(--text-primary);
+    }
+
+    .auth-submit-btn {
+        width: 100%;
+        background: var(--accent-orange);
+        color: #fff;
+        padding: 0.9rem;
+        font-size: 1rem;
+        font-weight: 700;
+        border: none;
+        border-radius: var(--radius-btn);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .auth-submit-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+    
+    .auth-submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Staggered Animations */
+    .stagger-1 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 50ms; }
+    .stagger-2 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 100ms; }
+    .stagger-3 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 150ms; }
+    .stagger-4 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 200ms; }
+    .stagger-5 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 250ms; }
+
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        display: none;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .auth-submit-btn.loading .btn-text { display: none; }
+    .auth-submit-btn.loading .spinner { display: block; }
+
+    @media (max-width: 900px) {
+        .auth-left-panel { display: none; }
+        .mobile-logo { display: flex; }
+        .auth-right-panel { padding: 2rem 1.5rem; }
     }
 </style>
 
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <i data-lucide="zap" style="color: var(--accent-orange); width: 40px; height: 40px; margin-bottom: 1rem;"></i>
-            <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 0.35rem;">Welcome Back</h2>
-            <p class="text-muted" style="font-size: 0.9rem;">Log in to manage your properties.</p>
+<div class="auth-split-layout">
+    <div class="auth-left-panel">
+        <div class="auth-left-content">
+            <div class="auth-logo-large">
+                <i data-lucide="zap" style="color: #fff; width: 32px; height: 32px;"></i> LiteBill
+            </div>
+            <h1 class="auth-tagline">Smart billing for smart landlords.</h1>
+            <ul class="auth-features">
+                <li><i data-lucide="check" style="width: 18px; height: 18px;"></i> Automatic bill splitting</li>
+                <li><i data-lucide="check" style="width: 18px; height: 18px;"></i> Full billing history</li>
+                <li><i data-lucide="check" style="width: 18px; height: 18px;"></i> Multi-property support</li>
+            </ul>
         </div>
-
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #EF4444; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: #EF4444; flex-shrink: 0;"></i>
-                <span style="color: #EF4444; font-size: 0.875rem; font-weight: 500;"><%= error %></span>
+        <div class="auth-testimonial">
+            <p style="font-style: italic; font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.5;">"LiteBill completely eliminated the monthly headache of calculating utility splits. My tenants appreciate the transparency, and I save hours every billing cycle."</p>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--accent-orange); display: flex; align-items: center; justify-content: center; font-weight: 800;">A</div>
+                <div>
+                    <div style="font-weight: 700; color: #fff;">Arjun M.</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8;">Property Manager, 14 Units</div>
+                </div>
             </div>
-        <% } %>
+        </div>
+    </div>
 
-        <form action="/auth/login" method="POST">
-            <div class="form-group">
-                <label class="form-label" for="mobile_number">Mobile Number</label>
-                <input type="text" id="mobile_number" name="mobile_number" class="form-control"
-                    required placeholder="Enter 10-digit number"
-                    value="<%= typeof mobileValue !== 'undefined' ? mobileValue : '' %>">
-            </div>
+    <div class="auth-right-panel">
+        <div class="auth-form-container">
+            <a href="/" class="mobile-logo stagger-1">
+                <i data-lucide="zap" style="width: 28px; height: 28px;"></i> LiteBill
+            </a>
+            
+            <h2 class="auth-heading stagger-1">Welcome back</h2>
+            <p class="auth-subheading stagger-1">Log in to manage your properties and billing cycles.</p>
 
-            <div class="form-group">
-                <label class="form-label" for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control"
-                    required placeholder="••••••••">
-            </div>
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="stagger-2" style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid var(--accent-red); border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; animation: fadeUp 0.3s ease forwards;">
+                    <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: var(--accent-red); flex-shrink: 0;"></i>
+                    <span style="color: var(--accent-red); font-size: 0.875rem; font-weight: 500;"><%= error %></span>
+                </div>
+            <% } %>
 
-            <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 1.5rem;">
-                <a href="#" style="color: var(--text-muted); font-size: 0.8rem;">Forgot password?</a>
-            </div>
+            <form action="/auth/login" method="POST" id="loginForm">
+                <div class="form-group stagger-2">
+                    <label class="form-label" for="mobile_number">Mobile Number</label>
+                    <div class="input-group">
+                        <span class="input-prefix">+91</span>
+                        <input type="text" id="mobile_number" name="mobile_number" class="form-input input-with-prefix"
+                            required placeholder="Enter 10-digit number"
+                            value="<%= typeof mobileValue !== 'undefined' ? mobileValue : '' %>"
+                            maxlength="10" pattern="\d{10}">
+                    </div>
+                </div>
 
-            <button type="submit" class="btn btn-primary"
-                style="width: 100%; background: var(--accent-orange); border: none; padding: 0.85rem; font-size: 1rem;">
-                Log In
-            </button>
-        </form>
+                <div class="form-group stagger-3">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" class="form-input"
+                            required placeholder="••••••••">
+                        <button type="button" class="input-toggle-btn" id="togglePassword" tabindex="-1">
+                            <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+                </div>
 
-        <p style="text-align: center; margin-top: 1.75rem; color: var(--text-muted); font-size: 0.875rem;">
-            Don't have an account? <a href="/auth/signup" style="color: var(--accent-orange); font-weight: 600;">Sign Up</a>
-        </p>
+                <div class="stagger-4" style="margin-top: 2rem;">
+                    <button type="submit" class="auth-submit-btn" id="submitBtn">
+                        <span class="btn-text">Log In</span>
+                        <div class="spinner"></div>
+                    </button>
+                </div>
+            </form>
+
+            <p class="stagger-5" style="text-align: center; margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
+                Don't have an account? <a href="/auth/signup" style="color: var(--text-primary); font-weight: 600;">Sign up</a>
+            </p>
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('togglePassword');
+        const pwdInput = document.getElementById('password');
+        
+        if(toggleBtn && pwdInput) {
+            toggleBtn.addEventListener('click', () => {
+                const type = pwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                pwdInput.setAttribute('type', type);
+                toggleBtn.innerHTML = type === 'password' ? '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>' : '<i data-lucide="eye-off" style="width: 18px; height: 18px;"></i>';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            });
+        }
+
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        if(form && submitBtn) {
+            form.addEventListener('submit', () => {
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            });
+        }
+    });
+</script>

@@ -1,46 +1,76 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header">
-    <h1><i data-lucide="home" style="color: var(--accent-yellow);"></i> My Houses</h1>
-    <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus" style="width: 16px; height: 16px;"></i> Add House</a>
+<div class="page-header sticky-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="home" style="color: var(--accent-yellow);"></i> My Properties
+        </h1>
+        <span class="badge badge-dim"><%= houses.length %> Total</span>
+    </div>
+    <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus"></i> Add Property</a>
 </div>
 
 <% if (houses.length === 0) { %>
-    <div class="analytic-card" style="text-align: center; padding: 4rem 2rem;">
-        <i data-lucide="home" style="width: 64px; height: 64px; color: var(--text-muted); opacity: 0.5; margin-bottom: 1.5rem;"></i>
-        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-main);">No properties added yet</h2>
-        <p class="text-muted" style="margin-bottom: 2rem;">Create your first property to start managing meters and generating bills.</p>
-        <a href="/houses/new" class="btn btn-primary" style="background: var(--accent-yellow); color: #000; border: none; font-weight: 600;"><i data-lucide="plus" style="width: 18px; height: 18px;"></i> Add Your First Property</a>
-    </div>
+    <%- include('../includes/empty_state', {
+        icon: 'home',
+        title: 'Add your first property',
+        description: 'Get started by adding a property to manage meters, automatically split utility bills, and track payment history.',
+        ctaText: 'Create Property',
+        ctaLink: '/houses/new',
+        ctaIcon: 'plus'
+    }) %>
 <% } else { %>
-    <div class="grid-layout">
+    <div class="grid-2">
         <% houses.forEach(house => { 
             const status = houseStatuses[house._id.toString()];
             const formattedDate = status.lastBillDate ? new Date(status.lastBillDate).toLocaleDateString() : 'Never';
+            
+            // Derive a cycle day if lastBillDate exists (rough estimate)
+            let cycleDayText = 'Not started';
+            let progressWidth = '0%';
+            if (status.lastBillDate) {
+                const diffTime = Math.abs(new Date() - new Date(status.lastBillDate));
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                cycleDayText = `Day ${diffDays}`;
+                progressWidth = `${Math.min((diffDays / 30) * 100, 100)}%`;
+            } else if (status.hasSetup && !status.hasBillThisCycle) {
+                cycleDayText = `Cycle active`;
+                progressWidth = `50%`; // Arbitrary visual feedback for active but no bill
+            }
+
+            let statusBadge = '<span class="badge badge-dim">Not Set Up</span>';
+            if (status.hasSetup) {
+                if (!status.hasBillThisCycle) statusBadge = '<span class="badge badge-orange">Awaiting Bill</span>';
+                else statusBadge = '<span class="badge badge-green">Active</span>';
+            }
         %>
-            <div class="analytic-card theme-house">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                    <h3 style="margin: 0; color: var(--text-main); font-size: 1.2rem;">
+            <div class="card-raised card-accent house-card" style="--card-accent-color: var(--accent-yellow); display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: var(--text-primary); font-size: 1.25rem; font-weight: 700;">
                         <%= house.house_name %>
                     </h3>
-                    
-                    <% if (!status.hasSetup) { %>
-                        <span class="badge" style="background: rgba(156, 163, 175, 0.15); color: #6B7280;">Not Set Up</span>
-                    <% } else if (!status.hasBillThisCycle) { %>
-                        <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange);">Awaiting Bill</span>
-                    <% } else { %>
-                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">Active</span>
-                    <% } %>
+                    <%- statusBadge %>
                 </div>
                 
-                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-                    <%= status.roomCount %> rooms &nbsp;·&nbsp; Last billed: <%= formattedDate %>
-                </p>
+                <div style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <i data-lucide="bed-double" style="width: 14px;"></i> <%= status.roomCount %> rooms 
+                    <span style="color: var(--border);">•</span> 
+                    <i data-lucide="calendar" style="width: 14px;"></i> Last billed: <%= formattedDate %>
+                    <span style="color: var(--border);">•</span> 
+                    <%= cycleDayText %>
+                </div>
                 
-                <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                    <a href="/houses/<%= house._id %>" class="btn btn-outline" style="flex: 1;">Enter Dashboard</a>
-                    <button type="button" class="btn btn-outline" style="color: #EF4444; border-color: #FCA5A5; padding: 0.5rem 1rem;" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
-                        <i data-lucide="trash-2" style="width: 16px;"></i>
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden; width: 100%;">
+                        <div style="height: 100%; width: <%= progressWidth %>; background: var(--accent-yellow); border-radius: 3px;"></div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 0.75rem; margin-top: auto;">
+                    <a href="/houses/<%= house._id %>" class="btn btn-secondary" style="flex: 1; border-color: var(--border); color: var(--text-primary);">Open Dashboard</a>
+                    <a href="/houses/<%= house._id %>/edit" class="btn btn-icon btn-ghost"><i data-lucide="settings-2"></i></a>
+                    <button type="button" class="btn btn-icon btn-ghost" style="color: var(--accent-red);" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
+                        <i data-lucide="trash-2"></i>
                     </button>
                 </div>
             </div>
@@ -48,4 +78,13 @@
     </div>
 <% } %>
 
-<!-- House adding modal is now globally included in boilerplate.ejs -->
+<style>
+    .house-card {
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .house-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-yellow);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+</style>

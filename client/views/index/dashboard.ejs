@@ -1,244 +1,400 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+<% 
+    const hour = new Date().getHours();
+    let greetingTime = 'Good evening';
+    if (hour < 12) greetingTime = 'Good morning';
+    else if (hour < 18) greetingTime = 'Good afternoon';
+    
+    const userDisplay = (typeof user !== 'undefined' && user.mobile_number) ? '+91 ' + user.mobile_number : 'User';
+    
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateFormatted = new Date().toLocaleDateString('en-IN', dateOptions);
+%>
+
+<div class="page-header">
     <div>
-        <h1 style="display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="layout-dashboard" style="color: var(--accent-orange);"></i> System Overview
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">
+            <%= greetingTime %>, <%= userDisplay %>
         </h1>
-        <p class="text-muted" style="margin-top: 0.5rem;">Welcome back! Here's a summary of your properties and billing.</p>
+        <p class="text-muted" style="font-size: 0.9rem;"><%= dateFormatted %></p>
     </div>
     <div style="display: flex; gap: 1rem;">
-        <a href="/houses/new" class="btn btn-outline"><i data-lucide="home"></i> Add Property</a>
-        <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="btn btn-primary" style="background: var(--accent-blue); border-color: var(--accent-blue);">
-                <i data-lucide="file-input"></i> Enter Main Bill
-            </a>
-        <% } else if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
-            <div class="dropdown-container" style="position: relative;">
-                <button id="dashEnterBillBtn" class="btn btn-primary" style="background: var(--accent-blue); border-color: var(--accent-blue); cursor: pointer;">
-                    <i data-lucide="file-input"></i> Enter Main Bill <i data-lucide="chevron-down" style="width: 14px; margin-left: 4px;"></i>
-                </button>
-                <div id="dashEnterBillDropdown" class="nav-dropdown-menu hidden" style="left: 0; transform-origin: top left; min-width: 200px;">
-                    <div class="dropdown-header">Select Property</div>
-                    <% navHouses.forEach(house => { %>
-                        <a href="/houses/<%= house._id %>/main-bill/new" class="dropdown-item">
-                            <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i> <%= house.house_name %>
-                        </a>
-                    <% }) %>
-                </div>
-            </div>
+        <a href="/houses/new" class="btn btn-ghost"><i data-lucide="plus"></i> Add Property</a>
+        <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
+            <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="btn btn-primary"><i data-lucide="file-input"></i> Enter Main Bill</a>
         <% } %>
     </div>
 </div>
 
-<div class="grid-layout">
-    <!-- Houses Widget -->
-    <div class="analytic-card theme-house">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <h3><i data-lucide="home" style="color: var(--accent-yellow);"></i> Properties</h3>
-            <div style="padding: 0.5rem; background: rgba(251, 203, 69, 0.1); border-radius: 50%;">
-                <i data-lucide="building" style="color: var(--accent-yellow); width: 24px; height: 24px;"></i>
-            </div>
+<% if (typeof nextStep !== 'undefined' && nextStep !== 'complete') { 
+    let bannerColor = 'var(--accent-orange)';
+    let actionTitle = '';
+    let instructionText = '';
+    let actionLink = '';
+    let actionBtnText = '';
+    
+    if (nextStep === 'add_house') {
+        actionTitle = 'Add your first property';
+        instructionText = 'Create a property to start managing your bills.';
+        actionLink = '/houses/new';
+        actionBtnText = 'Add Property';
+        bannerColor = 'var(--accent-orange)';
+    } else if (nextStep === 'setup') {
+        actionTitle = 'Initial Setup Required';
+        instructionText = 'Enter starting meter readings for a property.';
+        actionLink = '/houses/' + actionHouseId + '/readings/new';
+        actionBtnText = 'Setup Meters';
+        bannerColor = 'var(--accent-orange)';
+    } else if (nextStep === 'enter_bill') {
+        actionTitle = 'Main Bill Required';
+        instructionText = 'An active cycle is missing the supplier main bill.';
+        actionLink = '/houses/' + actionHouseId + '/main-bill/new';
+        actionBtnText = 'Enter Bill';
+        bannerColor = 'var(--accent-orange)';
+    } else if (nextStep === 'enter_readings') {
+        actionTitle = 'Readings Pending';
+        instructionText = 'Enter room meter readings to finalize the cycle.';
+        actionLink = '/houses/' + actionHouseId + '/readings/new';
+        actionBtnText = 'Enter Readings';
+        bannerColor = 'var(--accent-blue)';
+    }
+%>
+<div class="next-action-banner" style="border-left-color: <%= bannerColor %>;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="pulsing-dot" style="background: <%= bannerColor %>; box-shadow: 0 0 0 0 <%= bannerColor %>80;"></div>
+        <div>
+            <h3 style="margin-bottom: 0.25rem; font-size: 1rem; color: var(--text-primary);"><%= actionTitle %></h3>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);"><%= instructionText %></p>
         </div>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Manage your active rental units and houses.</p>
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
-            <%= typeof houseCount !== 'undefined' ? houseCount : 0 %> 
-            <span style="font-size: 1rem; color: var(--text-muted); font-weight: 500;">Active</span>
+    </div>
+    <a href="<%= actionLink %>" class="btn btn-primary" style="background: <%= bannerColor %>; border-color: <%= bannerColor %>;"><%= actionBtnText %></a>
+</div>
+<% } %>
+
+<div class="grid-3" style="margin-bottom: 2.5rem;">
+    <!-- Card 1 -->
+    <div class="card-raised card-accent" style="--card-accent-color: var(--accent-yellow);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <i data-lucide="home" style="color: var(--accent-yellow); width: 24px; height: 24px;"></i>
+            <a href="/houses" class="btn btn-ghost btn-icon" style="padding: 0;"><i data-lucide="arrow-right"></i></a>
         </div>
-        <a href="/houses" class="btn btn-outline" style="width: 100%;">Manage Properties</a>
+        <div class="stat-number count-up" data-target="<%= typeof houseCount !== 'undefined' ? houseCount : 0 %>">0</div>
+        <div class="stat-label">Active Properties</div>
     </div>
 
-    <!-- Billing Cycles Widget -->
-    <div class="analytic-card theme-cycle">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <h3><i data-lucide="calendar-clock" style="color: var(--accent-blue);"></i> Ongoing Cycles</h3>
-            <div style="padding: 0.5rem; background: rgba(112, 178, 220, 0.1); border-radius: 50%;">
-                <i data-lucide="refresh-cw" style="color: var(--accent-blue); width: 24px; height: 24px;"></i>
-            </div>
-        </div>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Currently active calculation periods across all properties.</p>
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
-            <%= typeof activeCyclesCount !== 'undefined' ? activeCyclesCount : 0 %> 
+    <!-- Card 2 -->
+    <div class="card-raised card-accent" style="--card-accent-color: var(--accent-blue);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <i data-lucide="refresh-cw" style="color: var(--accent-blue); width: 24px; height: 24px;"></i>
             <% if (typeof activeCyclesCount !== 'undefined' && activeCyclesCount > 0) { %>
-                <span class="badge" style="background: rgba(112, 178, 220, 0.2); color: var(--accent-blue); font-size: 0.8rem; margin-left: 0.5rem;">Processing</span>
+                <span class="badge badge-blue">Processing</span>
             <% } %>
         </div>
-        <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/cycles" class="btn btn-outline" style="width: 100%; border-color: var(--accent-blue); color: var(--accent-blue);">Monitor Cycles</a>
-        <% } else { %>
-            <a href="/houses" class="btn btn-outline" style="width: 100%; border-color: var(--accent-blue); color: var(--accent-blue);">Monitor Cycles</a>
-        <% } %>
+        <div class="stat-number count-up" data-target="<%= typeof activeCyclesCount !== 'undefined' ? activeCyclesCount : 0 %>">0</div>
+        <div class="stat-label">Active Cycles</div>
     </div>
 
-    <!-- Revenue / Bills Widget -->
-    <div class="analytic-card theme-bill" style="border-top-color: #10B981;">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <h3 style="color: #10B981;"><i data-lucide="indian-rupee" style="color: #10B981;"></i> Total Billed</h3>
-            <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 50%;">
-                <i data-lucide="trending-up" style="color: #10B981; width: 24px; height: 24px;"></i>
-            </div>
+    <!-- Card 3 -->
+    <div class="card-raised card-accent" style="--card-accent-color: var(--accent-green);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <i data-lucide="indian-rupee" style="color: var(--accent-green); width: 24px; height: 24px;"></i>
         </div>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Cumulative calculated balances from all main bills.</p>
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1;">
-            ₹<%= typeof totalRevenue !== 'undefined' ? totalRevenue.toLocaleString() : '0' %>
+        <div class="stat-number" style="display: flex; align-items: baseline;">
+            <span style="font-size: 1.5rem; margin-right: 0.25rem;">₹</span>
+            <span class="count-up" data-target="<%= typeof totalRevenue !== 'undefined' ? totalRevenue : 0 %>">0</span>
         </div>
-        <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/history" class="btn btn-green" style="width: 100%;">View History</a>
-        <% } else { %>
-            <a href="/cycles" class="btn btn-green" style="width: 100%;">Collection Hub</a>
-        <% } %>
+        <div class="stat-label">Across All Properties</div>
     </div>
 </div>
 
-<% if (typeof nextStep !== 'undefined' && nextStep !== 'complete') { %>
-<div class="analytic-card" style="margin-top: 2rem; border-left: 4px solid var(--accent-orange); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-    <div style="display: flex; align-items: center; gap: 1rem;">
-        <i data-lucide="info" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
-        <div>
-            <h3 style="margin: 0 0 0.25rem 0;">What to do next</h3>
-            <p class="text-muted" style="margin: 0; font-size: 0.9rem;">
-                <% if (nextStep === 'add_house') { %>
-                    You haven't added any properties yet. Create your first house to get started.
-                <% } else if (nextStep === 'setup') { %>
-                    You have a property that needs initial meter setup.
-                <% } else if (nextStep === 'enter_bill') { %>
-                    An active billing cycle is missing the supplier main bill.
-                <% } else if (nextStep === 'enter_readings') { %>
-                    You've added the main bill, now enter the room meter readings to finalize the cycle.
+<div class="dashboard-split">
+    <!-- Left Column: Recent Activity -->
+    <div class="dashboard-col-main">
+        <div class="card-raised" style="height: 100%;">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Recent Activity</h3>
+            
+            <div class="activity-feed">
+                <% if (typeof recentBills !== 'undefined' && recentBills.length > 0) { %>
+                    <% recentBills.forEach(bill => { %>
+                        <div class="activity-item">
+                            <div class="activity-dot" style="background: var(--accent-green);"></div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    <span style="color: var(--text-primary); font-weight: 600;">Bill finalized</span> for <%= bill.house_id ? bill.house_id.house_name : 'Property' %>
+                                </div>
+                                <div class="activity-time"><%= new Date(bill.bill_date).toLocaleDateString() %></div>
+                            </div>
+                            <div class="activity-amount">₹<%= bill.total_amount %></div>
+                        </div>
+                    <% }) %>
+                    <div style="margin-top: 1.5rem; text-align: center;">
+                        <a href="/houses" class="btn btn-ghost" style="font-size: 0.85rem;">View full history &rarr;</a>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i data-lucide="activity" style="width: 48px; height: 48px; color: var(--border); margin-bottom: 1rem;"></i>
+                        <p class="text-muted">No recent activity found.</p>
+                    </div>
                 <% } %>
-            </p>
+            </div>
         </div>
     </div>
-    <div>
-        <% if (nextStep === 'add_house') { %>
-            <a href="/houses/new" class="btn btn-primary">Add Property</a>
-        <% } else if (nextStep === 'setup') { %>
-            <a href="/houses/<%= actionHouseId %>/readings/new" class="btn btn-primary">Setup Meters</a>
-        <% } else if (nextStep === 'enter_bill') { %>
-            <a href="/houses/<%= actionHouseId %>/main-bill/new" class="btn btn-primary">Enter Bill</a>
-        <% } else if (nextStep === 'enter_readings') { %>
-            <a href="/houses/<%= actionHouseId %>/readings/new" class="btn btn-primary">Enter Readings</a>
-        <% } %>
+
+    <!-- Right Column: Quick Actions -->
+    <div class="dashboard-col-side">
+        <div class="card-raised" style="height: 100%;">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">What would you like to do?</h3>
+            
+            <div class="quick-actions-grid">
+                <a href="<%= (typeof navHouses !== 'undefined' && navHouses.length > 0) ? '/houses/' + navHouses[0]._id + '/main-bill/new' : '/houses/new' %>" class="quick-action-btn" style="--btn-color: var(--accent-green);">
+                    <div class="qa-icon-wrap"><i data-lucide="zap"></i></div>
+                    <div class="qa-label">Submit Readings</div>
+                </a>
+                
+                <a href="/houses/new" class="quick-action-btn" style="--btn-color: var(--accent-yellow);">
+                    <div class="qa-icon-wrap"><i data-lucide="home"></i></div>
+                    <div class="qa-label">Add Property</div>
+                </a>
+                
+                <a href="<%= (typeof navHouses !== 'undefined' && navHouses.length > 0) ? '/houses/' + navHouses[0]._id + '/history' : '/houses' %>" class="quick-action-btn" style="--btn-color: var(--accent-blue);">
+                    <div class="qa-icon-wrap"><i data-lucide="history"></i></div>
+                    <div class="qa-label">View History</div>
+                </a>
+                
+                <a href="<%= (typeof navHouses !== 'undefined' && navHouses.length > 0) ? '/houses/' + navHouses[0]._id + '/rooms' : '/houses' %>" class="quick-action-btn" style="--btn-color: var(--accent-purple);">
+                    <div class="qa-icon-wrap"><i data-lucide="bed-double"></i></div>
+                    <div class="qa-label">Manage Rooms</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
+<div style="margin-top: 2.5rem;">
+    <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Your Properties</h3>
+    <div class="houses-strip">
+        <% navHouses.forEach(house => { %>
+            <div class="house-mini-card">
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;"><%= house.house_name %></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span class="badge badge-dim"><i data-lucide="bed" style="width: 12px; margin-right: 4px;"></i> Rooms</span>
+                    <span class="badge badge-blue">Active</span>
+                </div>
+                <a href="/houses/<%= house._id %>" class="btn btn-outline" style="width: 100%; padding: 0.5rem; font-size: 0.8rem;">Enter Dashboard</a>
+            </div>
+        <% }) %>
     </div>
 </div>
 <% } %>
-<!-- Quick Actions & Insights Section -->
-<div class="grid-layout" style="margin-top: 2rem;">
-    <div class="analytic-card" style="border-top: 4px solid var(--accent-orange);">
-        <h3><i data-lucide="zap" style="color: var(--accent-orange);"></i> Quick Shortcuts</h3>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Fast track to common tasks.</p>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <a href="/houses/new" class="btn btn-outline" style="justify-content: flex-start; padding: 1rem; border-color: var(--border-soft);">
-                <i data-lucide="plus-circle" style="color: var(--accent-yellow); margin-right: 0.5rem;"></i> Create Property
-            </a>
-            
-            <% if (typeof navHouses !== 'undefined' && navHouses.length === 1) { %>
-                <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="btn btn-outline" style="justify-content: flex-start; padding: 1rem; border-color: var(--border-soft);">
-                    <i data-lucide="file-input" style="color: #10B981; margin-right: 0.5rem;"></i> Enter Main Bill
-                </a>
-                <a href="/houses/<%= navHouses[0]._id %>/rooms" class="btn btn-outline" style="justify-content: flex-start; padding: 1rem; border-color: var(--border-soft);">
-                    <i data-lucide="bed-double" style="color: var(--accent-pink); margin-right: 0.5rem;"></i> Manage Rooms
-                </a>
-            <% } else if (typeof navHouses !== 'undefined' && navHouses.length > 1) { %>
-                <div class="dropdown-container" style="position: relative;">
-                    <button id="quickEnterBillBtn" class="btn btn-outline" style="width: 100%; justify-content: flex-start; padding: 1rem; border-color: var(--border-soft); cursor: pointer; background: white;">
-                        <i data-lucide="file-input" style="color: #10B981; margin-right: 0.5rem;"></i> Enter Main Bill <i data-lucide="chevron-down" style="width: 14px; margin-left: auto;"></i>
-                    </button>
-                    <div id="quickEnterBillDropdown" class="nav-dropdown-menu hidden" style="top: 100%; left: 0; min-width: 200px; transform-origin: top;">
-                        <div class="dropdown-header">Select Property</div>
-                        <% navHouses.forEach(house => { %>
-                            <a href="/houses/<%= house._id %>/main-bill/new" class="dropdown-item">
-                                <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i> <%= house.house_name %>
-                            </a>
-                        <% }) %>
-                    </div>
-                </div>
 
-                <div class="dropdown-container" style="position: relative;">
-                    <button id="quickManageRoomsBtn" class="btn btn-outline" style="width: 100%; justify-content: flex-start; padding: 1rem; border-color: var(--border-soft); cursor: pointer; background: white;">
-                        <i data-lucide="bed-double" style="color: var(--accent-pink); margin-right: 0.5rem;"></i> Manage Rooms <i data-lucide="chevron-down" style="width: 14px; margin-left: auto;"></i>
-                    </button>
-                    <div id="quickManageRoomsDropdown" class="nav-dropdown-menu hidden" style="top: 100%; left: 0; min-width: 200px; transform-origin: top;">
-                        <div class="dropdown-header">Select Property</div>
-                        <% navHouses.forEach(house => { %>
-                            <a href="/houses/<%= house._id %>/rooms" class="dropdown-item">
-                                <i data-lucide="home" style="width: 14px; color: var(--accent-yellow);"></i> <%= house.house_name %>
-                            </a>
-                        <% }) %>
-                    </div>
-                </div>
-            <% } %>
-        </div>
-    </div>
+<style>
+    /* Next Action Banner */
+    .next-action-banner {
+        background: var(--surface-raised);
+        border-radius: var(--radius-card);
+        border-left: 4px solid var(--accent-orange);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    
+    .pulsing-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+        flex-shrink: 0;
+    }
 
-    <!-- Recent Bills Widget -->
-    <div class="analytic-card" style="border-top: 4px solid #10B981;">
-        <h3><i data-lucide="history" style="color: #10B981;"></i> Recent Bills</h3>
-        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Your latest finalized main bills.</p>
-        
-        <% if (typeof recentBills !== 'undefined' && recentBills.length > 0) { %>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <% recentBills.forEach(bill => { %>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-soft);">
-                        <div>
-                            <div style="font-weight: 600;"><%= bill.house_id ? bill.house_id.house_name : 'Unknown Property' %></div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);"><%= new Date(bill.bill_date).toLocaleDateString() %></div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div style="font-weight: 700; color: var(--text-main);">₹<%= bill.total_amount %></div>
-                            <a href="/cycles/<%= bill.billing_cycle_id ? bill.billing_cycle_id._id : '' %>/room-bills" class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">View</a>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-        <% } else { %>
-            <div style="text-align: center; padding: 2rem 0;">
-                <i data-lucide="inbox" style="color: var(--text-muted); opacity: 0.5; width: 32px; height: 32px; margin-bottom: 1rem;"></i>
-                <p class="text-muted">No recent bills found.</p>
-            </div>
-        <% } %>
-    </div>
-</div>
+    /* Dashboard Layout */
+    .dashboard-split {
+        display: flex;
+        gap: 1.5rem;
+    }
+    
+    .dashboard-col-main {
+        flex: 6; /* 60% approx */
+    }
+    
+    .dashboard-col-side {
+        flex: 4; /* 40% approx */
+    }
+
+    /* Activity Feed */
+    .activity-feed {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .activity-item:not(:last-child)::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 20px;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+    }
+    
+    .activity-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-top: 5px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 0 0 4px var(--surface-raised);
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-text {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+    }
+    
+    .activity-amount {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1.05rem;
+    }
+
+    /* Quick Actions Grid */
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .quick-action-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--btn-color);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 100%);
+    }
+    
+    .qa-icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.03);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+        color: var(--btn-color);
+        transition: all 0.2s ease;
+    }
+    
+    .quick-action-btn:hover .qa-icon-wrap {
+        background: var(--btn-color);
+        color: #fff;
+    }
+    
+    .qa-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Houses Strip */
+    .houses-strip {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        scrollbar-width: none; /* Firefox */
+    }
+    .houses-strip::-webkit-scrollbar {
+        display: none; /* Chrome */
+    }
+    
+    .house-mini-card {
+        min-width: 240px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    @media (max-width: 900px) {
+        .dashboard-split { flex-direction: column; }
+        .next-action-banner { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
+</style>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const setupLocalDropdown = (btnId, menuId) => {
-            const btn = document.getElementById(btnId);
-            const menu = document.getElementById(menuId);
-            if (btn && menu) {
-                btn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    document.querySelectorAll('.nav-dropdown-menu').forEach(m => {
-                        if (m !== menu) {
-                            m.classList.add('hidden');
-                            m.style.top = ''; m.style.bottom = ''; m.style.marginTop = ''; m.style.marginBottom = '';
-                        }
-                    });
-                    
-                    if (menu.classList.contains("hidden")) {
-                        menu.classList.remove("hidden");
-                        const rect = btn.getBoundingClientRect();
-                        if ((window.innerHeight - rect.bottom) < 260) {
-                            menu.style.top = 'auto'; menu.style.bottom = '100%';
-                            menu.style.marginTop = '0'; menu.style.marginBottom = '0.75rem';
-                            menu.style.transformOrigin = 'bottom left';
-                        } else {
-                            menu.style.top = '100%'; menu.style.bottom = 'auto';
-                            menu.style.marginTop = '0.75rem'; menu.style.marginBottom = '0';
-                            menu.style.transformOrigin = 'top left';
-                        }
-                    } else {
-                        menu.classList.add("hidden");
-                    }
-                });
-            }
-        };
+        // Count Up Animation
+        const counters = document.querySelectorAll('.count-up');
+        const speed = 200;
 
-        setupLocalDropdown("dashEnterBillBtn", "dashEnterBillDropdown");
-        setupLocalDropdown("quickEnterBillBtn", "quickEnterBillDropdown");
-        setupLocalDropdown("quickManageRoomsBtn", "quickManageRoomsDropdown");
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText.replace(/,/g, '');
+                
+                const inc = target / speed;
+
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + inc).toLocaleString();
+                    setTimeout(updateCount, 10);
+                } else {
+                    counter.innerText = target.toLocaleString();
+                }
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    updateCount();
+                    observer.disconnect();
+                }
+            }, { threshold: 0.5 });
+            
+            observer.observe(counter);
+        });
     });
 </script>

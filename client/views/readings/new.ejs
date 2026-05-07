@@ -1,93 +1,229 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="analytic-card">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
-            <div>
-                <h2>Record Room Readings</h2>
-                <p class="text-muted">Enter the current meter readings for all rooms. This will create a new Billing Cycle.</p>
-            </div>
-            <i data-lucide="zap" style="color: var(--primary); width: 32px; height: 32px;"></i>
+<!-- Header -->
+<div style="margin-bottom: 2.5rem;">
+    <h1 style="margin: 0 0 0.5rem 0; font-size: 2.25rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem;">
+        <i data-lucide="zap" style="color: var(--accent-green);"></i> Record Meter Readings
+    </h1>
+    <p class="text-secondary" style="font-size: 1rem; margin: 0;">
+        Enter current meter values. This concludes the active cycle and generates the bills.
+    </p>
+</div>
+
+<!-- Main Bill Context Bar -->
+<div class="card-raised" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(26,29,39,1) 100%); border-left: 4px solid var(--accent-yellow); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.5rem;">
+    <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-yellow); font-weight: 700; margin-bottom: 0.25rem;">Supplier Bill Target</div>
+        <div style="font-size: 1.1rem; color: var(--text-primary); font-weight: 600;">Match these totals across your rooms.</div>
+    </div>
+    <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.25rem;">Total Units</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"><%= mainBill.total_units %> <span style="font-size: 0.85rem; color: var(--text-muted);">U</span></div>
         </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.25rem;">Total Amount</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-green);">₹<%= mainBill.total_amount %></div>
+        </div>
+        <div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.25rem;">Avg Rate</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">₹<%= (mainBill.total_amount / mainBill.total_units).toFixed(2) %><span style="font-size: 0.85rem; color: var(--text-muted);">/U</span></div>
+        </div>
+    </div>
+</div>
 
-        <form id="readingsForm" action="/houses/<%= houseId %>/cycles/<%= cycleId %>/readings" method="POST">
+<form id="readingsForm" action="/houses/<%= houseId %>/cycles/<%= cycleId %>/readings" method="POST" style="padding-bottom: 120px;">
+    <% rooms.forEach(room => { %>
+        <div class="card-raised reading-card" style="margin-bottom: 1.5rem; transition: border-color 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
+                    <i data-lucide="gauge" style="color: var(--text-muted); width: 18px;"></i> <%= room.meter_name %>
+                </h3>
+                <div style="width: 150px;">
+                    <label class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Reading Date</label>
+                    <input type="date" id="date_<%= room._id %>" value="<%= new Date().toISOString().split('T')[0] %>" name="readings[<%= room._id %>][date]" class="form-input custom-date-input" style="padding: 0.5rem; font-size: 0.85rem;" required>
+                </div>
+            </div>
 
-            <% rooms.forEach(room=> { %>
-                <div class="analytic-card reading-input"
-                    style="margin-bottom: 1.5rem; background: var(--bg-main); border: none;">
-                    <h4 style="margin-bottom: 0.25rem;">
-                        <%= room.meter_name %>
-                    </h4>
-                    <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.85rem;">
-                        Previous reading: <%= previousReadings[room._id.toString()] ?? 'N/A' %> units
-                    </p>
-                    <div class="grid-layout" style="grid-template-columns: repeat(3, 1fr);">
-                        <div class="form-group">
-                            <label class="form-label" for="reading_<%= room._id %>">Current Reading</label>
-                            <input type="number" step="0.1" id="reading_<%= room._id %>" name="readings[<%= room._id %>][units]"
-                                class="form-control" required placeholder="0.0" oninput="calculateDifference('<%= room._id %>', <%= previousReadings[room._id.toString()] || 0 %>)">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Units this cycle</label>
-                            <input type="text" id="diff_<%= room._id %>" class="form-control" readonly placeholder="0.0" style="background: #f9fafb; font-weight: 600;">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="date_<%= room._id %>">Reading Date</label>
-                            <input type="date" id="date_<%= room._id %>" value="<%= new Date().toISOString().split('T')[0] %>"
-                                name="readings[<%= room._id %>][date]" class="form-control" required>
-                        </div>
+            <div style="display: grid; grid-template-columns: 1fr auto 1fr 1fr; gap: 1.5rem; align-items: center;">
+                <!-- Previous Reading -->
+                <div>
+                    <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Previous</label>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--text-dim); font-weight: 600; font-size: 1.1rem; text-align: center;">
+                        <%= previousReadings[room._id.toString()] ?? '0' %> <span style="font-size: 0.8rem;">U</span>
                     </div>
                 </div>
-                <% }) %>
 
-                    <div id="negativeWarning" class="hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; color: #EF4444; border-radius: 8px; margin-bottom: 1rem; padding: 1rem; font-size: 0.9rem;">
-                        <strong style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Invalid Readings Detected</strong>
-                        <span style="display: block; margin-top: 0.25rem;">One or more current readings are lower than their previous readings. Please correct them before submitting.</span>
-                    </div>
+                <div style="color: var(--border); margin-top: 1.5rem;">
+                    <i data-lucide="arrow-right"></i>
+                </div>
 
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem; max-width: 400px;">
-                        <button type="submit" class="btn btn-primary" style="flex: 1;">Submit & Start Cycle</button>
-                        <a href="/houses/<%= houseId %>" class="btn btn-outline" style="flex: 1;">Cancel</a>
+                <!-- Current Reading -->
+                <div>
+                    <label class="form-label" for="reading_<%= room._id %>" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-primary);">Current</label>
+                    <div style="position: relative;">
+                        <input type="number" step="0.1" id="reading_<%= room._id %>" name="readings[<%= room._id %>][units]" class="form-input current-reading-input" required placeholder="0.0" style="padding-right: 2.5rem; font-size: 1.1rem; font-weight: 700; text-align: center;" data-prev="<%= previousReadings[room._id.toString()] || 0 %>">
+                        <span style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-weight: 700; pointer-events: none; font-size: 0.8rem;">U</span>
                     </div>
-        </form>
+                    <div class="inline-error" style="color: var(--accent-red); font-size: 0.75rem; margin-top: 0.25rem; display: none;">Invalid reading</div>
+                </div>
+
+                <!-- Difference -->
+                <div>
+                    <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Units this Cycle</label>
+                    <div class="diff-display" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 1rem; color: var(--text-primary); font-weight: 700; font-size: 1.1rem; text-align: center; transition: all 0.3s ease;">
+                        &mdash;
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+
+    <!-- Sticky Bottom Bar -->
+    <div class="sticky-bottom-bar">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; flex-wrap: wrap; gap: 1rem;">
+            
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem; font-weight: 700;">Units Distributed</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);" id="totalDistributed">0.0 <span style="font-size: 1rem; color: var(--text-muted);">U</span></div>
+                </div>
+                
+                <div id="matchIndicator" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 99px; font-weight: 600; font-size: 0.9rem; background: rgba(255,255,255,0.05); color: var(--text-dim);">
+                    <i data-lucide="minus" style="width: 18px;"></i>
+                    <span>Awaiting Input</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <a href="/houses/<%= houseId %>" class="btn btn-secondary" style="border: none;">Cancel</a>
+                <button type="submit" id="submitBtn" class="btn btn-primary" style="background: var(--accent-green); color: #000; font-weight: 800;" disabled>Submit Readings &rarr;</button>
+            </div>
+        </div>
     </div>
+</form>
 
 <script>
-    function calculateDifference(roomId, prevValue) {
-        const input = document.getElementById(`reading_${roomId}`);
-        const diffInput = document.getElementById(`diff_${roomId}`);
-        const currentVal = parseFloat(input.value);
-        
-        if (isNaN(currentVal)) {
-            diffInput.value = '';
-            diffInput.style.color = 'var(--text-main)';
-            return;
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputs = document.querySelectorAll('.current-reading-input');
+        const totalDistributedEl = document.getElementById('totalDistributed');
+        const matchIndicator = document.getElementById('matchIndicator');
+        const submitBtn = document.getElementById('submitBtn');
+        const targetUnits = parseFloat("<%= mainBill.total_units %>");
 
-        const diff = currentVal - prevValue;
-        diffInput.value = diff > 0 ? '+' + diff.toFixed(1) : diff.toFixed(1);
+        function updateCalculations() {
+            let totalDiff = 0;
+            let hasErrors = false;
+            let allFilled = true;
 
-        if (diff < 0) {
-            diffInput.style.color = '#EF4444';
-        } else {
-            diffInput.style.color = '#10B981';
-        }
-    }
+            inputs.forEach(input => {
+                const prev = parseFloat(input.getAttribute('data-prev'));
+                const curr = parseFloat(input.value);
+                
+                const currentContainer = input.closest('div'); 
+                const cellContainer = currentContainer.parentElement;
+                const rowContainer = cellContainer.parentElement;
+                
+                const diffDisplay = rowContainer.querySelector('.diff-display');
+                const errorMsg = cellContainer.querySelector('.inline-error');
+                const card = input.closest('.reading-card');
 
-    document.getElementById('readingsForm').addEventListener('submit', function(e) {
-        let hasNegative = false;
-        const diffInputs = document.querySelectorAll('input[id^="diff_"]');
-        diffInputs.forEach(input => {
-            const val = parseFloat(input.value);
-            if (!isNaN(val) && val < 0) {
-                hasNegative = true;
+                if (!isNaN(curr)) {
+                    const diff = curr - prev;
+                    if (diff < 0) {
+                        if (diffDisplay) {
+                            diffDisplay.innerText = diff.toFixed(1) + ' U';
+                            diffDisplay.style.color = 'var(--accent-red)';
+                            diffDisplay.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                            diffDisplay.style.background = 'rgba(239, 68, 68, 0.05)';
+                        }
+                        if (errorMsg) errorMsg.style.display = 'block';
+                        input.style.borderColor = 'var(--accent-red)';
+                        card.style.borderColor = 'var(--accent-red)';
+                        hasErrors = true;
+                    } else {
+                        if (diffDisplay) {
+                            diffDisplay.innerText = '+' + diff.toFixed(1) + ' U';
+                            diffDisplay.style.color = 'var(--accent-green)';
+                            diffDisplay.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                            diffDisplay.style.background = 'rgba(16, 185, 129, 0.05)';
+                        }
+                        if (errorMsg) errorMsg.style.display = 'none';
+                        input.style.borderColor = 'var(--border)';
+                        card.style.borderColor = 'var(--accent-green)';
+                        totalDiff += diff;
+                    }
+                } else {
+                    allFilled = false;
+                    if (diffDisplay) {
+                        diffDisplay.innerHTML = '&mdash;';
+                        diffDisplay.style.color = 'var(--text-primary)';
+                        diffDisplay.style.borderColor = 'var(--border)';
+                        diffDisplay.style.background = 'rgba(255,255,255,0.02)';
+                    }
+                    if (errorMsg) errorMsg.style.display = 'none';
+                    input.style.borderColor = 'var(--border)';
+                    card.style.borderColor = 'var(--border)';
+                }
+            });
+
+            totalDistributedEl.innerHTML = `${totalDiff.toFixed(1)} <span style="font-size: 1rem; color: var(--text-muted);">U</span>`;
+
+            if (!allFilled) {
+                matchIndicator.style.background = 'rgba(255,255,255,0.05)';
+                matchIndicator.style.color = 'var(--text-dim)';
+                matchIndicator.innerHTML = '<i data-lucide="minus" style="width: 18px;"></i><span>Awaiting Input</span>';
+            } else {
+                const diffFromTarget = totalDiff - targetUnits;
+                if (Math.abs(diffFromTarget) < 0.1) {
+                    matchIndicator.style.background = 'rgba(16, 185, 129, 0.15)';
+                    matchIndicator.style.color = 'var(--accent-green)';
+                    matchIndicator.innerHTML = '<i data-lucide="check-circle" style="width: 18px;"></i><span>Units Match Perfectly</span>';
+                } else {
+                    matchIndicator.style.background = 'rgba(245, 158, 11, 0.15)';
+                    matchIndicator.style.color = 'var(--accent-orange)';
+                    matchIndicator.innerHTML = `<i data-lucide="alert-triangle" style="width: 18px;"></i><span>Differ by ${Math.abs(diffFromTarget).toFixed(1)} U</span>`;
+                }
             }
-        });
 
-        if (hasNegative) {
-            e.preventDefault();
-            document.getElementById('negativeWarning').classList.remove('hidden');
-        } else {
-            document.getElementById('negativeWarning').classList.add('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            submitBtn.disabled = hasErrors || !allFilled;
         }
+
+        inputs.forEach(input => input.addEventListener('input', updateCalculations));
+        
+        document.getElementById('readingsForm').addEventListener('submit', (e) => {
+            if (submitBtn.disabled) e.preventDefault();
+        });
     });
 </script>
+
+<style>
+    .custom-date-input::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.6;
+        cursor: pointer;
+    }
+    .custom-date-input::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+    .sticky-bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 17, 23, 0.95);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border);
+        padding: 1.5rem 2rem;
+        z-index: 100;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    }
+    @media (min-width: 1400px) {
+        .sticky-bottom-bar {
+            padding-left: calc((100vw - 1400px) / 2 + 2rem);
+            padding-right: calc((100vw - 1400px) / 2 + 2rem);
+        }
+    }
+</style>

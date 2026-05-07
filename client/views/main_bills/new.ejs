@@ -1,88 +1,180 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="container" style="max-width: 600px;">
-        <div class="analytic-card border-top-yellow">
-            <h2 style="color: var(--accent-yellow-light);">Supplier Main Bill</h2>
+<!-- Header -->
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
+            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
+            <span>/</span> 
+            <a href="/houses/<%= houseId %>" style="color: var(--text-dim); text-decoration: none;">House</a>
+            <span>/</span>
+            <span style="color: var(--accent-yellow);">Main Bill</span>
+        </div>
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
+            <i data-lucide="file-input" style="color: var(--accent-yellow); width: 32px; height: 32px;"></i> Enter Supplier Bill
+        </h1>
+    </div>
+</div>
 
-            <% if (typeof error !== 'undefined' && error === 'main_bill_required') { %>
-                <div style="background-color: rgba(239, 68, 68, 0.1); color: #EF4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #EF4444; font-weight: 500;">
-                    <i data-lucide="alert-circle" style="display: inline-block; vertical-align: text-bottom; margin-right: 0.5rem; width: 18px;"></i>
-                    Please enter the main electricity bill before recording room readings.
-                </div>
-            <% } %>
-
-            <div style="background-color: rgba(112, 178, 220, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-blue); font-size: 0.9rem;">
-                <strong>Billing Period:</strong> <%= typeof cycleStartDate !== 'undefined' ? cycleStartDate : 'N/A' %> &rarr; Today &middot; <strong><%= typeof roomCount !== 'undefined' ? roomCount : 0 %></strong> rooms will be split automatically.
+<div class="split-layout" style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+    
+    <!-- Left Panel (Form) -->
+    <div style="flex: 1.5; min-width: 350px;">
+        <% if (typeof error !== 'undefined' && error === 'main_bill_required') { %>
+            <div style="background-color: rgba(239, 68, 68, 0.1); color: #EF4444; padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; border-left: 4px solid #EF4444; font-weight: 600; display: flex; align-items: center; gap: 0.75rem;">
+                <i data-lucide="alert-circle"></i>
+                <span>Please enter the main electricity bill before recording room readings.</span>
             </div>
+        <% } %>
 
+        <div class="card-raised" style="border-top: 4px solid var(--accent-yellow);">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-primary);">Supplier Bill Details</h2>
+            
             <form action="/houses/<%= houseId %>/main-bill" method="POST">
-                <div class="form-group">
-                    <label class="form-label" for="total_units">Total Units Generated/Used : </label>
-                    <input type="number" step="0.01" id="total_units" name="total_units" class="form-control" required
-                        placeholder="0.00">
-                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">Enter the total units shown on your electricity provider's physical bill.</p>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="total_amount">Total Bill Amount (₹) :</label>
-                    <input type="number" step="0.01" id="total_amount" name="total_amount" class="form-control" required
-                        placeholder="0.00">
-                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">Enter the exact rupee amount before any subsidies or adjustments.</p>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Cost per unit (Live Preview)</label>
-                    <input type="text" id="cost_per_unit" class="form-control" readonly placeholder="&mdash;" style="background: #f9fafb; font-weight: 600; color: var(--accent-blue);">
-                </div>
-                <label for="duration" style="color: var(--text-muted); font-weight: 700;">Billing Duration: </label>
-                <div class="form-group" id='duration'
-                    style="display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 0.5rem;">
-                    <div style="flex: 1;">
-                        <label class="form-label" for="start_date">Cycle Start</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control" value="<%= typeof cycleStartDate !== 'undefined' ? cycleStartDate : '' %>" readonly style="pointer-events: none; background-color: var(--bg-secondary, #f9f9f9); opacity: 0.8;" required>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label" for="total_units" style="font-weight: 600; color: var(--text-primary);">Total Units Generated/Used</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="number" step="0.01" id="total_units" name="total_units" class="form-input" style="padding-right: 4rem;" required placeholder="0.00">
+                        <span style="position: absolute; right: 1rem; color: var(--text-dim); font-weight: 700; pointer-events: none;">kWh</span>
                     </div>
-                    <div style="flex: 1;">
+                    <p class="text-secondary" style="font-size: 0.85rem; margin-top: 0.5rem;">Enter the total units shown on your electricity provider's physical bill.</p>
+                </div>
 
-                        <label class="form-label" for="bill_date">Current Bill Date</label>
-                        <input type="date" id="bill_date" name="bill_date" class="form-control" value="<%= new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0] %>" required>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label" for="total_amount" style="font-weight: 600; color: var(--text-primary);">Total Bill Amount</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <span style="position: absolute; left: 1rem; color: var(--text-secondary); font-weight: 700; pointer-events: none;">₹</span>
+                        <input type="number" step="0.01" id="total_amount" name="total_amount" class="form-input" style="padding-left: 2.5rem;" required placeholder="0.00">
+                    </div>
+                    <p class="text-secondary" style="font-size: 0.85rem; margin-top: 0.5rem;">Enter the exact rupee amount before any subsidies or adjustments.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <label class="form-label" style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">Billing Duration</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label class="form-label" for="start_date" style="font-size: 0.8rem; color: var(--text-secondary);">Cycle Start</label>
+                            <input type="date" id="start_date" name="start_date" class="form-input" value="<%= typeof cycleStartDate !== 'undefined' ? cycleStartDate : '' %>" readonly style="pointer-events: none; opacity: 0.6; background: var(--surface-raised);">
+                        </div>
+                        <div style="flex: 1;">
+                            <label class="form-label" for="bill_date" style="font-size: 0.8rem; color: var(--text-secondary);">Current Bill Date</label>
+                            <input type="date" id="bill_date" name="bill_date" class="form-input custom-date-input" value="<%= new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0] %>" required>
+                        </div>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Main Bill</button>
-                    <a href="/houses/<%= houseId %>" class="btn btn-outline" style="flex: 1; text-align: center;">Cancel</a>
+                    <a href="/houses/<%= houseId %>" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 1.5; background: var(--accent-yellow); color: #000; font-weight: 800;">Save Main Bill &rarr;</button>
                 </div>
             </form>
         </div>
     </div>
-    <style>
-        .container {
-            margin: 0 auto;
-            padding: 2rem;
-        }
 
-        form label {
-            color: var(--text-muted);
-        }
-    </style>
+    <!-- Right Panel (Context & Preview) -->
+    <div style="flex: 1; min-width: 300px; position: sticky; top: 80px;">
+        <div class="card-raised card-accent" style="--card-accent-color: var(--accent-blue);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="bar-chart-2" style="color: var(--accent-blue);"></i> Calculation Preview
+                </h3>
+                <span class="badge badge-dim" id="cycleDaysCounter">Calculating...</span>
+            </div>
 
-    <script>
+            <!-- Cost per unit live box -->
+            <div style="background: rgba(77, 159, 236, 0.1); border: 1px solid rgba(77, 159, 236, 0.2); border-radius: var(--radius-sm); padding: 1.5rem; margin-bottom: 2rem; text-align: center;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-blue); font-weight: 800; margin-bottom: 0.5rem; letter-spacing: 0.5px;">Estimated Cost Per Unit</div>
+                <div id="costPerUnitDisplay" style="font-size: 2.25rem; font-weight: 800; color: var(--text-primary);">₹0.00</div>
+            </div>
+
+            <!-- Room Split Preview -->
+            <h4 style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Estimated Split (<%= roomCount %> Rooms)</h4>
+            
+            <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="roomListPreview">
+                    <% rooms.forEach(room => { %>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); font-weight: 500;">
+                                <i data-lucide="bed-double" style="width: 14px; color: var(--text-muted);"></i> <%= room.meter_name %>
+                            </div>
+                            <div class="room-share-value" style="font-weight: 700; color: var(--text-secondary);">₹&mdash;</div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p class="text-secondary" style="font-size: 0.85rem;">No rooms configured.</p>
+            <% } %>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
         const totalUnitsInput = document.getElementById('total_units');
         const totalAmountInput = document.getElementById('total_amount');
-        const costPerUnitInput = document.getElementById('cost_per_unit');
+        const costPerUnitDisplay = document.getElementById('costPerUnitDisplay');
+        const roomShares = document.querySelectorAll('.room-share-value');
+        const startDateInput = document.getElementById('start_date');
+        const billDateInput = document.getElementById('bill_date');
+        const daysCounter = document.getElementById('cycleDaysCounter');
+        
+        const roomCount = <%= typeof roomCount !== 'undefined' ? roomCount : 0 %>;
 
-        function updateCostPerUnit() {
+        function updatePreview() {
             const units = parseFloat(totalUnitsInput.value);
             const amount = parseFloat(totalAmountInput.value);
 
             if (!isNaN(units) && !isNaN(amount) && units > 0) {
                 const cost = amount / units;
-                costPerUnitInput.value = `₹${cost.toFixed(2)} per unit`;
+                costPerUnitDisplay.innerText = `₹${cost.toFixed(2)}`;
+                costPerUnitDisplay.style.color = 'var(--accent-green)';
+                
+                // Equal split estimation just for visual feedback
+                const splitAmount = amount / (roomCount || 1);
+                roomShares.forEach(el => {
+                    el.innerText = `~₹${splitAmount.toFixed(0)}`;
+                    el.style.color = 'var(--text-primary)';
+                });
             } else {
-                costPerUnitInput.value = '—';
+                costPerUnitDisplay.innerText = '₹0.00';
+                costPerUnitDisplay.style.color = 'var(--text-primary)';
+                roomShares.forEach(el => {
+                    el.innerText = '₹—';
+                    el.style.color = 'var(--text-secondary)';
+                });
             }
         }
 
-        totalUnitsInput.addEventListener('input', updateCostPerUnit);
-        totalAmountInput.addEventListener('input', updateCostPerUnit);
-    </script>
+        function updateDays() {
+            if (startDateInput.value && billDateInput.value) {
+                const start = new Date(startDateInput.value);
+                const end = new Date(billDateInput.value);
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                daysCounter.innerText = `${diffDays} Days Covered`;
+            } else {
+                daysCounter.innerText = 'Unknown duration';
+            }
+        }
+
+        totalUnitsInput.addEventListener('input', updatePreview);
+        totalAmountInput.addEventListener('input', updatePreview);
+        billDateInput.addEventListener('change', updateDays);
+
+        updatePreview();
+        updateDays();
+    });
+</script>
+
+<style>
+    /* Styling native date input to fit dark theme */
+    .custom-date-input::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.6;
+        cursor: pointer;
+    }
+    .custom-date-input::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+</style>

@@ -1,172 +1,221 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="top-header" style="margin-bottom: 2rem;">
-        <div>
-            <h1 style="margin-bottom: 0.5rem;">Bill Distribution</h1>
-            <p class="text-muted">
-                <%= cycle.house.house_name %> |
-                    Period: <%= new Date(cycle.startDate).toLocaleDateString() %> - <%= cycle.endDate ? new
-                            Date(cycle.endDate).toLocaleDateString() : 'Active' %>
-            </p>
+<!-- Header -->
+<div class="page-header sticky-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
+            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
+            <span>/</span> 
+            <a href="/houses/<%= houseId %>" style="color: var(--text-dim); text-decoration: none;"><%= cycle.house.house_name %></a>
+            <span>/</span>
+            <a href="/houses/<%= houseId %>/cycles" style="color: var(--text-dim); text-decoration: none;">Cycles</a>
+            <span>/</span>
+            <span style="color: var(--accent-blue);">Distribution</span>
         </div>
-        <div class="top-filters">
-            <a href="<%= (typeof houseId !== 'undefined' && houseId) ? '/houses/' + houseId : '/houses' %>" class="btn btn-outline"
-                style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="arrow-left" style="width: 16px;"></i> Back to House
-            </a>
-
-        </div>
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
+            <i data-lucide="pie-chart" style="color: var(--accent-blue); width: 32px; height: 32px;"></i> Room Distribution
+        </h1>
+        <p class="text-secondary" style="margin-top: 0.5rem; margin-bottom: 0; font-size: 1rem;">
+            Billing period: <%= cycle.startDate.toLocaleDateString('en-IN', {month: 'long', day: 'numeric', year: 'numeric'}) %> 
+            &rarr; 
+            <%= cycle.endDate ? cycle.endDate.toLocaleDateString('en-IN', {month: 'long', day: 'numeric', year: 'numeric'}) : 'Present' %>
+        </p>
     </div>
+    <button class="btn btn-secondary" onclick="window.print()" style="display: flex; align-items: center; gap: 0.5rem; border-color: var(--accent-blue); color: var(--accent-blue);">
+        <i data-lucide="printer" style="width: 18px;"></i> Print Ledger
+    </button>
+</div>
 
-    <!-- Main Bill Summary Card -->
-    <% if (mainBill) { %>
-        <div class="analytic-card" style="margin-bottom: 2rem; padding: 1.25rem;">
-            <div
-                style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-
-                <!-- Total Bill -->
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="background: rgba(79, 70, 229, 0.1); padding: 0.6rem; border-radius: 10px;">
-                        <i data-lucide="receipt" style="color: var(--primary); width: 20px; height: 20px;"></i>
-                    </div>
-                    <div>
-                        <div
-                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 0.1rem;">
-                            Utility Bill</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">₹<%=
-                                mainBill.total_amount.toLocaleString() %>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
-
-                <!-- Total Units -->
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="background: rgba(245, 158, 11, 0.1); padding: 0.6rem; border-radius: 10px;">
-                        <i data-lucide="zap" style="color: #f59e0b; width: 20px; height: 20px;"></i>
-                    </div>
-                    <div>
-                        <div
-                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 0.1rem;">
-                            Total Units</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">
-                            <%= mainBill.total_units %> <span
-                                    style="font-size: 0.8rem; font-weight: 500; opacity: 0.7;">Units</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="width: 1px; height: 30px; background: var(--border-soft);"></div>
-
-                <!-- Rate -->
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="background: rgba(16, 185, 129, 0.1); padding: 0.6rem; border-radius: 10px;">
-                        <i data-lucide="trending-up" style="color: #10b981; width: 20px; height: 20px;"></i>
-                    </div>
-                    <div>
-                        <div
-                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 0.1rem;">
-                            Unit Rate</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">₹<%=
-                                (mainBill.total_amount / mainBill.total_units).toFixed(2) %>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-primary" onclick="window.print()"
-                    style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="printer" style="width: 16px;"></i> Print Summary
-                </button>
-            </div>
-
-            <!-- Verification Row -->
-            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-soft); display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; gap: 1.5rem; flex-wrap: wrap;">
-                    <span><strong>Room Bills Total:</strong> ₹<%= roomBillsTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
-                    <span><strong>Difference:</strong> ₹<%= billDifference %></span>
+<!-- Summary Header Card -->
+<% if (hasBill) { %>
+    <div class="card-raised print-no-break" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-blue);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <i data-lucide="indian-rupee" style="color: var(--accent-blue); width: 32px; height: 32px;"></i>
                 </div>
                 <div>
-                    <% if (billDifference === "0.00") { %>
-                        <span style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; font-weight: 600; font-size: 0.9rem;">
-                            <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i> Verified Match
-                        </span>
-                    <% } else { %>
-                        <span style="display: flex; align-items: center; gap: 0.5rem; color: #EF4444; font-weight: 600; font-size: 0.9rem;">
-                            <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Mismatch
-                        </span>
-                    <% } %>
+                    <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Supplier Bill</div>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary); line-height: 1;">₹<%= mainBill.total_amount.toLocaleString() %></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <div style="background: rgba(255,255,255,0.02); padding: 1rem 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Units</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= mainBill.total_units %> <span style="font-size: 1rem; color: var(--text-dim);">U</span></div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 1rem 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Rate Per Unit</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= (mainBill.total_amount / mainBill.total_units).toFixed(2) %></div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 1rem 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Bill Date</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-top: 0.25rem;"><%= mainBill.bill_date ? new Date(mainBill.bill_date).toLocaleDateString('en-IN', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A' %></div>
                 </div>
             </div>
         </div>
-        <% } %>
-
-
-            <!-- Room Individual Bills Grid -->
-            <div class="grid-layout" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem;">
-                <% roomBills.forEach(bill=> { %>
-                    <div class="analytic-card"
-                        style="display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-                                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                                    <div
-                                        style="width: 12px; height: 12px; border-radius: 50%; background: var(--primary);">
-                                    </div>
-                                    <%= bill.room_id.meter_name %>
-                                </h3>
-                                <span
-                                    style="font-size: 0.75rem; background: rgba(174, 226, 194, 0.3); color: #047857; padding: 0.2rem 0.6rem; border-radius: 99px; font-weight: 600;">Final
-                                    Bill</span>
-                            </div>
-
-                            <div style="text-align: center; margin-bottom: 2rem; padding: 1rem 0;">
-                                <div
-                                    style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); line-height: 1;">
-                                    ₹<%= Math.floor(bill.amount).toLocaleString() %><span
-                                            style="font-size: 1.2rem; color: var(--text-muted);">.<%= (bill.amount %
-                                                1).toFixed(2).split('.')[1] %></span>
-                                </div>
-                                <div
-                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    Individual Room Share</div>
-                            </div>
-
-                            <div
-                                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 1px dashed var(--border-soft);">
-                                <span style="font-size: 0.9rem; color: var(--text-muted);">Previous Reading</span>
-                                <span style="font-weight: 600; font-size: 1rem;">
-                                    <%= bill.previous_reading %>
-                                </span>
-                            </div>
-                            <div
-                                style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 1px dashed var(--border-soft);">
-                                <span style="font-size: 0.9rem; color: var(--text-muted);">Current Reading</span>
-                                <span style="font-weight: 600; font-size: 1rem;">
-                                    <%= bill.current_reading %>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); margin: 1rem -1.5rem -1.5rem -1.5rem; padding: 1.2rem 1.5rem; border-radius: 0 0 var(--radius-md) var(--radius-md); border-top: 1px solid var(--border-soft);">
-                            <div style="display: flex; flex-direction: column;">
-                                <strong style="font-size: 1.1rem; color: var(--primary);">
-                                    <%= bill.units_consumed %> Units
-                                </strong>
-                                <span style="font-size: 0.75rem; color: var(--text-muted);">Adjusted Consumption</span>
-                            </div>
-                            <i data-lucide="chevron-right" style="color: var(--text-muted); width: 20px;"></i>
-                        </div>
-                    </div>
-                    <% }) %>
+        
+        <!-- Verification Row -->
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                Generated Room Bills Total: <strong style="color: var(--text-primary);">₹<%= roomBillsTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></strong>
+                <span style="margin: 0 0.5rem; color: var(--text-dim);">|</span>
+                Difference: <strong>₹<%= billDifference %></strong>
             </div>
+            <div>
+                <% if (parseFloat(billDifference) < 1.00) { %>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 1rem;">
+                        <i data-lucide="check-circle" style="width: 16px; margin-right: 0.25rem;"></i> Distribution Verified
+                    </span>
+                <% } else { %>
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.5rem 1rem;">
+                        <i data-lucide="alert-triangle" style="width: 16px; margin-right: 0.25rem;"></i> Mismatch Detected
+                    </span>
+                <% } %>
+            </div>
+        </div>
+    </div>
+<% } else { %>
+    <div class="card-raised" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-orange);">
+        <h3 style="color: var(--accent-orange); margin-top: 0;"><i data-lucide="alert-triangle"></i> No Main Bill</h3>
+        <p class="text-secondary">This cycle does not have a supplier bill recorded, so individual room costs cannot be calculated accurately.</p>
+    </div>
+<% } %>
+
+<% if (roomBills.length > 0) { 
+    // Colors for visualization
+    const colors = ['#4D9FEC', '#8B5CF6', '#2DD4BF', '#FBBF24', '#F43F5E', '#0EA5E9', '#A855F7', '#10B981'];
+    const totalAmount = roomBills.reduce((s, b) => s + b.amount, 0);
+    const totalUnits = roomBills.reduce((s, b) => s + b.units_consumed, 0);
+%>
+
+<!-- Distribution Visualization -->
+<div class="card-raised print-no-break" style="margin-bottom: 2rem;">
+    <h3 style="margin: 0 0 1.5rem 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
+        <i data-lucide="align-left" style="color: var(--text-muted);"></i> Usage Distribution
+    </h3>
+    
+    <!-- Large Horizontal Stacked Bar -->
+    <div style="display: flex; height: 24px; border-radius: 12px; overflow: hidden; background: var(--border-soft); margin-bottom: 1.5rem;">
+        <% roomBills.forEach((rb, idx) => { 
+            const pct = Math.max((rb.amount / totalAmount) * 100, 0);
+            const color = colors[idx % colors.length];
+        %>
+            <div style="width: <%= pct %>%; background: <%= color %>; transition: filter 0.2s;" class="dist-bar chart-bar" data-room="<%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %>" title="<%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %>: <%= pct.toFixed(1) %>%"></div>
+        <% }) %>
+    </div>
+    
+    <!-- Legend -->
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <% roomBills.forEach((rb, idx) => { 
+            const color = colors[idx % colors.length];
+            const pct = totalAmount > 0 ? ((rb.amount / totalAmount) * 100).toFixed(1) : 0;
+        %>
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-soft); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);">
+                <div style="width: 12px; height: 12px; border-radius: 3px; background: <%= color %>;"></div>
+                <div style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;"><%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %></div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-left: 0.25rem;"><%= pct %>%</div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<!-- Bills Table -->
+<div class="card-raised" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="list" style="color: var(--text-muted);"></i> Room Invoices
+        </h3>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Room Name</th>
+                    <th>Prev Reading</th>
+                    <th>Curr Reading</th>
+                    <th>Units</th>
+                    <th style="width: 20%;">Proportion</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% roomBills.forEach((bill, idx) => { 
+                    const color = colors[idx % colors.length];
+                    const pct = totalAmount > 0 ? (bill.amount / totalAmount) * 100 : 0;
+                %>
+                    <tr>
+                        <td style="font-weight: 700; color: var(--text-primary);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: <%= color %>;"></div>
+                                <%= bill.room_id ? bill.room_id.meter_name : 'Deleted Room' %>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-secondary);"><%= bill.previous_reading %></td>
+                        <td style="color: var(--text-primary); font-weight: 500;"><%= bill.current_reading %></td>
+                        <td style="font-weight: 600;"><%= bill.units_consumed %> <span style="font-size: 0.8rem; color: var(--text-dim);">U</span></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="flex: 1; height: 6px; background: var(--border-soft); border-radius: 3px; overflow: hidden;">
+                                    <div style="height: 100%; width: <%= pct %>%; background: <%= color %>;"></div>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--text-dim); width: 35px; text-align: right;"><%= pct.toFixed(1) %>%</span>
+                            </div>
+                        </td>
+                        <td style="text-align: right; font-weight: 800; color: var(--accent-green); font-size: 1.1rem;">₹<%= bill.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+            <tfoot style="border-top: 2px solid var(--border); background: rgba(255,255,255,0.02);">
+                <tr>
+                    <td colspan="3" style="font-weight: 700; padding: 1.5rem; text-transform: uppercase; color: var(--text-secondary);">Total Distributed</td>
+                    <td style="font-weight: 800; color: var(--text-primary); font-size: 1.1rem;"><%= totalUnits %> <span style="font-size: 0.8rem; color: var(--text-dim);">U</span></td>
+                    <td></td>
+                    <td style="text-align: right; font-weight: 800; color: var(--text-primary); font-size: 1.25rem;">₹<%= totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<% } else { %>
+    <div class="card-raised" style="padding: 5rem 2rem; text-align: center;">
+        <i data-lucide="file-x" style="width: 64px; height: 64px; color: var(--border); margin-bottom: 1.5rem;"></i>
+        <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">No Room Bills Yet</h2>
+        <p class="text-secondary" style="max-width: 400px; margin: 0 auto;">Room bills will be generated automatically once the final readings for this cycle are submitted.</p>
+    </div>
+<% } %>
 
 <style>
+    .dist-bar:hover {
+        filter: brightness(1.2);
+    }
+    
     @media print {
-        nav.top-navbar { display: none !important; }
-        .page-header .btn, .top-filters, .btn { display: none !important; }
-        .analytic-card { box-shadow: none !important; border: 1px solid #ddd !important; page-break-inside: avoid; }
-        button { display: none !important; }
-        body { background: white; }
+        body {
+            background: #fff;
+            color: #000;
+        }
+        .navbar, .sidebar, .btn, .print-no-break {
+            /* We'll handle this in a dedicated print stylesheet, 
+               but basic cleanup here */
+            break-inside: avoid;
+        }
+        .card-raised {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            background: #fff !important;
+        }
+        .data-table th, .data-table td {
+            color: #000 !important;
+            border-color: #ddd !important;
+        }
+        .dist-bar {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
     }
 </style>

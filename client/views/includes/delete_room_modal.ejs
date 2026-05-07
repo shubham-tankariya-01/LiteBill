@@ -1,20 +1,24 @@
 <!-- Delete Room Confirmation Modal -->
 <div id="deleteRoomModal" class="modal hidden" style="z-index: 10000;">
-    <div class="modal-content analytic-card" style="border-top-color: #EF4444; max-width: 400px; text-align: center; padding: 2.5rem 2rem;">
-        <div style="width: 60px; height: 60px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
-            <i data-lucide="alert-triangle" style="color: #EF4444; width: 32px; height: 32px;"></i>
+    <div class="modal-content-new" style="max-width: 400px; text-align: center; padding: 2.5rem 2rem;">
+        <button type="button" class="modal-close-btn" onclick="closeDeleteRoomModal()">
+            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+
+        <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; border: 1px solid rgba(239, 68, 68, 0.2);">
+            <i data-lucide="alert-triangle" style="color: var(--accent-red); width: 32px; height: 32px;"></i>
         </div>
         
-        <h2 style="margin-bottom: 0.5rem; color: var(--text-main);">Delete Room?</h2>
-        <p class="text-muted" style="margin-bottom: 2rem; font-size: 0.9rem; line-height: 1.5;">
-            Are you sure you want to delete <strong id="deleteRoomName" style="color: var(--text-main);">this room</strong>? 
-            This action cannot be undone and will permanently erase all associated bills and reading data.
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">Are you sure?</h2>
+        <p class="text-secondary" style="margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5;">
+            You are about to delete <strong id="deleteRoomName" style="color: var(--text-primary);">this room</strong>. 
+            This action cannot be undone and will erase all readings and billing distributions for this room.
         </p>
 
         <form id="deleteRoomForm" method="POST" action="">
             <div style="display: flex; gap: 1rem;">
-                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeDeleteRoomModal()">Cancel</button>
-                <button type="submit" class="btn" style="flex: 1; background: #EF4444; color: white; border-color: #EF4444;">Delete</button>
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeDeleteRoomModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1.5; background: var(--accent-red); color: white; border: none;">Delete Permanently</button>
             </div>
         </form>
     </div>
@@ -25,9 +29,11 @@
         document.getElementById('deleteRoomName').innerText = roomName;
         document.getElementById('deleteRoomForm').action = `/rooms/${roomId}?_method=DELETE`;
         document.getElementById('deleteRoomModal').classList.remove('hidden');
+        document.body.classList.add('modal-open');
     }
 
     function closeDeleteRoomModal() {
         document.getElementById('deleteRoomModal').classList.add('hidden');
+        document.body.classList.remove('modal-open');
     }
 </script>

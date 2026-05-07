@@ -1,91 +1,164 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<!-- Header -->
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1 style="display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="refresh-cw" style="color: var(--accent-blue);"></i> Billing Cycles</h1>
-        <p class="text-muted" style="margin-top: 0.5rem;"><%= house.house_name %> | History of all billing periods</p>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
+            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
+            <span>/</span> 
+            <a href="/houses/<%= houseId %>" style="color: var(--text-dim); text-decoration: none;"><%= house.house_name %></a>
+            <span>/</span>
+            <span style="color: var(--accent-blue);">Billing Cycles</span>
+        </div>
+        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
+            <i data-lucide="refresh-cw" style="color: var(--accent-blue); width: 32px; height: 32px;"></i> Billing Timeline
+        </h1>
     </div>
-    <a href="/houses/<%= houseId %>" class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;">
-        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Back to Dashboard
-    </a>
 </div>
 
-<div class="grid-layout">
-    <% cycles.forEach(cycle => { %>
-        <% const isActive = !cycle.endDate; %>
-        <% const res = cycleResults[cycle._id]; %>
-        <% const hasMainBill = res && res.mainBill; %>
-        
-        <% if (isActive) { %>
-            <% const runDays = Math.floor((Date.now() - new Date(cycle.startDate)) / 86400000); %>
-            <div class="analytic-card" style="border-left: 4px solid #10B981; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981; padding: 0.4rem 0.8rem; font-size: 0.75rem;">
-                            <i data-lucide="zap" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px; margin-right: 4px;"></i>Active
-                        </span>
-                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
-                            <i data-lucide="clock" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> Running for <%= runDays %> days
-                        </span>
-                    </div>
-                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
-                        Started <%= cycle.startDate.toLocaleDateString() %>
-                    </h3>
-                    <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;">Rooms processed so far: <%= res ? res.roomBillsCount : 0 %></p>
-                </div>
-                <div style="margin-top: 1.5rem;">
-                    <% if (!hasMainBill) { %>
-                        <a href="/houses/<%= houseId %>/main-bill/new" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
-                            Submit Main Bill <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                        </a>
-                    <% } else { %>
-                        <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; background: #10B981; border-color: #10B981;">
-                            Record Readings <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                        </a>
+<div class="timeline-container" style="position: relative; max-width: 800px; margin: 0 auto; padding-left: 2rem;">
+    <!-- Timeline vertical line -->
+    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); border-radius: 2px;"></div>
+
+    <% if (cycles.length === 0) { %>
+        <div class="card-raised" style="text-align: center; padding: 4rem 2rem;">
+            <i data-lucide="refresh-cw" style="color: var(--text-dim); width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No Cycles Yet</h3>
+            <p class="text-secondary">Complete the initial meter setup to start your first billing cycle.</p>
+        </div>
+    <% } else { %>
+        <% cycles.forEach((cycle, index) => { 
+            const data = cycleResults[cycle._id];
+            const isActive = !cycle.endDate;
+            
+            // Calculate duration
+            const start = new Date(cycle.startDate);
+            const end = cycle.endDate ? new Date(cycle.endDate) : new Date();
+            const daysRunning = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+            
+            // Format dates
+            const startDateStr = start.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+            const endDateStr = cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present';
+        %>
+            <div class="timeline-item" style="position: relative; margin-bottom: 3rem;">
+                <!-- Timeline Dot -->
+                <div style="position: absolute; left: -2rem; top: 1.5rem; transform: translate(-50%, -50%); width: 16px; height: 16px; border-radius: 50%; background: <%= isActive ? 'var(--accent-green)' : 'var(--accent-blue)' %>; border: 4px solid var(--bg-body); z-index: 2; box-shadow: 0 0 0 2px <%= isActive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(77, 159, 236, 0.3)' %>;">
+                    <% if (isActive) { %>
+                        <div class="pulse-ring" style="position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px; border-radius: 50%; border: 2px solid var(--accent-green); animation: pulse 2s infinite;"></div>
                     <% } %>
                 </div>
-            </div>
-        <% } else { %>
-            <% const cycleDays = Math.floor((new Date(cycle.endDate) - new Date(cycle.startDate)) / 86400000); %>
-            <div class="analytic-card" style="border-left: 4px solid var(--accent-blue); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span class="badge" style="background: rgba(112, 178, 220, 0.1); color: var(--accent-blue); padding: 0.4rem 0.8rem; font-size: 0.75rem;">
-                            <i data-lucide="calendar-check" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px; margin-right: 4px;"></i>Completed
-                        </span>
-                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
-                            <i data-lucide="clock" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-top: -2px;"></i> <%= cycleDays %>-day cycle
-                        </span>
-                    </div>
-                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
-                        <%= cycle.startDate.toLocaleDateString() %> &rarr; <%= cycle.endDate.toLocaleDateString() %>
-                    </h3>
-                    
-                    <% if (hasMainBill) { %>
-                        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+
+                <% if (isActive) { %>
+                    <!-- Active Cycle Card -->
+                    <div class="card-raised" style="border-left: 4px solid var(--accent-green); transition: transform 0.2s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
                             <div>
-                                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">Total Billed</div>
-                                <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); line-height: 1;">₹<%= res.mainBill.total_amount.toLocaleString() %></div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+                                    <h3 style="margin: 0; font-size: 1.25rem; color: var(--text-primary);">Current Cycle</h3>
+                                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 800;">LIVE</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;"><%= startDateStr %> &rarr; Now</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 1rem; font-weight: 700; color: var(--text-main);"><%= res.mainBill.total_units %> Units</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">₹<%= (res.mainBill.total_amount / res.mainBill.total_units).toFixed(2) %>/unit</div>
+                                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= daysRunning %></div>
+                                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Days Running</div>
                             </div>
                         </div>
-                    <% } %>
-                    
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-soft);">
-                        <span class="badge" style="background: rgba(107, 114, 128, 0.1); color: var(--text-muted); font-size: 0.75rem;">
-                            <%= res ? res.roomBillsCount : 0 %> rooms billed
-                        </span>
+
+                        <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 1.5rem; text-align: center;">
+                            <% if (!data.mainBill) { %>
+                                <i data-lucide="file-input" style="color: var(--accent-yellow); margin-bottom: 0.5rem; width: 24px; height: 24px;"></i>
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">Awaiting Supplier Bill</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">Enter the main electricity bill to calculate the current rate per unit.</p>
+                                <a href="/houses/<%= houseId %>/main-bill/new" class="btn btn-primary" style="background: var(--accent-yellow); color: #000; font-weight: 700; border: none;">Enter Main Bill &rarr;</a>
+                            <% } else { %>
+                                <i data-lucide="gauge" style="color: var(--accent-green); margin-bottom: 0.5rem; width: 24px; height: 24px;"></i>
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">Awaiting Room Readings</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">Supplier bill recorded (₹<%= data.mainBill.total_amount %>). Record individual meter readings to close this cycle.</p>
+                                <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-primary" style="background: var(--accent-green); color: #000; font-weight: 700; border: none;">Record Readings &rarr;</a>
+                            <% } %>
+                        </div>
                     </div>
-                </div>
-                <div style="margin-top: 1.5rem;">
-                    <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-outline" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; border-color: var(--accent-blue); color: var(--accent-blue);">
-                        View Bill Distribution <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                    </a>
-                </div>
+
+                <% } else { %>
+                    <!-- Completed Cycle Card -->
+                    <div class="card-raised cycle-card" style="border-left: 4px solid var(--accent-blue); padding: 0;">
+                        <div style="padding: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                                <div>
+                                    <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-primary);"><%= startDateStr %> &mdash; <%= endDateStr %></h3>
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;"><%= daysRunning %> Days Duration</div>
+                                </div>
+                                <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; border-color: var(--accent-blue); color: var(--accent-blue);">View Distribution &rarr;</a>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                                <% if (data.mainBill) { %>
+                                    <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                                        <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: 700;">Total Billed</div>
+                                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-green);">₹<%= data.mainBill.total_amount.toLocaleString() %></div>
+                                    </div>
+                                    <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                                        <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: 700;">Rate Per Unit</div>
+                                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">₹<%= (data.mainBill.total_amount / data.mainBill.total_units).toFixed(2) %></div>
+                                    </div>
+                                <% } %>
+                                <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
+                                    <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: 700;">Meters Billed</div>
+                                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"><%= data.roomBillsCount %></div>
+                                </div>
+                            </div>
+
+                            <% if (data.mainBill && data.roomBills && data.roomBills.length > 0) { 
+                                const totalCost = data.mainBill.total_amount;
+                                // Simple distinct colors for visualization
+                                const colors = ['#4D9FEC', '#8B5CF6', '#2DD4BF', '#FBBF24', '#F43F5E', '#0EA5E9'];
+                            %>
+                                <div style="margin-top: 1rem;">
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">Cost Distribution</div>
+                                    <!-- Horizontal Stacked Bar -->
+                                    <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--border-soft); margin-bottom: 0.5rem;">
+                                        <% data.roomBills.forEach((rb, idx) => { 
+                                            const pct = Math.max((rb.amount / totalCost) * 100, 0);
+                                            const color = colors[idx % colors.length];
+                                        %>
+                                            <div style="width: <%= pct %>%; background: <%= color %>;" title="<%= rb.room_id ? rb.room_id.meter_name : 'Room' %>: ₹<%= rb.amount %>"></div>
+                                        <% }) %>
+                                    </div>
+                                    <!-- Legend (max 4 items for space) -->
+                                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                                        <% data.roomBills.slice(0, 4).forEach((rb, idx) => { 
+                                            const color = colors[idx % colors.length];
+                                        %>
+                                            <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; color: var(--text-dim);">
+                                                <div style="width: 8px; height: 8px; border-radius: 2px; background: <%= color %>;"></div>
+                                                <%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %>
+                                            </div>
+                                        <% }) %>
+                                        <% if (data.roomBills.length > 4) { %>
+                                            <div style="font-size: 0.7rem; color: var(--text-dim);">+ <%= data.roomBills.length - 4 %> more</div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
             </div>
-        <% } %>
-    <% }) %>
+        <% }) %>
+    <% } %>
 </div>
+
+<style>
+    @keyframes pulse {
+        0% { transform: scale(0.8); opacity: 0.8; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+    .cycle-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .cycle-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+</style>

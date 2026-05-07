@@ -51,14 +51,14 @@ router.post("/", async (req, res, next) => {
 // -- Routes under /rooms --
 router.get("/:roomId", async (req, res, next) => {
     try {
-        const room = await Room.findById(req.params.roomId);
+        const room = await Room.findById(req.params.roomId).populate("house_id");
         if (!room) return res.status(404).send('Resource not found');
         
         const roomBills = await RoomBill.find({ room_id: room._id })
             .populate("billing_cycle_id")
             .sort({ createdAt: -1 });
 
-        res.render("rooms/show", { room, roomId: room._id, roomBills });
+        res.render("rooms/show", { room, roomId: room._id, roomBills, house: room.house_id });
     } catch (err) {
         next(err);
     }
@@ -104,14 +104,14 @@ router.delete("/:roomId", async (req, res, next) => {
 
 router.get("/:roomId/analysis", async (req, res, next) => {
     try {
-        const room = await Room.findById(req.params.roomId);
+        const room = await Room.findById(req.params.roomId).populate("house_id");
         if (!room) return res.status(404).send('Resource not found');
         
         const roomBills = await RoomBill.find({ room_id: room._id })
             .populate("billing_cycle_id")
             .sort({ createdAt: 1 }); // Sort chronologically for charts
 
-        res.render("rooms/analysis", { room, roomId: req.params.roomId, roomBills });
+        res.render("rooms/analysis", { room, roomId: req.params.roomId, roomBills, house: room.house_id });
     } catch (err) {
         next(err);
     }

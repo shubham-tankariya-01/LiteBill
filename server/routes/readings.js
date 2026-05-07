@@ -35,7 +35,7 @@ router.get("/new", async (req, res, next) => {
       previousReadings[r.room_id.toString()] = r.reading_value;
     });
 
-    res.render("readings/new", { houseId, cycleId, rooms, previousReadings });
+    res.render("readings/new", { houseId, cycleId, rooms, previousReadings, mainBill });
   } catch (err) {
     next(err);
   }
@@ -48,14 +48,12 @@ router.post("/setup", async (req, res, next) => {
     const readingsInput = req.body.readings;
 
     if (!readingsInput || Object.keys(readingsInput).length === 0) {
-      return res.status(400).json({ error: "Initial readings required" });
+      return res.redirect(`/houses/${houseId}/readings/new?error=missing_data`);
     }
 
-    // Use the date from the first reading as the anchor for the initialization
-    const firstReadingId = Object.keys(readingsInput)[0];
-    const setupDate = new Date(readingsInput[firstReadingId].date);
+    const setupDate = new Date();
 
-    // 1. Create a baseline 'Initialization' Cycle
+    // 1. Create a baseline (closed) cycle for initial values
     const setupCycle = new BillingCycle({
       house: houseId,
       startDate: setupDate, 
@@ -108,9 +106,6 @@ router.post("/", async (req, res, next) => {
     return res.redirect(`/cycles/${cycleId}/room-bills`);
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const readingsInput = req.body.readings;
 
@@ -138,11 +133,9 @@ router.post("/", async (req, res, next) => {
 
     // 2. Insert readings
     try {
-      await RoomReading.insertMany(formattedReadings, { session });
+      await RoomReading.insertMany(formattedReadings);
     } catch (err) {
       if (err.code === 11000) {
-        await session.abortTransaction();
-        session.endSession();
         return res.redirect(`/cycles/${cycleId}/room-bills`);
       }
       throw err;
@@ -152,12 +145,12 @@ router.post("/", async (req, res, next) => {
     const roomBills = await calculate_Individual_Bill(houseId, cycleId, formattedReadings);
 
     // 4. Save Room Bills
-    await RoomBill.insertMany(roomBills, { session });
+    await RoomBill.insertMany(roomBills);
 
     // 5. Finalize Current Cycle
     const latestReadingDate = new Date(Math.max(...formattedReadings.map(r => r.reading_date)));
     currentCycle.endDate = latestReadingDate;
-    await currentCycle.save({ session });
+    await currentCycle.save();
 
     // 6. Transition to New Cycle
     const nextDay = new Date(latestReadingDate);
@@ -167,7 +160,7 @@ router.post("/", async (req, res, next) => {
       house: houseId,
       startDate: nextDay
     });
-    const savedNewCycle = await newCycle.save({ session });
+    const savedNewCycle = await newCycle.save();
 
     if (!savedNewCycle || !savedNewCycle._id) {
       throw new Error("Failed to initialize the new billing cycle properly.");
@@ -177,20 +170,13 @@ router.post("/", async (req, res, next) => {
     await House.findByIdAndUpdate(houseId, { 
       active_billing_cycle: savedNewCycle._id,
       previous_billing_cycle: currentCycle._id
-    }, { session });
-
-    await session.commitTransaction();
-    session.endSession();
+    });
 
     res.redirect(`/cycles/${cycleId}/room-bills`);
 
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     next(err);
   }
 });
 
 export default router;
-
-

@@ -20,7 +20,7 @@ router.get("/", async (req, res, next) => {
         const cycleResults = {};
         for (let cycle of cycles) {
             const mainBill = await MainBill.findOne({ billing_cycle_id: cycle._id });
-            const roomBills = await RoomBill.find({ billing_cycle_id: cycle._id });
+            const roomBills = await RoomBill.find({ billing_cycle_id: cycle._id }).populate('room_id');
             
             let totalRoomAmount = 0;
             roomBills.forEach(rb => totalRoomAmount += rb.amount);
@@ -28,7 +28,8 @@ router.get("/", async (req, res, next) => {
             cycleResults[cycle._id] = {
                 mainBill: mainBill || null,
                 roomBillsCount: roomBills.length,
-                totalRoomAmount: totalRoomAmount
+                totalRoomAmount: totalRoomAmount,
+                roomBills: roomBills
             };
         }
 

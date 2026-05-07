@@ -1,6 +1,9 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import House from "../models/House.js";
+import MainBill from "../models/MainBill.js";
+import Room from "../models/Room.js";
 
 const router = express.Router();
 
@@ -114,7 +117,13 @@ router.get("/profile", async (req, res, next) => {
             req.session.destroy(() => {});
             return res.redirect("/auth/login");
         }
-        res.render("auth/profile", { user, error: null, success: null });
+        
+        const propertiesCount = await House.countDocuments();
+        const billsCount = await MainBill.countDocuments();
+        const roomsCount = await Room.countDocuments();
+        const stats = { propertiesCount, billsCount, roomsCount };
+
+        res.render("auth/profile", { user, stats, error: null, success: null });
     } catch (err) {
         next(err);
     }
@@ -137,6 +146,7 @@ router.post("/change-password", async (req, res, next) => {
         if (!isMatch) {
             return res.render("auth/profile", {
                 user,
+                stats: { propertiesCount: await House.countDocuments(), billsCount: await MainBill.countDocuments(), roomsCount: await Room.countDocuments() },
                 error: "Current password is incorrect.",
                 success: null
             });
@@ -145,6 +155,7 @@ router.post("/change-password", async (req, res, next) => {
         if (!new_password || new_password.length < 6) {
             return res.render("auth/profile", {
                 user,
+                stats: { propertiesCount: await House.countDocuments(), billsCount: await MainBill.countDocuments(), roomsCount: await Room.countDocuments() },
                 error: "New password must be at least 6 characters.",
                 success: null
             });
@@ -155,6 +166,7 @@ router.post("/change-password", async (req, res, next) => {
 
         res.render("auth/profile", {
             user,
+            stats: { propertiesCount: await House.countDocuments(), billsCount: await MainBill.countDocuments(), roomsCount: await Room.countDocuments() },
             error: null,
             success: "Password changed successfully."
         });

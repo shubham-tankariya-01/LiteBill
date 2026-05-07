@@ -1,67 +1,156 @@
-<!-- House adding modal -->
-<link rel="stylesheet" href="/public/css/houses.css" />
+<style>
+    /* Global Modal System */
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+    .modal-content-new {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 480px;
+        padding: 2rem;
+        position: relative;
+        transform: scale(1);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .modal.hidden .modal-content-new {
+        transform: scale(0.95);
+    }
+    .modal-close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+        z-index: 10;
+    }
+    .modal-close-btn:hover {
+        background: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+    }
+    
+    /* Steps Animation */
+    .step-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    .step-container {
+        width: 100%;
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    .step-container.hidden {
+        display: none;
+    }
+    
+    .meter-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .meter-row input {
+        flex: 1;
+    }
+    .meter-row .remove-meter-btn {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--accent-red);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: var(--radius-sm);
+        width: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .meter-row .remove-meter-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+    }
+    
+    body.modal-open {
+        overflow: hidden;
+    }
+</style>
 
 <div id="modal" class="modal hidden">
-    <div class="modal-content analytic-card theme-house">
+    <div class="modal-content-new">
         <button type="button" id="closeModalBtn" class="modal-close-btn">
             <i data-lucide="x" style="width: 20px; height: 20px;"></i>
         </button>
 
-        <!-- STEP 1 -->
-        <div id="step1" class="step-container">
-            <h2 class="modal-title">
-                <div class="modal-icon-wrapper">
-                    <i data-lucide="home"></i>
+        <div class="step-wrapper">
+            <!-- STEP 1 -->
+            <div id="step1" class="step-container">
+                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange);"></div>
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--border);"></div>
                 </div>
-                Add House Details
-            </h2>
+                
+                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); text-align: center;">Add New Property</h2>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.9rem;">What would you like to call this house?</p>
 
-            <div class="form-group mb-2">
-                <label class="form-label" for="houseName">House Name</label>
-                <input type="text" id="houseName" class="form-control" placeholder="e.g. Sunset Villa"
-                    autocomplete="off" />
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label" for="houseName">House Name</label>
+                    <input type="text" id="houseName" class="form-input" placeholder="e.g. Sunset Villa" autocomplete="off" />
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('closeModalBtn').click()">Cancel</button>
+                    <button type="button" id="nextBtn" class="btn btn-primary" style="flex: 1.5; background: var(--accent-orange); color: #fff;">Next &rarr;</button>
+                </div>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn btn-outline flex-1"
-                    onclick="document.getElementById('closeModalBtn').click()">Cancel</button>
-                <button type="button" id="nextBtn" class="btn btn-primary flex-1">Next &nbsp;<i
-                        data-lucide="arrow-right" class="icon-sm"></i></button>
+            <!-- STEP 2 -->
+            <div id="step2" class="step-container hidden">
+                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange); opacity: 0.5;"></div>
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange);"></div>
+                </div>
+
+                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); text-align: center;">Configure Meters</h2>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Enter the names of the meters installed in this house.</p>
+
+                <div id="metersContainer" style="margin-bottom: 1rem; max-height: 200px; overflow-y: auto; padding-right: 0.5rem;">
+                    <div class="meter-row">
+                        <input type="text" name="meters[]" class="form-input" placeholder="e.g. Main Electricity" autocomplete="off" />
+                        <button type="button" class="remove-meter-btn" title="Remove" style="visibility: hidden;">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" id="addMeterBtn" class="btn btn-secondary" style="width: 100%; margin-bottom: 2rem; border-style: dashed;">
+                    <i data-lucide="plus" style="width: 16px;"></i> Add Another Meter
+                </button>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" id="backToStep1Btn" class="btn btn-secondary" style="flex: 1;">&larr; Back</button>
+                    <button type="button" id="submitBtn" class="btn btn-primary" style="flex: 1.5; background: var(--accent-green); color: #000;">Complete Setup</button>
+                </div>
             </div>
         </div>
-
-        <!-- STEP 2 -->
-        <div id="step2" class="step-container hidden">
-            <h2 class="modal-title mb-1">
-                <div class="modal-icon-wrapper bg-green-soft">
-                    <i data-lucide="zap" class="text-green"></i>
-                </div>
-                Name the Meters
-            </h2>
-            <p class="text-muted mb-2" style="font-size: 0.85rem;">Enter the names of the meters installed in this house.</p>
-
-            <div id="metersContainer">
-                <div class="form-group meter-row">
-                    <input type="text" name="meters[]" class="form-control" placeholder="e.g. Main Electricity"
-                        autocomplete="off" />
-                    <!-- default one cannot be removed easily, hiding button -->
-                    <button type="button" class="remove-meter-btn" title="Remove" style="visibility: hidden;">
-                        <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
-                    </button>
-                </div>
-            </div>
-
-            <button type="button" id="addMeterBtn" class="btn btn-dashed-green">
-                <i data-lucide="plus" class="icon-sm"></i> Add Another Meter
-            </button>
-
-            <div class="modal-actions">
-                <button type="button" id="backToStep1Btn" class="btn btn-outline flex-1">Back</button>
-                <button type="button" id="submitBtn" class="btn btn-primary flex-1-5"><i data-lucide="check"
-                        class="icon-sm"></i> Complete Setup</button>
-            </div>
-        </div>
-
     </div>
 </div>
 

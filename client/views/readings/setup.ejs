@@ -1,55 +1,137 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="analytic-card">
-    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
-        <div>
-            <h2>Initial House Setup</h2>
-        </div>
-        <i data-lucide="settings" style="color: var(--primary); width: 32px; height: 32px;"></i>
+<!-- Stepper -->
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: center;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); flex-wrap: wrap; justify-content: center;">
+        <span>1. Add House</span>
+        <i data-lucide="chevron-right" style="width: 14px;"></i>
+        <span>2. Configure Meters</span>
+        <i data-lucide="chevron-right" style="width: 14px;"></i>
+        <span style="color: var(--accent-orange);">3. Set Baseline Readings</span>
+        <i data-lucide="chevron-right" style="width: 14px;"></i>
+        <span>4. Ready</span>
+    </div>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary);">Initial House Setup</h1>
+        <p class="text-secondary" style="font-size: 1rem;">Let's synchronize the system with your physical meters.</p>
     </div>
 
-    <div style="background: rgba(112, 178, 220, 0.08); border-left: 4px solid var(--accent-blue); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
-        <h4 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-blue); font-size: 1.1rem; margin-top: 0;">
+    <div class="card-raised" style="background: linear-gradient(135deg, rgba(77, 159, 236, 0.1) 0%, rgba(26,29,39,1) 100%); border-left: 4px solid var(--accent-blue); padding: 1.5rem; margin-bottom: 2.5rem;">
+        <h4 style="margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-blue); font-size: 1.1rem; font-weight: 800;">
             <i data-lucide="info" style="width: 20px; height: 20px;"></i> One-Time Setup Required
         </h4>
-        <p style="margin: 0; color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">
-            Enter the meter readings currently displayed on each physical meter. These values are your starting point — your first electricity bill will be calculated based on the difference between these readings and the next ones you enter. You will not be asked to do this again.
+        <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            Enter the reading currently displayed on each physical meter. These values act as your starting point (or "baseline"). Your very first electricity bill will be calculated based on the difference between these initial readings and the next readings you enter. <strong>You will only need to do this once per property.</strong>
         </p>
     </div>
-    
-    <details style="margin-bottom: 2rem; background: var(--bg-body); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 0.75rem 1rem;">
-        <summary style="cursor: pointer; font-weight: 600; color: var(--text-muted); outline: none;">Why is this step needed?</summary>
-        <p style="margin-top: 0.75rem; margin-bottom: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-            Without a baseline reading, the system cannot calculate how many units each room consumed during your very first billing period. Think of this as synchronizing the app with the physical meter's current state.
-        </p>
-    </details>
 
-    <form action="/houses/<%= houseId %>/readings/setup" method="POST">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem;">
+        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary);">Meter Baselines</h3>
+        <span class="badge badge-dim" id="progressCounter" style="font-size: 0.8rem;">0 / <%= rooms.length %> rooms filled</span>
+    </div>
+
+    <form action="/houses/<%= houseId %>/readings/setup" method="POST" id="setupForm">
         <% rooms.forEach(room => { %>
-            <div class="analytic-card reading-input" style="margin-bottom: 1.5rem; background: var(--bg-main); border: none;">
-                <h4 style="margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0;">
-                    <i data-lucide="bed-double" style="width: 20px; height: 20px; color: var(--accent-pink);"></i> <%= room.meter_name %>
-                </h4>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; margin-top: 0;">Enter the value currently shown on the physical meter for this room.</p>
-                <div class="grid-layout">
-                    <div class="form-group">
-                        <label class="form-label">Opening Reading (Value currently on meter)</label>
-                        <input type="number" step="0.1" name="readings[<%= room._id %>][units]"
-                            class="form-control" required placeholder="0.0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Setup Date</label>
-                        <input type="date" value="<%= new Date().toISOString().split('T')[0] %>"
-                            name="readings[<%= room._id %>][date]" class="form-control" required>
-                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; margin-bottom: 0;">Use today's date or the date you physically read the meters.</p>
+            <div class="card-raised room-card" style="margin-bottom: 1rem; padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem; transition: border-color 0.3s ease;">
+                <!-- Meter Icon -->
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-lucide="gauge" style="color: var(--text-muted);"></i>
+                </div>
+                
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; color: var(--text-primary);"><%= room.meter_name %></h4>
+                    
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 150px;">
+                            <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase;">Opening Reading</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="number" step="0.1" name="readings[<%= room._id %>][units]" class="form-input setup-reading-input" required placeholder="0.0" style="padding-right: 2.5rem; font-weight: 600;">
+                                <span style="position: absolute; right: 0.75rem; color: var(--text-dim); font-weight: 700; pointer-events: none; font-size: 0.8rem;">U</span>
+                            </div>
+                            <div class="validation-msg" style="color: var(--accent-red); font-size: 0.75rem; margin-top: 0.25rem; display: none;">Value must be 0 or positive.</div>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase;">Date</label>
+                            <input type="date" value="<%= new Date().toISOString().split('T')[0] %>" name="readings[<%= room._id %>][date]" class="form-input custom-date-input" required>
+                        </div>
                     </div>
                 </div>
             </div>
         <% }) %>
 
-        <div style="display: flex; gap: 1rem; margin-top: 2rem; max-width: 400px;">
-            <button type="submit" class="btn btn-primary" style="flex: 1;">Complete Setup</button>
-            <a href="/houses/<%= houseId %>" class="btn btn-outline" style="flex: 1;">Cancel</a>
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <a href="/houses/<%= houseId %>" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+            <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 2; background: var(--accent-orange); color: #fff; font-weight: 800;" disabled>Complete Setup &rarr;</button>
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputs = document.querySelectorAll('.setup-reading-input');
+        const counter = document.getElementById('progressCounter');
+        const form = document.getElementById('setupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const totalRooms = <%= rooms.length %>;
+
+        function updateProgress() {
+            let filled = 0;
+            let hasError = false;
+
+            inputs.forEach(input => {
+                const val = parseFloat(input.value);
+                const msg = input.parentElement.nextElementSibling;
+                const card = input.closest('.room-card');
+
+                if (!isNaN(val)) {
+                    if (val < 0) {
+                        msg.style.display = 'block';
+                        input.style.borderColor = 'var(--accent-red)';
+                        hasError = true;
+                    } else {
+                        msg.style.display = 'none';
+                        input.style.borderColor = 'var(--border)';
+                        card.style.borderColor = 'var(--accent-green)';
+                        filled++;
+                    }
+                } else {
+                    msg.style.display = 'none';
+                    input.style.borderColor = 'var(--border)';
+                    card.style.borderColor = 'var(--border)';
+                }
+            });
+
+            counter.innerText = `${filled} / ${totalRooms} rooms filled`;
+            
+            if (filled === totalRooms) {
+                counter.className = 'badge badge-green';
+            } else {
+                counter.className = 'badge badge-dim';
+            }
+
+            submitBtn.disabled = hasError || filled !== totalRooms;
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', updateProgress);
+        });
+
+        form.addEventListener('submit', (e) => {
+            if (submitBtn.disabled) e.preventDefault();
+        });
+    });
+</script>
+
+<style>
+    .custom-date-input::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.6;
+        cursor: pointer;
+    }
+    .custom-date-input::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+</style>

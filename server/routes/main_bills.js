@@ -20,7 +20,8 @@ router.get("/new", async (req, res, next) => {
             return res.redirect(`/houses/${houseId}/readings/new`);
         }
 
-        const roomCount = await Room.countDocuments({ house_id: houseId });
+        const rooms = await Room.find({ house_id: houseId }).sort({ createdAt: 1 });
+        const roomCount = rooms.length;
 
         let cycleStartDate = "";
         if (house.active_billing_cycle && house.active_billing_cycle.startDate) {
@@ -32,6 +33,7 @@ router.get("/new", async (req, res, next) => {
             activeCycle: house.active_billing_cycle,
             cycleStartDate, 
             roomCount,
+            rooms,
             error: req.query.error || null 
         });
     } catch (err) {
@@ -77,9 +79,18 @@ router.post("/", async (req, res, next) => {
 
 router.get("/:billId/edit", async (req, res, next) => {
     try {
-        const mainBill = await MainBill.findById(req.params.billId);
+        const mainBill = await MainBill.findById(req.params.billId).populate('house_id');
         if (!mainBill) return res.status(404).send('Resource not found');
-        res.render("main_bills/edit", { mainBill });
+        
+        const rooms = await Room.find({ house_id: mainBill.house_id._id }).sort({ createdAt: 1 });
+        const roomCount = rooms.length;
+
+        res.render("main_bills/edit", { 
+            mainBill,
+            rooms,
+            roomCount,
+            houseId: mainBill.house_id._id
+        });
     } catch (err) {
         next(err);
     }

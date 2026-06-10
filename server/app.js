@@ -66,7 +66,8 @@ main()
     .catch((err) => console.error("DB connection error:", err));
 
 async function main() {
-    await mongoose.connect(dbUrl);
+    const dbName = process.env.MONGO_DB_NAME || "LiteBill";
+    await mongoose.connect(dbUrl, { dbName: dbName });
 }
 
 // ── Session (MongoDB-backed) ─────────────────────────────────────────────────
@@ -77,6 +78,7 @@ app.use(
         saveUninitialized: false,
         store: MongoStore.create({
             mongoUrl: dbUrl,
+            dbName: process.env.MONGO_DB_NAME || "LiteBill",
             collectionName: "sessions",
             ttl: 24 * 60 * 60, // 1 day in seconds
         }),

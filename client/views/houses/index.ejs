@@ -1,90 +1,241 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header sticky-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
-    <div style="display: flex; align-items: center; gap: 1rem;">
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="home" style="color: var(--accent-yellow);"></i> My Properties
+<div class="page-header properties-header">
+    <div class="properties-title-wrap">
+        <h1 class="properties-title">
+            <i data-lucide="home"></i>
+            <span>My Properties</span>
         </h1>
-        <span class="badge badge-dim"><%= houses.length %> Total</span>
     </div>
-    <a href="/houses/new" class="btn btn-primary"><i data-lucide="plus"></i> Add Property</a>
+
+    <div class="properties-header-actions">
+        <span class="badge badge-dim"><%= houses.length %> properties</span>
+        <a href="/houses/new" class="btn btn-outline-premium">
+            <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+            <span>Add Property</span>
+        </a>
+    </div>
 </div>
 
 <% if (houses.length === 0) { %>
-    <%- include('../includes/empty_state', {
-        icon: 'home',
-        title: 'Add your first property',
-        description: 'Get started by adding a property to manage meters, automatically split utility bills, and track payment history.',
-        ctaText: 'Create Property',
-        ctaLink: '/houses/new',
-        ctaIcon: 'plus'
-    }) %>
+    <div class="card empty-state properties-empty-state">
+        <div class="empty-state-icon" style="width: 88px; height: 88px; border-radius: 24px; background: #F7F6F2;">
+            <i data-lucide="home" style="width: 48px; height: 48px; color: #7A7A8A;"></i>
+        </div>
+        <div class="empty-state-title">No properties yet</div>
+        <div class="empty-state-description">Add your first property to start managing meters and billing cycles.</div>
+        <a href="/houses/new" class="btn btn-accent">Add Property -&gt;</a>
+    </div>
 <% } else { %>
-    <div class="grid-2">
-        <% houses.forEach(house => { 
+    <section class="grid-2 properties-grid">
+        <% houses.forEach((house) => {
             const status = houseStatuses[house._id.toString()];
-            const formattedDate = status.lastBillDate ? new Date(status.lastBillDate).toLocaleDateString() : 'Never';
-            
-            // Derive a cycle day if lastBillDate exists (rough estimate)
-            let cycleDayText = 'Not started';
+            const formattedDate = status.lastBillDate ? new Date(status.lastBillDate).toLocaleDateString('en-IN') : 'Never';
+
+            let cycleDayText = 'Not Set Up';
             let progressWidth = '0%';
+
             if (status.lastBillDate) {
                 const diffTime = Math.abs(new Date() - new Date(status.lastBillDate));
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 cycleDayText = `Day ${diffDays}`;
                 progressWidth = `${Math.min((diffDays / 30) * 100, 100)}%`;
             } else if (status.hasSetup && !status.hasBillThisCycle) {
-                cycleDayText = `Cycle active`;
-                progressWidth = `50%`; // Arbitrary visual feedback for active but no bill
+                cycleDayText = 'Cycle active';
+                progressWidth = '50%';
+            } else if (status.hasSetup) {
+                cycleDayText = 'Ready to bill';
+                progressWidth = '100%';
             }
 
-            let statusBadge = '<span class="badge badge-dim">Not Set Up</span>';
+            let badgeClass = 'badge-dim';
+            let badgeText = 'Not Set Up';
             if (status.hasSetup) {
-                if (!status.hasBillThisCycle) statusBadge = '<span class="badge badge-orange">Awaiting Bill</span>';
-                else statusBadge = '<span class="badge badge-green">Active</span>';
+                if (!status.hasBillThisCycle) {
+                    badgeClass = 'badge-orange';
+                    badgeText = 'Awaiting Bill';
+                } else {
+                    badgeClass = 'badge-green';
+                    badgeText = 'Active';
+                }
             }
         %>
-            <div class="card-raised card-accent house-card" style="--card-accent-color: var(--accent-yellow); display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; color: var(--text-primary); font-size: 1.25rem; font-weight: 700;">
-                        <%= house.house_name %>
-                    </h3>
-                    <%- statusBadge %>
+            <article class="glass-card properties-card">
+                <div class="properties-card-top">
+                    <h3><%= house.house_name %></h3>
+                    <span class="badge <%= badgeClass %>"><%= badgeText %></span>
                 </div>
-                
-                <div style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <i data-lucide="bed-double" style="width: 14px;"></i> <%= status.roomCount %> rooms 
-                    <span style="color: var(--border);">•</span> 
-                    <i data-lucide="calendar" style="width: 14px;"></i> Last billed: <%= formattedDate %>
-                    <span style="color: var(--border);">•</span> 
-                    <%= cycleDayText %>
-                </div>
-                
-                <div style="margin-bottom: 1.5rem;">
-                    <div style="height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden; width: 100%;">
-                        <div style="height: 100%; width: <%= progressWidth %>; background: var(--accent-yellow); border-radius: 3px;"></div>
+
+                <div class="properties-card-middle">
+                    <div class="properties-meta-row">
+                        <span class="properties-meta-chip">
+                            <i data-lucide="bed-double"></i>
+                            <span><%= status.roomCount %> rooms</span>
+                        </span>
+                        <span class="properties-meta-chip">
+                            <i data-lucide="calendar"></i>
+                            <span>Last billed: <%= formattedDate %></span>
+                        </span>
+                        <span class="properties-meta-chip">
+                            <i data-lucide="clock-3"></i>
+                            <span><%= cycleDayText %></span>
+                        </span>
+                    </div>
+
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style="width: <%= progressWidth %>; background: linear-gradient(90deg, var(--accent-orange), var(--accent-pink));"></div>
                     </div>
                 </div>
-                
-                <div style="display: flex; gap: 0.75rem; margin-top: auto;">
-                    <a href="/houses/<%= house._id %>" class="btn btn-secondary" style="flex: 1; border-color: var(--border); color: var(--text-primary);">Open Dashboard</a>
-                    <a href="/houses/<%= house._id %>/edit" class="btn btn-icon btn-ghost"><i data-lucide="settings-2"></i></a>
-                    <button type="button" class="btn btn-icon btn-ghost" style="color: var(--accent-red);" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
-                        <i data-lucide="trash-2"></i>
-                    </button>
+
+                <div class="properties-card-bottom">
+                    <a href="/houses/<%= house._id %>" class="btn btn-secondary properties-open-btn">Open Dashboard</a>
+
+                    <div class="properties-card-actions">
+                        <a href="/houses/<%= house._id %>/edit" class="properties-icon-btn" aria-label="Edit property">
+                            <i data-lucide="settings-2"></i>
+                        </a>
+                        <button type="button" class="properties-icon-btn properties-delete-btn" aria-label="Delete property" onclick="openDeleteHouseModal('<%= house._id %>', '<%= house.house_name %>')">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </article>
         <% }) %>
-    </div>
+    </section>
 <% } %>
 
 <style>
-    .house-card {
-        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    .properties-header {
+        margin-bottom: 24px;
     }
-    .house-card:hover {
+
+    .properties-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .properties-title i {
+        width: 24px;
+        height: 24px;
+        color: var(--accent-orange);
+    }
+
+    .properties-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .properties-empty-state {
+        min-height: 320px;
+    }
+
+    .properties-grid {
+        gap: 20px;
+    }
+
+    .properties-card {
+        border-radius: 20px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .properties-card:hover {
         transform: translateY(-2px);
-        border-color: var(--accent-yellow);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+    }
+
+    .properties-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .properties-card-top h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: var(--text-primary);
+    }
+
+    .properties-card-middle {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .properties-meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .properties-meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        background: var(--surface-soft);
+        color: var(--text-primary);
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .properties-meta-chip i {
+        width: 14px;
+        height: 14px;
+        color: #7A7A8A;
+    }
+
+    .properties-card-bottom {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .properties-open-btn {
+        flex: 1;
+    }
+
+    .properties-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .properties-icon-btn i {
+        width: 18px;
+        height: 18px;
+    }
+
+    .properties-delete-btn:hover {
+        color: #EF4444;
+    }
+
+    @media (max-width: 768px) {
+        .properties-header-actions {
+            width: 100%;
+        }
+
+        .properties-header-actions .btn {
+            width: 100%;
+        }
+
+        .properties-card-bottom {
+            align-items: stretch;
+        }
     }
 </style>

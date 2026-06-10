@@ -6,12 +6,11 @@
     <title>LiteBill Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/public/css/base.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    
     <%- include('../includes/navbar.ejs') %>
 
     <div class="main-container">
@@ -20,9 +19,16 @@
 
     <%- include('../includes/add_house_modal.ejs') %>
     <%- include('../includes/delete_house_modal.ejs') %>
+
+    <div id="toast-container"></div>
+
     <script src="/public/js/polish.js"></script>
     <script>
-      lucide.createIcons();
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof lucide !== "undefined") {
+                lucide.createIcons();
+            }
+        });
     </script>
 </body>
 </html>

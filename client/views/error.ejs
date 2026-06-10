@@ -1,48 +1,226 @@
-<% layout('layouts/boilerplate') %>
+<% layout(false) %>
 
-<% 
-    const statusCode = error && error.status ? error.status : 500;
+<%
+    const statusCode = error && error.status ? Number(error.status) : 500;
     const is404 = statusCode === 404;
-    const icon = is404 ? 'link-2-off' : 'alert-triangle';
-    const accentColor = is404 ? 'var(--accent-orange)' : 'var(--accent-red)';
+    const icon = is404 ? 'search-x' : 'alert-triangle';
     const title = is404 ? 'Page Not Found' : 'Something went wrong';
+    const description = message || (is404
+        ? 'The page you were looking for could not be found. It may have been moved, renamed, or no longer exists.'
+        : 'We hit an unexpected issue while processing your request. Please try again or head back to your dashboard.');
+    const iconColor = is404 ? '#FF6B2B' : '#EF4444';
 %>
 
-<div style="display: flex; align-items: center; justify-content: center; min-height: 70vh; padding: 2rem;">
-    <div style="text-align: center; position: relative; max-width: 600px; width: 100%;">
-        
-        <!-- Large background number -->
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15rem; font-weight: 900; color: rgba(255,255,255,0.03); z-index: 0; user-select: none; pointer-events: none;">
-            <%= statusCode %>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= statusCode %> | LiteBill</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #F2F1EC;
+            --surface: #FFFFFF;
+            --surface-dark: #1F1F1F;
+            --text-primary: #1A1A1A;
+            --text-secondary: #7A7A8A;
+            --text-on-dark-secondary: #A0A0B0;
+            --accent-orange: #FF6B2B;
+            --accent-red: #EF4444;
+            --border-subtle: #F0EFE9;
+            --border-button: #E0E0E0;
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --font-main: 'Inter', sans-serif;
+        }
 
-        <div style="position: relative; z-index: 1;">
-            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-soft); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                <i data-lucide="<%= icon %>" style="width: 40px; height: 40px; color: <%= accentColor %>;"></i>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .error-shell {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .error-ghost-code {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(10rem, 30vw, 18rem);
+            font-weight: 900;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.04);
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .error-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-icon-box {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            border-radius: 20px;
+            background: var(--surface);
+            box-shadow: var(--shadow-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-icon-box i {
+            width: 40px;
+            height: 40px;
+        }
+
+        .error-title {
+            margin-bottom: 12px;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .error-message {
+            max-width: 400px;
+            margin: 0 auto 28px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .error-stack {
+            margin-bottom: 28px;
+            padding: 20px;
+            border-radius: 14px;
+            background: var(--surface-dark);
+            color: var(--text-on-dark-secondary);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            text-align: left;
+            overflow-x: auto;
+            max-height: 200px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .error-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-button);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--surface-dark);
+        }
+
+        .btn-primary {
+            background: var(--surface-dark);
+            color: #FFFFFF;
+            border: 1.5px solid var(--surface-dark);
+        }
+
+        .btn-primary:hover {
+            background: #333333;
+            border-color: #333333;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            .error-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="error-shell">
+        <div class="error-ghost-code"><%= statusCode %></div>
+
+        <div class="error-content">
+            <div class="error-icon-box">
+                <i data-lucide="<%= icon %>" style="color: <%= iconColor %>;" aria-hidden="true"></i>
             </div>
-            
-            <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin: 0 0 1rem 0; letter-spacing: -0.5px;">
-                <%= title %>
-            </h1>
-            
-            <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0 auto 2.5rem auto; line-height: 1.6; max-width: 80%;">
-                <%= message || 'We encountered an unexpected error while processing your request.' %>
-            </p>
+
+            <h1 class="error-title"><%= title %></h1>
+            <p class="error-message"><%= description %></p>
 
             <% if (error && error.stack && process.env.NODE_ENV !== 'production') { %>
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin-bottom: 2.5rem; text-align: left; overflow-x: auto; position: relative; z-index: 10;">
-                    <pre style="color: var(--text-muted); font-size: 0.85rem; margin: 0; font-family: monospace;"><%= error.stack %></pre>
-                </div>
+                <pre class="error-stack"><%= error.stack %></pre>
             <% } %>
 
-            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; position: relative; z-index: 10;">
-                <button onclick="window.history.back()" class="btn btn-secondary" style="min-width: 150px;">
-                    <i data-lucide="arrow-left" style="width: 16px;"></i> Go Back
+            <div class="error-actions">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                    <span>← Go Back</span>
                 </button>
-                <a href="/dashboard" class="btn btn-primary" style="background: var(--text-primary); color: var(--bg-body); min-width: 200px;">
-                    Return to Dashboard
-                </a>
+                <a href="/dashboard" class="btn btn-primary">Return to Dashboard</a>
             </div>
         </div>
-    </div>
-</div>
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

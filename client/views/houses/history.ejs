@@ -1,277 +1,705 @@
 <% layout('layouts/boilerplate') %>
 
-<!-- Header -->
-<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
-            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
-            <span>/</span> 
-            <a href="/houses/<%= house._id %>" style="color: var(--text-dim); text-decoration: none;"><%= house.house_name %></a>
-            <span>/</span>
-            <span style="color: var(--accent-orange);">History</span>
-        </div>
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
-            <i data-lucide="history" style="color: var(--accent-orange); width: 32px; height: 32px;"></i> Billing History
-        </h1>
-    </div>
-    <a href="/houses/<%= house._id %>" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Back to Dashboard</a>
-</div>
+<%
+    const formatDate = (value, options = {}) => new Date(value).toLocaleDateString('en-US', options);
+%>
 
-<% if (cycles.length > 0) { %>
-<!-- Summary Header Row -->
-<div class="grid-3" style="margin-bottom: 2rem;">
-    <div class="card-raised" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="bar-chart-2" style="color: var(--accent-blue);"></i>
-        </div>
+<div class="history-page">
+    <div class="history-breadcrumb eyebrow">
+        <a href="/houses">Properties</a>
+        <span>/</span>
+        <a href="/houses/<%= house._id %>"><%= house.house_name %></a>
+        <span>/</span>
+        <span>History</span>
+    </div>
+
+    <div class="page-header history-header">
         <div>
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Cycles</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= historySummary.totalCycles %></div>
+            <h1 class="history-title">
+                <i data-lucide="history" aria-hidden="true"></i>
+                <span>Billing History</span>
+            </h1>
+        </div>
+        <div class="page-actions">
+            <a href="/houses/<%= house._id %>" class="btn btn-secondary history-back-btn">
+                <i data-lucide="arrow-left" aria-hidden="true"></i>
+                <span>Back to Dashboard</span>
+            </a>
         </div>
     </div>
-    
-    <div class="card-raised" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="indian-rupee" style="color: var(--accent-green);"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Amount Billed</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= historySummary.totalBilled.toLocaleString() %></div>
-        </div>
-    </div>
-    
-    <div class="card-raised" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(251, 191, 36, 0.1); display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="calculator" style="color: var(--accent-yellow);"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Avg Bill / Cycle</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= historySummary.avgBillAmount.toLocaleString(undefined, {maximumFractionDigits: 0}) %></div>
-        </div>
-    </div>
-</div>
 
-<!-- Search and Filter Bar -->
-<div class="card-raised" style="margin-bottom: 2rem; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <div style="position: relative; min-width: 250px; flex: 1;">
-        <i data-lucide="search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; color: var(--text-dim);"></i>
-        <input type="text" id="historySearch" placeholder="Search by month or year..." class="form-input" style="padding-left: 2.75rem; background: var(--bg-body); border-color: var(--border-soft);">
-    </div>
-    
-    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-        <div class="filter-pills" style="display: flex; background: var(--bg-body); border: 1px solid var(--border-soft); border-radius: 8px; overflow: hidden; margin-right: 1rem;">
-            <button class="filter-pill active" data-filter="all">All</button>
-            <button class="filter-pill" data-filter="active">Active</button>
-            <button class="filter-pill" data-filter="completed">Completed</button>
-        </div>
-        
-        <select id="sortDropdown" class="form-input" style="width: auto; background: var(--bg-body); cursor: pointer;">
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="highest">Highest bill</option>
-        </select>
-    </div>
-</div>
-<% } %>
-
-<!-- Cycle Cards Grid -->
-<% if (cycles.length === 0) { %>
-    <div class="card-raised" style="text-align: center; padding: 5rem 2rem; max-width: 600px; margin: 0 auto;">
-        <div style="width: 80px; height: 80px; background: rgba(254, 138, 92, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-            <i data-lucide="history" style="width: 40px; height: 40px; color: var(--accent-orange);"></i>
-        </div>
-        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">No History Found</h2>
-        <p class="text-secondary" style="margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-            Once you complete a billing cycle, its detailed invoice and distribution history will appear here.
-        </p>
-    </div>
-<% } else { %>
-    <div class="grid-layout" id="historyGrid" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
-        <% cycles.forEach((cycle) => { 
-            const mainBill = mainBills.find(b => b.billing_cycle_id._id.toString() === cycle._id.toString());
-            const isActive = !cycle.endDate;
-            const statusClass = isActive ? 'status-active' : 'status-completed';
-            
-            const start = new Date(cycle.startDate);
-            const end = cycle.endDate ? new Date(cycle.endDate) : new Date();
-            const daysRunning = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
-            
-            const startDateStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const endDateStr = cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present';
-            
-            const billAmount = mainBill ? mainBill.total_amount : 0;
-            const stats = cycleStats[cycle._id.toString()] || { roomCount: 0, avgRoomAmount: 0 };
-        %>
-            <div class="card-raised history-card <%= statusClass %>" data-date="<%= start.getTime() %>" data-amount="<%= billAmount %>" style="display: flex; flex-direction: column; padding: 0; overflow: hidden; border-left: 4px solid <%= isActive ? 'var(--accent-green)' : 'var(--border)' %>;">
-                
-                <!-- Card Header -->
-                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-soft); <%= isActive ? 'background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);' : '' %>">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                        <span class="badge" style="background: <%= isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)' %>; color: <%= isActive ? 'var(--accent-green)' : 'var(--text-secondary)' %>; font-weight: 700;">
-                            <% if (isActive) { %>
-                                <span style="display: inline-block; width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite;"></span>
-                            <% } else { %>
-                                <span style="display: inline-block; width: 6px; height: 6px; background: var(--text-dim); border-radius: 50%; margin-right: 4px;"></span>
-                            <% } %>
-                            <%= isActive ? 'Active' : 'Completed' %>
-                        </span>
-                        
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">
-                            <i data-lucide="clock" style="width: 12px;"></i> <%= daysRunning %> Days
-                        </div>
-                    </div>
-                    
-                    <h3 class="cycle-title" style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"><%= startDateStr %></h3>
-                    <p style="margin: 0; color: var(--text-dim); font-size: 0.85rem;">to <%= endDateStr %></p>
+    <% if (cycles.length > 0) { %>
+        <div class="history-summary-row">
+            <article class="card history-summary-card">
+                <div class="history-summary-icon history-summary-icon-blue">
+                    <i data-lucide="bar-chart-2" aria-hidden="true"></i>
                 </div>
-
-                <!-- Card Body -->
-                <div style="padding: 1.5rem; flex-grow: 1;">
-                    <% if (mainBill) { %>
-                        <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div style="flex: 1;">
-                                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Bill Amount</div>
-                                <div class="bill-amount" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= billAmount.toLocaleString() %></div>
-                            </div>
-                            <div style="flex: 1; border-left: 1px solid var(--border-soft); padding-left: 1.5rem;">
-                                <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Avg per Room</div>
-                                <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-blue);">₹<%= Math.round(stats.avgRoomAmount).toLocaleString() %></div>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
-                            <i data-lucide="users" style="width: 14px;"></i> <%= stats.roomCount %> rooms billed
-                        </div>
-                    <% } else if (isActive) { %>
-                        <div style="background: rgba(251, 191, 36, 0.1); padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed rgba(251, 191, 36, 0.3);">
-                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-yellow); font-weight: 700; font-size: 0.85rem; margin-bottom: 0.25rem;">
-                                <i data-lucide="file-input" style="width: 16px;"></i> Supplier Bill Required
-                            </div>
-                            <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Enter the main bill to proceed.</p>
-                        </div>
-                    <% } else { %>
-                        <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">No bill data recorded for this cycle.</p>
-                        </div>
-                    <% } %>
+                <div>
+                    <div class="stat-label">Total Cycles</div>
+                    <div class="history-summary-value"><%= historySummary.totalCycles %></div>
                 </div>
+            </article>
 
-                <!-- Footer Action -->
-                <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-soft); background: rgba(255,255,255,0.01);">
-                    <% if (isActive) { %>
-                        <% if (!mainBill) { %>
-                            <a href="/houses/<%= house._id %>/main-bill/new" class="btn btn-secondary" style="width: 100%; border-color: var(--accent-yellow); color: var(--accent-yellow);">Enter Supplier Bill &rarr;</a>
-                        <% } else { %>
-                            <a href="/houses/<%= house._id %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-secondary" style="width: 100%; border-color: var(--accent-green); color: var(--accent-green);">Submit Readings &rarr;</a>
-                        <% } %>
-                    <% } else { %>
-                        <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-secondary" style="width: 100%;">View Distribution &rarr;</a>
-                    <% } %>
+            <article class="card history-summary-card">
+                <div class="history-summary-icon history-summary-icon-green">
+                    <i data-lucide="indian-rupee" aria-hidden="true"></i>
                 </div>
+                <div>
+                    <div class="stat-label">Total Amount Billed</div>
+                    <div class="history-summary-value">₹<%= historySummary.totalBilled.toLocaleString() %></div>
+                </div>
+            </article>
+
+            <article class="card history-summary-card">
+                <div class="history-summary-icon history-summary-icon-orange">
+                    <i data-lucide="calculator" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Avg Bill / Cycle</div>
+                    <div class="history-summary-value">₹<%= historySummary.avgBillAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) %></div>
+                </div>
+            </article>
+        </div>
+
+        <div class="card history-filter-bar">
+            <div class="history-search-wrap">
+                <i data-lucide="search" aria-hidden="true"></i>
+                <input id="historySearch" type="text" class="form-input" placeholder="Search by month or year...">
             </div>
-        <% }) %>
-    </div>
-<% } %>
+
+            <div class="history-filter-actions">
+                <div class="history-pill-group" role="tablist" aria-label="Cycle status filter">
+                    <button type="button" class="history-filter-pill is-active" data-filter="all">All</button>
+                    <button type="button" class="history-filter-pill" data-filter="active">Active</button>
+                    <button type="button" class="history-filter-pill" data-filter="completed">Completed</button>
+                </div>
+
+                <select id="historySort" class="history-sort-select" aria-label="Sort billing cycles">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="highest">Highest bill</option>
+                </select>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (cycles.length === 0) { %>
+        <div class="card empty-state history-empty-state">
+            <div class="empty-state-icon history-empty-icon">
+                <i data-lucide="history" aria-hidden="true"></i>
+            </div>
+            <h2 class="empty-state-title">No History Found</h2>
+            <p class="empty-state-description">
+                Once you complete a billing cycle, its detailed invoice and distribution history will appear here.
+            </p>
+        </div>
+    <% } else { %>
+        <div class="history-grid" id="historyGrid">
+            <% cycles.forEach((cycle) => {
+                const cycleId = cycle._id.toString();
+                const mainBill = mainBills.find((bill) => bill.billing_cycle_id && bill.billing_cycle_id._id.toString() === cycleId);
+                const isActive = !cycle.endDate;
+                const stats = cycleStats[cycleId] || { roomCount: 0, avgRoomAmount: 0 };
+                const start = new Date(cycle.startDate);
+                const end = cycle.endDate ? new Date(cycle.endDate) : new Date();
+                const dayCount = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+                const startLabel = formatDate(start, { month: 'short', day: 'numeric', year: 'numeric' });
+                const endLabel = cycle.endDate ? formatDate(cycle.endDate, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present';
+                const billAmount = mainBill ? Number(mainBill.total_amount || 0) : 0;
+                const cardSearchText = `${start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} ${start.getFullYear()} ${startLabel} ${endLabel}`.toLowerCase();
+            %>
+                <article
+                    class="history-cycle-card <%= isActive ? 'is-active' : 'is-completed' %>"
+                    data-status="<%= isActive ? 'active' : 'completed' %>"
+                    data-date="<%= start.getTime() %>"
+                    data-amount="<%= billAmount %>"
+                    data-search="<%= cardSearchText %>"
+                >
+                    <div class="history-cycle-header">
+                        <div class="history-cycle-header-row">
+                            <span class="history-status-pill <%= isActive ? 'history-status-active' : 'history-status-completed' %>">
+                                <span class="history-status-dot"></span>
+                                <span><%= isActive ? 'Active' : 'Completed' %></span>
+                            </span>
+                            <span class="history-days-chip">
+                                <i data-lucide="clock-3" aria-hidden="true"></i>
+                                <span><%= dayCount %> Days</span>
+                            </span>
+                        </div>
+                        <h3><%= startLabel %></h3>
+                        <p>to <%= endLabel %></p>
+                    </div>
+
+                    <div class="history-cycle-body">
+                        <% if (mainBill) { %>
+                            <div class="history-cycle-stats">
+                                <div class="history-cycle-stat">
+                                    <div class="stat-label">Bill Amount</div>
+                                    <div class="history-cycle-amount">₹<%= billAmount.toLocaleString() %></div>
+                                </div>
+                                <div class="history-cycle-divider"></div>
+                                <div class="history-cycle-stat">
+                                    <div class="stat-label">Avg per Room</div>
+                                    <div class="history-cycle-avg">₹<%= Math.round(stats.avgRoomAmount).toLocaleString() %></div>
+                                </div>
+                            </div>
+                            <div class="history-cycle-meta">
+                                <i data-lucide="users" aria-hidden="true"></i>
+                                <span><%= stats.roomCount %> rooms billed</span>
+                            </div>
+                        <% } else if (isActive) { %>
+                            <div class="history-dashed-note history-dashed-note-orange">
+                                <i data-lucide="receipt" aria-hidden="true"></i>
+                                <div>
+                                    <strong>Supplier Bill Required</strong>
+                                    <p>Enter the supplier bill for this cycle before recording room readings.</p>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="history-dashed-note history-dashed-note-neutral">
+                                <i data-lucide="file-text" aria-hidden="true"></i>
+                                <div>
+                                    <strong>No bill data</strong>
+                                    <p>No supplier bill was recorded for this cycle.</p>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="history-cycle-footer">
+                        <% if (isActive && !mainBill) { %>
+                            <a href="/houses/<%= house._id %>/main-bill/new" class="btn history-footer-btn history-footer-btn-orange">Enter Supplier Bill →</a>
+                        <% } else if (isActive && mainBill) { %>
+                            <a href="/houses/<%= house._id %>/cycles/<%= cycle._id %>/readings/new" class="btn history-footer-btn history-footer-btn-green">Submit Readings →</a>
+                        <% } else { %>
+                            <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-secondary history-footer-btn">View Distribution →</a>
+                        <% } %>
+                    </div>
+                </article>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
 
 <style>
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.5); opacity: 0.5; }
-        100% { transform: scale(1); opacity: 1; }
+    .history-page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
     }
-    
-    .history-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    .history-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
-    .history-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-    
-    .filter-pill {
-        background: transparent;
-        border: none;
-        padding: 0.5rem 1rem;
+
+    .history-breadcrumb a,
+    .history-breadcrumb span {
         color: var(--text-secondary);
-        font-weight: 600;
+    }
+
+    .history-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .history-title i {
+        width: 26px;
+        height: 26px;
+        color: var(--accent-orange);
+    }
+
+    .history-summary-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .history-summary-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .history-summary-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .history-summary-icon i {
+        width: 22px;
+        height: 22px;
+    }
+
+    .history-summary-icon-blue {
+        background: #EBF1FD;
+        color: #2C5CC5;
+    }
+
+    .history-summary-icon-green {
+        background: #E6F4ED;
+        color: #2E7D52;
+    }
+
+    .history-summary-icon-orange {
+        background: #FFF0E6;
+        color: #CC4A0C;
+    }
+
+    .history-summary-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.1;
+    }
+
+    .history-filter-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 16px 20px;
+    }
+
+    .history-search-wrap {
+        position: relative;
+        flex: 1 1 280px;
+        min-width: 200px;
+    }
+
+    .history-search-wrap i {
+        position: absolute;
+        top: 50%;
+        left: 14px;
+        width: 18px;
+        height: 18px;
+        color: var(--text-secondary);
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .history-search-wrap .form-input {
+        padding-left: 42px;
+    }
+
+    .history-filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .history-pill-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px;
+        background: var(--bg-body);
+        border-radius: 999px;
+    }
+
+    .history-filter-pill {
+        min-height: 40px;
+        padding: 0 18px;
+        border-radius: 999px;
+        color: var(--text-secondary);
         font-size: 0.85rem;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: background 0.2s ease, color 0.2s ease;
     }
-    .filter-pill:hover {
-        color: var(--text-primary);
+
+    .history-filter-pill.is-active {
+        background: var(--surface-dark);
+        color: var(--text-on-dark);
     }
-    .filter-pill.active {
-        background: var(--surface-raised);
+
+    .history-sort-select {
+        min-height: 44px;
+        padding: 10px 14px;
+        background: var(--surface-soft);
+        border: none;
+        border-radius: 12px;
         color: var(--text-primary);
+        outline: none;
+    }
+
+    .history-empty-state {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .history-empty-icon {
+        background: var(--surface-soft);
+    }
+
+    .history-empty-icon i {
+        width: 32px;
+        height: 32px;
+        color: var(--text-secondary);
+    }
+
+    .history-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 20px;
+    }
+
+    .history-cycle-card {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        background: var(--surface);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 4px solid #E8E7E2;
+    }
+
+    .history-cycle-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-cycle-card.is-active {
+        border-left-color: var(--accent-green);
+    }
+
+    .history-cycle-header {
+        padding: 20px 20px 0;
+    }
+
+    .history-cycle-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .history-status-pill,
+    .history-days-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 30px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .history-status-active {
+        background: #E6F4ED;
+        color: #2E7D52;
+    }
+
+    .history-status-completed {
+        background: var(--surface-muted);
+        color: var(--text-secondary);
+    }
+
+    .history-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: currentColor;
+    }
+
+    .history-status-active .history-status-dot {
+        animation: historyPulse 2s infinite;
+    }
+
+    .history-days-chip {
+        background: var(--surface-soft);
+        color: var(--text-secondary);
+    }
+
+    .history-days-chip i {
+        width: 14px;
+        height: 14px;
+    }
+
+    .history-cycle-header h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .history-cycle-header p {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .history-cycle-body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 20px;
+        flex: 1;
+    }
+
+    .history-cycle-stats {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .history-cycle-divider {
+        width: 1px;
+        background: var(--border-subtle);
+    }
+
+    .history-cycle-amount {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.1;
+    }
+
+    .history-cycle-avg {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+        line-height: 1.1;
+    }
+
+    .history-cycle-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .history-cycle-meta i {
+        width: 14px;
+        height: 14px;
+    }
+
+    .history-dashed-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 16px;
+        border: 1.5px dashed #D8D7D2;
+        background: #FCFBF8;
+    }
+
+    .history-dashed-note i {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .history-dashed-note strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+    }
+
+    .history-dashed-note p {
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+
+    .history-dashed-note-orange {
+        border-color: #FFD4B0;
+    }
+
+    .history-dashed-note-orange i,
+    .history-dashed-note-orange strong {
+        color: #CC4A0C;
+    }
+
+    .history-dashed-note-neutral i,
+    .history-dashed-note-neutral strong {
+        color: var(--text-secondary);
+    }
+
+    .history-cycle-footer {
+        padding: 16px 20px;
+        border-top: 1px solid var(--border-subtle);
+        background: #FAFAF8;
+    }
+
+    .history-footer-btn {
+        width: 100%;
+    }
+
+    .history-footer-btn-orange {
+        background: #FFF7F2;
+        color: #CC4A0C;
+        border: 1.5px solid #FFB588;
+    }
+
+    .history-footer-btn-orange:hover {
+        border-color: #CC4A0C;
+    }
+
+    .history-footer-btn-green {
+        background: #F2FBF6;
+        color: #2E7D52;
+        border: 1.5px solid #9ED5B8;
+    }
+
+    .history-footer-btn-green:hover {
+        border-color: #2E7D52;
+    }
+
+    @keyframes historyPulse {
+        0% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.45;
+            transform: scale(1.35);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .history-summary-row {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .history-summary-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .history-summary-card {
+            min-width: 240px;
+            flex-shrink: 0;
+        }
+
+        .history-filter-bar {
+            align-items: stretch;
+        }
+
+        .history-filter-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .history-pill-group {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-filter-pill {
+            flex: 1;
+            padding: 0 12px;
+        }
+
+        .history-sort-select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .history-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .history-cycle-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .history-cycle-divider {
+            width: 100%;
+            height: 1px;
+        }
+
+        .history-back-btn {
+            width: 100%;
+        }
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.getElementById('historySearch');
-        const filterPills = document.querySelectorAll('.filter-pill');
-        const sortDropdown = document.getElementById('sortDropdown');
         const grid = document.getElementById('historyGrid');
-        
-        if (!grid) return;
-        
-        let currentFilter = 'all';
-        let currentSort = 'newest';
-        
-        function applyFilters() {
-            const term = searchInput ? searchInput.value.toLowerCase() : '';
-            const cards = Array.from(grid.querySelectorAll('.history-card'));
-            
-            cards.forEach(card => {
-                const title = card.querySelector('.cycle-title').textContent.toLowerCase();
-                const isMatchSearch = title.includes(term);
-                
-                const isMatchFilter = 
-                    currentFilter === 'all' || 
-                    (currentFilter === 'active' && card.classList.contains('status-active')) ||
-                    (currentFilter === 'completed' && card.classList.contains('status-completed'));
-                
-                if (isMatchSearch && isMatchFilter) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
+        const searchInput = document.getElementById('historySearch');
+        const sortSelect = document.getElementById('historySort');
+        const pills = Array.from(document.querySelectorAll('.history-filter-pill'));
+
+        if (!grid) {
+            return;
+        }
+
+        let activeFilter = 'all';
+        let activeSort = sortSelect ? sortSelect.value : 'newest';
+
+        const applyHistoryControls = () => {
+            const cards = Array.from(grid.querySelectorAll('.history-cycle-card'));
+            const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            cards.forEach((card) => {
+                const status = card.dataset.status;
+                const searchBlob = card.dataset.search || '';
+                const matchesFilter = activeFilter === 'all' || status === activeFilter;
+                const matchesSearch = !searchTerm || searchBlob.includes(searchTerm);
+                card.style.display = matchesFilter && matchesSearch ? 'flex' : 'none';
             });
-            
-            // Apply sorting
-            const visibleCards = cards.filter(c => c.style.display !== 'none');
-            
+
+            const visibleCards = cards.filter((card) => card.style.display !== 'none');
+
             visibleCards.sort((a, b) => {
-                if (currentSort === 'newest') {
-                    return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
-                } else if (currentSort === 'oldest') {
-                    return parseFloat(a.dataset.date) - parseFloat(b.dataset.date);
-                } else if (currentSort === 'highest') {
-                    return parseFloat(b.dataset.amount) - parseFloat(a.dataset.amount);
+                if (activeSort === 'oldest') {
+                    return Number(a.dataset.date) - Number(b.dataset.date);
                 }
+                if (activeSort === 'highest') {
+                    return Number(b.dataset.amount) - Number(a.dataset.amount);
+                }
+                return Number(b.dataset.date) - Number(a.dataset.date);
             });
-            
-            visibleCards.forEach(card => grid.appendChild(card));
-        }
-        
+
+            visibleCards.forEach((card) => grid.appendChild(card));
+        };
+
         if (searchInput) {
-            searchInput.addEventListener('input', applyFilters);
+            searchInput.addEventListener('input', applyHistoryControls);
         }
-        
-        filterPills.forEach(pill => {
-            pill.addEventListener('click', (e) => {
-                filterPills.forEach(p => p.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilter = e.target.dataset.filter;
-                applyFilters();
+
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (event) => {
+                activeSort = event.target.value;
+                applyHistoryControls();
+            });
+        }
+
+        pills.forEach((pill) => {
+            pill.addEventListener('click', () => {
+                pills.forEach((item) => item.classList.remove('is-active'));
+                pill.classList.add('is-active');
+                activeFilter = pill.dataset.filter;
+                applyHistoryControls();
             });
         });
-        
-        if (sortDropdown) {
-            sortDropdown.addEventListener('change', (e) => {
-                currentSort = e.target.value;
-                applyFilters();
-            });
-        }
+
+        applyHistoryControls();
     });
 </script>

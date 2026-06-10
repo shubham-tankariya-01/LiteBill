@@ -1,606 +1,672 @@
-<nav class="navbar top-navbar">
-    <div class="brand">
-        <a href="/dashboard" class="logo-link">
-            <i data-lucide="zap" class="logo-icon"></i>
-            <span class="logo-text">LiteBill</span>
+<%
+    const pathValue = typeof currentPath !== 'undefined' ? currentPath : '';
+    const houses = typeof navHouses !== 'undefined' ? navHouses : [];
+    const firstHouse = houses.length > 0 ? houses[0] : null;
+    const userInitial = (typeof user !== 'undefined' && user.mobile_number) ? user.mobile_number[0] : 'U';
+    const hasNotifications = false;
+
+    const isDashboard = pathValue === '/dashboard';
+    const isProperties = pathValue.startsWith('/houses') && !pathValue.includes('/history') && !pathValue.includes('/cycles') && !pathValue.includes('/readings') && !pathValue.includes('/main-bill');
+    const isBilling = pathValue.includes('/readings') || pathValue.includes('/main-bill') || pathValue.includes('/cycles');
+    const isHistory = pathValue.includes('/history');
+%>
+
+<nav class="litebill-navbar">
+    <div class="litebill-navbar-inner">
+        <a href="/dashboard" class="litebill-logo-pill" aria-label="LiteBill dashboard">
+            <i data-lucide="zap"></i>
+            <span>LiteBill</span>
         </a>
-    </div>
 
-    <div class="nav-links-center desktop-only" id="desktopNavLinks">
-        <a href="/dashboard" class="nav-item-center">Dashboard</a>
-        
-        <div class="dropdown-container">
-            <a href="#" id="navPropsBtn" class="nav-item-center">Properties <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i></a>
-            <div id="navPropsDropdown" class="nav-dropdown-menu hidden">
-                <a href="/houses" class="dropdown-item"><i data-lucide="list"></i> View All Properties</a>
-                <a href="/houses/new" class="dropdown-item"><i data-lucide="plus-circle"></i> Add New Property</a>
-                <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-header">Quick Access</div>
-                    <% navHouses.slice(0, 4).forEach(house => { %>
-                        <a href="/houses/<%= house._id %>" class="dropdown-item"><i data-lucide="arrow-right"></i> <%= house.house_name %></a>
-                    <% }) %>
-                <% } %>
-            </div>
-        </div>
+        <div class="litebill-nav-center desktop-only">
+            <div class="litebill-nav-pills">
+                <a href="/dashboard" class="litebill-nav-pill <%= isDashboard ? 'active' : '' %>">Dashboard</a>
 
-        <div class="dropdown-container">
-            <a href="#" id="navBillingBtn" class="nav-item-center">Billing <i data-lucide="chevron-down" style="width: 14px; margin-left: 2px;"></i></a>
-            <div id="navBillingDropdown" class="nav-dropdown-menu hidden">
-                <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-                    <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="dropdown-item"><i data-lucide="pen-line"></i> Submit Readings</a>
-                    <a href="/houses/<%= navHouses[0]._id %>/history" class="dropdown-item"><i data-lucide="history"></i> Billing History</a>
-                    <a href="/houses/<%= navHouses[0]._id %>/cycles" class="dropdown-item"><i data-lucide="calendar-clock"></i> View Cycles</a>
-                <% } else { %>
-                    <a href="/houses/new" class="dropdown-item"><i data-lucide="home"></i> Add Property First</a>
-                <% } %>
-            </div>
-        </div>
-
-        <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-            <a href="/houses/<%= navHouses[0]._id %>/history" class="nav-item-center">History</a>
-        <% } %>
-    </div>
-
-    <div class="nav-actions-right">
-        <button id="searchBtn" class="btn-icon btn-ghost"><i data-lucide="search"></i></button>
-        
-        <div class="dropdown-container desktop-only">
-            <button id="quickAddBtn" class="btn btn-primary btn-quick-add">
-                <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Quick Add
-            </button>
-            <div id="quickAddDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
-                <a href="/houses/new" class="dropdown-item"><i data-lucide="home"></i> New House</a>
-                <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-                    <a href="/houses/<%= navHouses[0]._id %>/rooms/new" class="dropdown-item"><i data-lucide="bed-double"></i> New Room</a>
-                    <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="dropdown-item"><i data-lucide="receipt"></i> Submit Bill</a>
-                <% } %>
-            </div>
-        </div>
-
-        <button class="btn-icon btn-ghost notification-btn desktop-only">
-            <i data-lucide="bell"></i>
-            <span class="notification-badge">2</span>
-        </button>
-
-        <div class="dropdown-container desktop-only">
-            <a href="#" id="navUserBtn" class="user-avatar-gradient">
-                <%= (typeof user !== 'undefined' && user.mobile_number) ? user.mobile_number[0] : 'U' %>
-            </a>
-            <div id="navUserDropdown" class="nav-dropdown-menu hidden" style="right: 0; transform-origin: top right;">
-                <a href="/auth/profile" class="dropdown-item"><i data-lucide="user"></i> My Profile</a>
-                <a href="/auth/profile" class="dropdown-item"><i data-lucide="lock"></i> Change Password</a>
-                <div class="dropdown-divider"></div>
-                <form action="/auth/logout" method="POST" style="margin: 0;">
-                    <button type="submit" class="dropdown-item" style="color: var(--accent-red); width: 100%; text-align: left; background: none; border: none; font-family: inherit; font-size: 0.9rem;">
-                        <i data-lucide="log-out" style="color: var(--accent-red);"></i> Sign Out
+                <div class="litebill-dropdown-wrap">
+                    <button type="button" id="propertiesMenuButton" class="litebill-nav-pill <%= isProperties ? 'active' : '' %>">
+                        <span>Properties</span>
+                        <i data-lucide="chevron-down"></i>
                     </button>
-                </form>
+                    <div id="propertiesMenu" class="litebill-dropdown-menu hidden">
+                        <a href="/houses" class="litebill-dropdown-item"><i data-lucide="layout-grid"></i> All Properties</a>
+                        <a href="/houses/new" class="litebill-dropdown-item"><i data-lucide="plus"></i> Add Property</a>
+                        <div class="litebill-dropdown-divider"></div>
+                        <div class="litebill-dropdown-section-title">Your Houses</div>
+                        <% if (houses.length > 0) { %>
+                            <% houses.slice(0, 5).forEach((house) => { %>
+                                <a href="/houses/<%= house._id %>" class="litebill-dropdown-item">
+                                    <i data-lucide="house"></i>
+                                    <span><%= house.house_name %></span>
+                                </a>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="litebill-dropdown-empty">No properties yet</div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="litebill-dropdown-wrap">
+                    <button type="button" id="billingMenuButton" class="litebill-nav-pill <%= isBilling ? 'active' : '' %>">
+                        <span>Billing</span>
+                        <i data-lucide="chevron-down"></i>
+                    </button>
+                    <div id="billingMenu" class="litebill-dropdown-menu hidden">
+                        <% if (firstHouse) { %>
+                            <a href="/houses/<%= firstHouse._id %>/readings/new" class="litebill-dropdown-item"><i data-lucide="clipboard-pen-line"></i> Submit Readings</a>
+                            <a href="/houses/<%= firstHouse._id %>/main-bill/new" class="litebill-dropdown-item"><i data-lucide="receipt"></i> Enter Main Bill</a>
+                            <a href="/houses/<%= firstHouse._id %>/cycles" class="litebill-dropdown-item"><i data-lucide="calendar-clock"></i> View Cycles</a>
+                        <% } else { %>
+                            <a href="/houses" class="litebill-dropdown-item"><i data-lucide="home-plus"></i> Add a property first</a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="litebill-dropdown-wrap">
+                    <button type="button" id="historyMenuButton" class="litebill-nav-pill <%= isHistory ? 'active' : '' %>">
+                        <span>History</span>
+                        <i data-lucide="chevron-down"></i>
+                    </button>
+                    <div id="historyMenu" class="litebill-dropdown-menu hidden">
+                        <% if (houses.length > 0) { %>
+                            <% houses.forEach((house) => { %>
+                                <a href="/houses/<%= house._id %>/history" class="litebill-dropdown-item">
+                                    <i data-lucide="history"></i>
+                                    <span><%= house.house_name %></span>
+                                </a>
+                            <% }) %>
+                        <% } else { %>
+                            <a href="/houses/new" class="litebill-dropdown-item"><i data-lucide="plus"></i> Add a property first</a>
+                        <% } %>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <button id="mobileMenuTrigger" class="btn-icon btn-ghost mobile-only" style="margin-left: 0.5rem;">
-            <i data-lucide="menu"></i>
-        </button>
+
+        <div class="litebill-nav-right desktop-only">
+            <button type="button" id="openCommandPalette" class="litebill-icon-button" aria-label="Open search">
+                <i data-lucide="search"></i>
+            </button>
+
+            <button type="button" class="litebill-icon-button litebill-bell-button" aria-label="Notifications">
+                <i data-lucide="bell"></i>
+                <% if (hasNotifications) { %>
+                    <span class="litebill-notification-dot"></span>
+                <% } %>
+            </button>
+
+            <div class="litebill-dropdown-wrap">
+                <button type="button" id="userMenuButton" class="litebill-avatar-pill" aria-label="Open user menu">
+                    <span><%= userInitial %></span>
+                </button>
+                <div id="userMenu" class="litebill-dropdown-menu litebill-dropdown-menu-right hidden">
+                    <a href="/auth/profile" class="litebill-dropdown-item"><i data-lucide="user"></i> My Profile</a>
+                    <a href="/auth/profile" class="litebill-dropdown-item"><i data-lucide="lock"></i> Change Password</a>
+                    <div class="litebill-dropdown-divider"></div>
+                    <form action="/auth/logout" method="POST" style="margin: 0;">
+                        <button type="submit" class="litebill-dropdown-item litebill-dropdown-item-danger" style="width: 100%; text-align: left;">
+                            <i data-lucide="log-out"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-only litebill-mobile-actions">
+            <button type="button" id="openMobileDrawer" class="litebill-icon-button litebill-hamburger-button" aria-label="Open menu">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
     </div>
 </nav>
 
-<!-- Command Palette -->
-<div id="commandPalette" class="command-palette hidden">
-    <div class="command-palette-backdrop" id="commandPaletteBackdrop"></div>
-    <div class="command-palette-content">
-        <div class="command-search-wrapper">
-            <i data-lucide="search" class="command-search-icon"></i>
-            <input type="text" id="commandInput" class="command-input" placeholder="Search houses, rooms, billing cycles... (Esc to close)">
-            <div class="command-badge">ESC</div>
+<div id="commandPalette" class="litebill-command-palette hidden">
+    <div id="commandPaletteBackdrop" class="litebill-command-backdrop"></div>
+    <div class="litebill-command-card">
+        <div class="litebill-command-input-wrap">
+            <i data-lucide="search"></i>
+            <input id="commandPaletteInput" type="text" class="litebill-command-input" placeholder="Search houses, pages, billing flows..." />
+            <span class="litebill-command-kbd">ESC</span>
         </div>
-        <div class="command-results">
-            <div class="command-section">
-                <div class="command-section-title">Quick Actions</div>
-                <a href="/houses/new" class="command-item"><i data-lucide="plus-circle"></i> Add New Property</a>
-                <a href="/auth/profile" class="command-item"><i data-lucide="user"></i> Profile Settings</a>
+        <div class="litebill-command-body">
+            <div class="litebill-command-section">
+                <div class="litebill-dropdown-section-title">Quick Links</div>
+                <a href="/dashboard" class="litebill-dropdown-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="/houses" class="litebill-dropdown-item"><i data-lucide="layout-grid"></i> All Properties</a>
+                <a href="/houses/new" class="litebill-dropdown-item"><i data-lucide="plus"></i> Add Property</a>
             </div>
-            <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-            <div class="command-section">
-                <div class="command-section-title">Your Properties</div>
-                <% navHouses.forEach(h => { %>
-                    <a href="/houses/<%= h._id %>" class="command-item"><i data-lucide="home"></i> <%= h.house_name %></a>
-                <% }) %>
+            <div class="litebill-command-section">
+                <div class="litebill-dropdown-section-title">Your Houses</div>
+                <% if (houses.length > 0) { %>
+                    <% houses.forEach((house) => { %>
+                        <a href="/houses/<%= house._id %>" class="litebill-dropdown-item">
+                            <i data-lucide="house"></i>
+                            <span><%= house.house_name %></span>
+                        </a>
+                    <% }) %>
+                <% } else { %>
+                    <div class="litebill-dropdown-empty">No properties yet</div>
+                <% } %>
             </div>
-            <% } %>
         </div>
     </div>
 </div>
 
-<!-- Mobile Drawer -->
-<div id="mobileDrawer" class="mobile-drawer hidden">
-    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop"></div>
-    <div class="mobile-drawer-content">
-        <div class="mobile-drawer-header">
-            <div class="logo-link">
-                <i data-lucide="zap" class="logo-icon"></i>
-                <span class="logo-text">LiteBill</span>
-            </div>
-            <button id="mobileMenuClose" class="btn-icon btn-ghost"><i data-lucide="x"></i></button>
+<div id="mobileDrawer" class="litebill-mobile-overlay hidden">
+    <div id="mobileDrawerBackdrop" class="litebill-mobile-backdrop"></div>
+    <div class="litebill-mobile-drawer">
+        <div class="litebill-mobile-drawer-header">
+            <a href="/dashboard" class="litebill-logo-pill litebill-logo-pill-mobile">
+                <i data-lucide="zap"></i>
+                <span>LiteBill</span>
+            </a>
+            <button type="button" id="closeMobileDrawer" class="litebill-icon-button" aria-label="Close menu">
+                <i data-lucide="x"></i>
+            </button>
         </div>
-        <div class="mobile-drawer-links">
-            <a href="/dashboard" class="mobile-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-            <a href="/houses" class="mobile-nav-item"><i data-lucide="home"></i> Properties</a>
-            <% if (typeof navHouses !== 'undefined' && navHouses.length > 0) { %>
-                <a href="/houses/<%= navHouses[0]._id %>/main-bill/new" class="mobile-nav-item"><i data-lucide="receipt"></i> Submit Readings</a>
-                <a href="/houses/<%= navHouses[0]._id %>/history" class="mobile-nav-item"><i data-lucide="history"></i> History</a>
-            <% } %>
-        </div>
-        <div class="mobile-drawer-footer">
-            <a href="/auth/profile" class="mobile-nav-item" style="border-bottom: none;"><i data-lucide="user"></i> My Profile</a>
-            <form action="/auth/logout" method="POST" style="margin: 0; margin-top: 1rem;">
-                <button type="submit" class="btn btn-danger" style="width: 100%;">Sign Out</button>
+
+        <div class="litebill-mobile-links">
+            <a href="/dashboard" class="litebill-mobile-link <%= isDashboard ? 'active' : '' %>">Dashboard</a>
+            <a href="/houses" class="litebill-mobile-link <%= isProperties ? 'active' : '' %>">Properties</a>
+            <a href="<%= firstHouse ? '/houses/' + firstHouse._id + '/cycles' : '/houses' %>" class="litebill-mobile-link <%= isBilling ? 'active' : '' %>">Billing</a>
+            <a href="<%= firstHouse ? '/houses/' + firstHouse._id + '/history' : '/houses' %>" class="litebill-mobile-link <%= isHistory ? 'active' : '' %>">History</a>
+            <a href="/auth/profile" class="litebill-mobile-link">Profile</a>
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <button type="submit" class="litebill-mobile-link litebill-mobile-link-danger">Sign Out</button>
             </form>
         </div>
     </div>
 </div>
 
 <style>
-    /* Navbar Core */
-    .top-navbar {
-        position: fixed;
+    .litebill-navbar {
+        position: sticky;
         top: 0;
-        left: 0;
-        width: 100%;
-        height: 60px;
-        background: rgba(15,17,23,0.8);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--border);
-        z-index: 1000;
+        z-index: 1500;
+        height: var(--navbar-height);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border-bottom: 1px solid var(--glass-border);
+        box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .litebill-navbar-inner {
+        max-width: 1300px;
+        height: 100%;
+        margin: 0 auto;
+        padding: 0 32px;
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: center;
-        padding: 0 2rem;
+        gap: 20px;
     }
 
-    /* Logo Section */
-    .logo-link {
-        display: flex;
+    .litebill-logo-pill {
+        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-    .logo-icon {
-        color: var(--accent-orange);
-        transition: transform 0.3s ease;
-    }
-    .logo-link:hover .logo-icon {
-        transform: rotate(15deg) scale(1.1);
-    }
-    .logo-text {
+        gap: 10px;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: var(--surface-dark);
+        color: var(--text-on-dark);
         font-weight: 800;
-        font-size: 1.25rem;
-        background: var(--gradient-hero);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        flex-shrink: 0;
     }
 
-    /* Center Links */
-    .nav-links-center {
+    .litebill-logo-pill i {
+        width: 18px;
+        height: 18px;
+        color: var(--accent-orange);
+    }
+
+    .litebill-nav-center {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .litebill-nav-pills {
         display: flex;
         align-items: center;
-        gap: 2rem;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        gap: 6px;
+        padding: 6px;
+        background: var(--surface-soft);
+        border-radius: 999px;
     }
-    .nav-item-center {
-        font-weight: 500;
+
+    .litebill-nav-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 0 22px;
+        border-radius: 999px;
         color: var(--text-secondary);
         font-size: 0.95rem;
-        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .litebill-nav-pill i {
+        width: 14px;
+        height: 14px;
+    }
+
+    .litebill-nav-pill:hover,
+    .litebill-nav-pill.active {
+        background: var(--surface-dark);
+        color: var(--text-on-dark);
+    }
+
+    .litebill-nav-right {
         display: flex;
         align-items: center;
+        gap: 10px;
+    }
+
+    .litebill-icon-button {
         position: relative;
-        padding: 1.1rem 0;
-        transition: color 0.2s ease;
+        width: 48px;
+        min-width: 48px;
+        height: 48px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #7A7A8A;
+        transition: background 0.2s ease, color 0.2s ease;
+        cursor: pointer;
     }
-    .nav-item-center:hover, .nav-item-center.active {
-        color: var(--text-primary);
+
+    .litebill-icon-button:hover {
+        background: #F7F6F2;
+        color: #1A1A1A;
     }
-    .nav-item-center::after {
-        content: '';
+
+    .litebill-icon-button i {
+        width: 18px;
+        height: 18px;
+    }
+
+    .litebill-bell-button {
+        overflow: visible;
+    }
+
+    .litebill-notification-dot {
         position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 2px;
+        top: 11px;
+        right: 12px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
         background: var(--accent-orange);
-        transition: width 0.3s ease;
-        border-radius: 2px 2px 0 0;
-    }
-    .nav-item-center.active::after, .nav-item-center:hover::after {
-        width: 100%;
     }
 
-    /* Right Actions */
-    .nav-actions-right {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .btn-quick-add {
-        padding: 0.4rem 0.8rem;
-        border-radius: var(--radius-pill);
-        font-size: 0.8rem;
-    }
-    .notification-btn {
-        position: relative;
-    }
-    .notification-badge {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        background: var(--accent-red);
-        color: #fff;
-        font-size: 0.6rem;
-        font-weight: 700;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        display: flex;
+    .litebill-avatar-pill {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        background: var(--surface-dark);
+        color: var(--text-on-dark);
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid rgba(15,17,23,1);
-    }
-    .user-avatar-gradient {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: var(--gradient-hero);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
         font-weight: 700;
-        font-size: 0.9rem;
-        text-decoration: none;
-        transition: transform 0.2s ease;
-    }
-    .user-avatar-gradient:hover {
-        transform: scale(1.05);
+        cursor: pointer;
     }
 
-    /* Dropdowns */
-    .dropdown-container {
+    .litebill-dropdown-wrap {
         position: relative;
     }
-    .nav-dropdown-menu {
+
+    .litebill-dropdown-menu {
         position: absolute;
-        top: 100%;
-        margin-top: 0.5rem;
-        background: var(--surface-raised);
-        border: 1px solid var(--border);
+        top: calc(100% + 10px);
+        left: 0;
+        min-width: 240px;
+        padding: 8px;
+        background: #FFFFFF;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        z-index: 1600;
+    }
+
+    .litebill-dropdown-menu-right {
+        right: 0;
+        left: auto;
+    }
+
+    .litebill-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 40px;
+        padding: 10px 12px;
         border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        width: 220px;
-        padding: 0.5rem;
-        z-index: 1000;
-        opacity: 0;
-        transform: translateY(-8px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        pointer-events: none;
-    }
-    .nav-dropdown-menu.show {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-    .nav-dropdown-menu.hidden {
-        display: none !important;
-    }
-    .dropdown-header {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: var(--text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.6rem 0.75rem;
+        color: #1A1A1A;
         font-size: 0.9rem;
-        font-weight: 500;
-        color: var(--text-primary);
-        text-decoration: none;
-        border-radius: 8px;
-        transition: background 0.15s ease;
-    }
-    .dropdown-item i {
-        width: 16px;
-        height: 16px;
-        color: var(--text-secondary);
-    }
-    .dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    .dropdown-item:hover i {
-        color: var(--accent-orange);
-    }
-    .dropdown-divider {
-        height: 1px;
-        background: var(--border);
-        margin: 0.5rem 0;
     }
 
-    /* Command Palette */
-    .command-palette {
+    .litebill-dropdown-item:hover {
+        background: #F7F6F2;
+    }
+
+    .litebill-dropdown-item i {
+        width: 18px;
+        height: 18px;
+        color: #7A7A8A;
+    }
+
+    .litebill-dropdown-item-danger,
+    .litebill-dropdown-item-danger i {
+        color: #CC4A0C;
+    }
+
+    .litebill-dropdown-divider {
+        height: 1px;
+        background: #F0EFE9;
+        margin: 8px 0;
+    }
+
+    .litebill-dropdown-section-title {
+        padding: 8px 12px;
+        color: #7A7A8A;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .litebill-dropdown-empty {
+        padding: 12px;
+        color: #7A7A8A;
+        font-size: 0.85rem;
+    }
+
+    .litebill-command-palette {
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        z-index: 1800;
         display: flex;
+        align-items: flex-start;
         justify-content: center;
-        padding-top: 10vh;
+        padding: 80px 16px 24px;
     }
-    .command-palette.hidden {
-        display: none;
-    }
-    .command-palette-backdrop {
+
+    .litebill-command-backdrop {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.8);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        background: rgba(0, 0, 0, 0.5);
     }
-    .command-palette-content {
+
+    .litebill-command-card {
         position: relative;
         width: 100%;
         max-width: 600px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+        background: #FFFFFF;
+        border-radius: 24px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14);
         overflow: hidden;
-        animation: fadeUp 0.2s ease forwards;
-        margin: 0 1rem;
-        height: fit-content;
-    }
-    .command-search-wrapper {
-        display: flex;
-        align-items: center;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--border);
-    }
-    .command-search-icon {
-        color: var(--text-secondary);
-        width: 20px;
-        height: 20px;
-        margin-right: 1rem;
-    }
-    .command-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: var(--text-primary);
-        font-size: 1.1rem;
-        font-weight: 500;
-        font-family: var(--font-main);
-    }
-    .command-input:focus {
-        outline: none;
-    }
-    .command-badge {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.4rem;
-        background: var(--surface-raised);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        color: var(--text-dim);
-        font-weight: 700;
-    }
-    .command-results {
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 0.5rem;
-    }
-    .command-section {
-        margin-bottom: 0.5rem;
-    }
-    .command-section-title {
-        padding: 0.5rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--text-dim);
-        text-transform: uppercase;
-    }
-    .command-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1rem;
-        color: var(--text-primary);
-        text-decoration: none;
-        font-size: 0.95rem;
-        border-radius: 8px;
-        transition: background 0.1s ease;
-    }
-    .command-item i {
-        width: 16px;
-        height: 16px;
-        color: var(--text-secondary);
-    }
-    .command-item:hover, .command-item.active {
-        background: var(--surface-raised);
     }
 
-    /* Mobile Drawer */
-    .mobile-only {
-        display: none;
+    .litebill-command-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        border-bottom: 1px solid #F0EFE9;
     }
-    .mobile-drawer {
+
+    .litebill-command-input-wrap i {
+        width: 18px;
+        height: 18px;
+        color: #7A7A8A;
+    }
+
+    .litebill-command-input {
+        flex: 1;
+        min-height: auto;
+        padding: 0;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #1A1A1A;
+        font-size: 0.95rem;
+    }
+
+    .litebill-command-kbd {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #F2F1EC;
+        color: #7A7A8A;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .litebill-command-body {
+        max-height: 420px;
+        overflow-y: auto;
+        padding: 8px;
+    }
+
+    .litebill-command-section + .litebill-command-section {
+        margin-top: 8px;
+    }
+
+    .litebill-mobile-actions {
+        align-items: center;
+    }
+
+    .litebill-hamburger-button {
+        color: #1A1A1A;
+    }
+
+    .litebill-mobile-overlay {
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        z-index: 1700;
     }
-    .mobile-drawer.hidden {
-        display: none;
-    }
-    .mobile-drawer-backdrop {
+
+    .litebill-mobile-backdrop {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.6);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.5);
     }
-    .mobile-drawer-content {
+
+    .litebill-mobile-drawer {
         position: absolute;
         top: 0;
         left: 0;
-        bottom: 0;
         width: 80%;
-        max-width: 320px;
-        background: var(--surface);
-        border-right: 1px solid var(--border);
+        max-width: 300px;
+        height: 100%;
+        background: #FFFFFF;
+        transform: translateX(-100%);
+        transition: transform 0.24s ease;
         display: flex;
         flex-direction: column;
-        transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .mobile-drawer.open .mobile-drawer-content {
+
+    .litebill-mobile-overlay.open .litebill-mobile-drawer {
         transform: translateX(0);
     }
-    .mobile-drawer-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border);
+
+    .litebill-mobile-drawer-header {
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #F0EFE9;
     }
-    .mobile-drawer-links {
-        flex: 1;
-        padding: 1rem 0;
-        overflow-y: auto;
+
+    .litebill-logo-pill-mobile {
+        min-height: 40px;
     }
-    .mobile-nav-item {
+
+    .litebill-mobile-links {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .litebill-mobile-link {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem 1.5rem;
-        color: var(--text-primary);
-        text-decoration: none;
-        font-size: 1rem;
+        width: 100%;
+        min-height: 56px;
+        padding: 0 16px;
+        border-bottom: 1px solid #F0EFE9;
+        color: #1A1A1A;
         font-weight: 500;
-        border-bottom: 1px solid rgba(255,255,255,0.02);
+        text-align: left;
     }
-    .mobile-nav-item i {
-        color: var(--text-secondary);
+
+    .litebill-mobile-link.active {
+        background: #F7F6F2;
+        font-weight: 700;
     }
-    .mobile-drawer-footer {
-        padding: 1.5rem;
-        border-top: 1px solid var(--border);
-        background: var(--surface-raised);
+
+    .litebill-mobile-link-danger {
+        color: #CC4A0C;
     }
 
     @media (max-width: 768px) {
-        .desktop-only { display: none !important; }
-        .mobile-only { display: inline-flex; }
-        .top-navbar { padding: 0 1rem; }
+        .litebill-navbar-inner {
+            padding: 0 16px;
+        }
+
+        .litebill-nav-center,
+        .litebill-nav-right {
+            display: none !important;
+        }
+
+        .litebill-mobile-actions {
+            display: inline-flex;
+        }
     }
 </style>
 
 <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const dropdownPairs = [
+            ["propertiesMenuButton", "propertiesMenu"],
+            ["billingMenuButton", "billingMenu"],
+            ["historyMenuButton", "historyMenu"],
+            ["userMenuButton", "userMenu"]
+        ];
 
+        const commandPalette = document.getElementById("commandPalette");
+        const commandBackdrop = document.getElementById("commandPaletteBackdrop");
+        const commandInput = document.getElementById("commandPaletteInput");
+        const searchTrigger = document.getElementById("openCommandPalette");
 
-        // Dropdown toggle logic
-        const setupDropdown = (btnId, menuId) => {
-            const btn = document.getElementById(btnId);
+        const mobileOverlay = document.getElementById("mobileDrawer");
+        const mobileBackdrop = document.getElementById("mobileDrawerBackdrop");
+        const mobileOpen = document.getElementById("openMobileDrawer");
+        const mobileClose = document.getElementById("closeMobileDrawer");
+
+        const closeAllDropdowns = () => {
+            dropdownPairs.forEach(([, menuId]) => {
+                const menu = document.getElementById(menuId);
+                if (menu) menu.classList.add("hidden");
+            });
+        };
+
+        dropdownPairs.forEach(([buttonId, menuId]) => {
+            const button = document.getElementById(buttonId);
             const menu = document.getElementById(menuId);
-            if (!btn || !menu) return;
+            if (!button || !menu) return;
 
-            btn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Close others
-                document.querySelectorAll('.nav-dropdown-menu').forEach(m => {
-                    if (m !== menu) {
-                        m.classList.remove('show');
-                        setTimeout(() => m.classList.add('hidden'), 200);
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const isHidden = menu.classList.contains("hidden");
+                closeAllDropdowns();
+                if (isHidden) menu.classList.remove("hidden");
+            });
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!event.target.closest(".litebill-dropdown-wrap")) {
+                closeAllDropdowns();
+            }
+        });
+
+        const openCommandPalette = () => {
+            commandPalette?.classList.remove("hidden");
+            document.body.classList.add("modal-open");
+            setTimeout(() => commandInput?.focus(), 20);
+        };
+
+        const closeCommandPalette = () => {
+            commandPalette?.classList.add("hidden");
+            document.body.classList.remove("modal-open");
+            if (commandInput) {
+                commandInput.value = "";
+                commandInput.dispatchEvent(new Event("input"));
+            }
+        };
+
+        commandInput?.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const sections = document.querySelectorAll(".litebill-command-section");
+            sections.forEach(section => {
+                const items = section.querySelectorAll(".litebill-dropdown-item");
+                let visibleCount = 0;
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(query)) {
+                        item.style.display = "";
+                        visibleCount++;
+                    } else {
+                        item.style.display = "none";
                     }
                 });
-                
-                if (menu.classList.contains("hidden") || !menu.classList.contains("show")) {
-                    menu.classList.remove("hidden");
-                    // slight delay to allow display:block to apply before animating opacity
-                    setTimeout(() => menu.classList.add("show"), 10);
+                if (visibleCount > 0) {
+                    section.style.display = "";
                 } else {
-                    menu.classList.remove("show");
-                    setTimeout(() => menu.classList.add("hidden"), 200);
-                }
-            });
-        };
-
-        setupDropdown("navPropsBtn", "navPropsDropdown");
-        setupDropdown("navBillingBtn", "navBillingDropdown");
-        setupDropdown("quickAddBtn", "quickAddDropdown");
-        setupDropdown("navUserBtn", "navUserDropdown");
-
-        // Close dropdowns on outside click
-        document.addEventListener("click", (e) => {
-            document.querySelectorAll('.nav-dropdown-menu.show').forEach(menu => {
-                const btnId = menu.id.replace('Dropdown', 'Btn');
-                const btn = document.getElementById(btnId);
-                if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
-                    menu.classList.remove("show");
-                    setTimeout(() => menu.classList.add("hidden"), 200);
+                    section.style.display = "none";
                 }
             });
         });
 
-        // Command Palette Logic
-        const cmdPalette = document.getElementById('commandPalette');
-        const cmdInput = document.getElementById('commandInput');
-        
-        const openCmd = () => {
-            cmdPalette.classList.remove('hidden');
-            setTimeout(() => cmdInput.focus(), 100);
-        };
-        const closeCmd = () => {
-            cmdPalette.classList.add('hidden');
-            cmdInput.value = '';
-        };
+        searchTrigger?.addEventListener("click", openCommandPalette);
+        commandBackdrop?.addEventListener("click", closeCommandPalette);
 
-        document.getElementById('searchBtn')?.addEventListener('click', openCmd);
-        document.getElementById('commandPaletteBackdrop')?.addEventListener('click', closeCmd);
-
-        document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                cmdPalette.classList.contains('hidden') ? openCmd() : closeCmd();
-            }
-            if (e.key === 'Escape' && !cmdPalette.classList.contains('hidden')) {
-                closeCmd();
-            }
-        });
-
-        // Mobile Drawer Logic
-        const mobileDrawer = document.getElementById('mobileDrawer');
         const openMobileMenu = () => {
-            mobileDrawer.classList.remove('hidden');
-            // small delay to allow transition
-            setTimeout(() => mobileDrawer.classList.add('open'), 10);
+            mobileOverlay?.classList.remove("hidden");
+            document.body.classList.add("modal-open");
+            requestAnimationFrame(() => mobileOverlay?.classList.add("open"));
         };
+
         const closeMobileMenu = () => {
-            mobileDrawer.classList.remove('open');
-            setTimeout(() => mobileDrawer.classList.add('hidden'), 300);
+            mobileOverlay?.classList.remove("open");
+            document.body.classList.remove("modal-open");
+            setTimeout(() => mobileOverlay?.classList.add("hidden"), 240);
         };
 
-        document.getElementById('mobileMenuTrigger')?.addEventListener('click', openMobileMenu);
-        document.getElementById('mobileMenuClose')?.addEventListener('click', closeMobileMenu);
-        document.getElementById('mobileDrawerBackdrop')?.addEventListener('click', closeMobileMenu);
+        mobileOpen?.addEventListener("click", openMobileMenu);
+        mobileClose?.addEventListener("click", closeMobileMenu);
+        mobileBackdrop?.addEventListener("click", closeMobileMenu);
 
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+        document.addEventListener("keydown", (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+                event.preventDefault();
+                if (commandPalette?.classList.contains("hidden")) openCommandPalette();
+                else closeCommandPalette();
+            }
+
+            if (event.key === "Escape") {
+                closeAllDropdowns();
+                if (commandPalette && !commandPalette.classList.contains("hidden")) closeCommandPalette();
+                if (mobileOverlay && !mobileOverlay.classList.contains("hidden")) closeMobileMenu();
+            }
+        });
+
+        const currentPath = window.location.pathname;
+        if (currentPath === "/dashboard") {
+            document.querySelector('.litebill-nav-pill[href="/dashboard"]')?.classList.add("active");
         }
     });
 </script>

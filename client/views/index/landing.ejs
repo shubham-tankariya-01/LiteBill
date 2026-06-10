@@ -1,85 +1,602 @@
 <% layout('layouts/boilerplate') %>
 
-<div style="max-width: 900px; margin: 0 auto; padding: 4rem 1rem; display: flex; flex-direction: column; gap: 6rem;">
+<style>
+    /* Hide the default internal app navbar */
+    .litebill-navbar,
+    .top-navbar {
+        display: none !important;
+    }
+
+    .main-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    /* Landing Page Specific Styles */
+    .landing-page {
+        font-family: var(--font-main);
+        color: var(--text-primary);
+        background-color: var(--bg-body);
+        overflow-x: hidden;
+    }
+
+    /* Custom Public Header */
+    .public-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        background: rgba(248, 250, 252, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: 1000;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .public-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .public-brand i {
+        width: 28px;
+        height: 28px;
+        color: var(--accent-primary);
+    }
+
+    .public-nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 120px 40px 60px;
+        background: radial-gradient(circle at top center, rgba(37, 99, 235, 0.08) 0%, transparent 60%);
+    }
+
+    .hero-content {
+        max-width: 1280px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 60px;
+        margin: 0 auto;
+    }
+
+    .hero-text {
+        flex: 1;
+        max-width: 600px;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        background: var(--surface-soft);
+        color: var(--accent-primary);
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 24px;
+        letter-spacing: -0.03em;
+        color: var(--surface-dark);
+    }
+
+    .hero-title span {
+        background: linear-gradient(135deg, var(--accent-primary), #8B5CF6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 16px;
+    }
+
+    .hero-image-wrapper {
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Neon blue shadow and border for images */
+    .neon-bordered-image {
+        width: 100%;
+        max-width: 500px;
+        border-radius: 20px;
+        border: 2px solid rgba(37, 99, 235, 0.2);
+        box-shadow: 0 0 40px rgba(37, 99, 235, 0.4);
+        object-fit: cover;
+    }
+
+    .hero-image-wrapper .neon-bordered-image {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    /* How It Works Flow Section */
+    .how-it-works {
+        padding: 120px 40px;
+        background: var(--surface);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 80px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .section-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 16px;
+        color: var(--surface-dark);
+    }
+
+    .section-desc {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .flow-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        position: relative;
+        padding: 40px 0;
+    }
+
+    /* Interactive Timeline Beam */
+    .timeline-track {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 5px;
+        background: rgba(15, 23, 42, 0.15); /* Faint track */
+        z-index: 0;
+        border-radius: 999px;
+    }
+
+    .timeline-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0%;
+        background: #1E3A8A; /* Navy blue scroll fill */
+        box-shadow: 0 0 20px rgba(30, 58, 138, 0.8);
+        border-radius: 999px;
+        transition: height 0.1s ease-out;
+    }
+
+    @keyframes pulseGreen {
+        0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+        100% { box-shadow: 0 0 30px rgba(16, 185, 129, 1); }
+    }
+
+    .flow-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 120px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .flow-row::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 24px;
+        height: 24px;
+        background: var(--surface-dark);
+        border: 3px solid rgba(37, 99, 235, 0.5);
+        border-radius: 50%;
+        z-index: 5;
+        transition: all 0.4s ease;
+    }
+
+    .flow-row::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 3px;
+        width: 5%;
+        background: rgba(37, 99, 235, 0.2);
+        z-index: 4;
+        transition: all 0.4s ease;
+    }
+
+    /* Active 'Reached' States */
+    .flow-row.reached::before {
+        border-color: #10B981;
+        background: #10B981;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+        animation: pulseGreen 2s infinite alternate;
+    }
+
+    .flow-row.reached::after {
+        background: #10B981;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    }
+
+    .flow-row.reached .flow-content {
+        border-color: rgba(16, 185, 129, 0.4);
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.1);
+    }
+
+    .flow-row:not(.reverse)::after {
+        left: 45%;
+    }
+
+    .flow-row.reverse::after {
+        right: 45%;
+    }
+
+    .flow-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .flow-row.reverse {
+        flex-direction: row-reverse;
+    }
+
+    .flow-content {
+        width: 45%;
+        background: var(--surface-dark);
+        padding: 40px;
+        border-radius: 24px;
+        color: var(--text-on-dark);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .flow-content:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+    }
+
+    .flow-step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.2);
+        color: #60A5FA;
+        font-weight: 800;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        border: 1px solid rgba(37, 99, 235, 0.4);
+    }
+
+    .flow-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 16px;
+        color: #FFFFFF;
+    }
+
+    .flow-desc {
+        color: var(--text-on-dark-secondary);
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .flow-image {
+        width: 45%;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flow-image .neon-bordered-image {
+        max-width: 400px;
+        transition: transform 0.4s ease;
+    }
+
+    .flow-row:hover .neon-bordered-image {
+        transform: scale(1.02);
+    }
+
+    /* Footer */
+    .footer {
+        background: var(--surface-dark);
+        padding: 80px 40px;
+        text-align: center;
+        color: var(--text-on-dark);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.8), transparent);
+    }
+
+    .developer-signature {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dev-label {
+        font-size: 0.9rem;
+        color: var(--text-on-dark-secondary);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+    }
+
+    .dev-name {
+        font-size: 2.5rem;
+        font-weight: 900;
+        font-family: var(--font-main);
+        background: linear-gradient(135deg, #60A5FA, #A78BFA, #F472B6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 1px;
+        text-shadow: 0 0 30px rgba(96, 165, 250, 0.4);
+        position: relative;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .hero-content {
+            flex-direction: column;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+        }
+
+        .hero-buttons {
+            justify-content: center;
+        }
+
+        .timeline-track, .flow-row::before, .flow-row::after {
+            display: none;
+        }
+
+        .flow-row, .flow-row.reverse {
+            flex-direction: column;
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+
+        .flow-content, .flow-image {
+            width: 100%;
+            max-width: 600px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .public-header {
+            padding: 0 20px;
+        }
+
+        .hero-section {
+            padding: 100px 20px 40px;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="landing-page">
+    <!-- Custom Public Header -->
+    <header class="public-header">
+        <a href="/" class="public-brand">
+            <i data-lucide="zap"></i>
+            LiteBill
+        </a>
+        <div class="public-nav-actions">
+            <a href="/auth/login" class="btn btn-ghost">Log In</a>
+            <a href="/auth/signup" class="btn btn-primary" style="min-height: 40px; padding: 8px 20px;">Get Started</a>
+        </div>
+    </header>
+
     <!-- Hero Section -->
-    <div style="text-align: center; max-width: 500px; margin: 0 auto;">
-        <i data-lucide="zap" style="width: 48px; height: 48px; color: var(--accent-orange); margin-bottom: 1.5rem;"></i>
-        <h1 style="font-size: 3rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 1rem;">LiteBill<span style="color: var(--accent-orange);">.</span></h1>
-        <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.1rem;">Modern utility bill tracking inspired by aviation dashboards. Pure precision.</p>
-        
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-            <a href="/auth/login" class="btn btn-outline" style="min-width: 120px;">Log In</a>
-            <a href="/auth/signup" class="btn btn-primary" style="min-width: 120px;">Get Started</a>
-        </div>
-    </div>
-
-    <!-- Section 1: How it works -->
-    <div style="text-align: center;">
-        <h2 style="font-size: 1.75rem; font-weight: 600; margin-bottom: 3rem;">How it works</h2>
-        
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 1.5rem;">
-            
-            <!-- Step 1 -->
-            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center;">
-                <div style="width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--accent-orange) 15%, transparent); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; position: relative;">
-                    <i data-lucide="home" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
-                    <div style="position: absolute; top: -5px; right: -5px; background: var(--accent-orange); color: #000; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">1</div>
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="hero-badge">The new standard in property billing</div>
+                <h1 class="hero-title">Smart billing for <span>modern properties.</span></h1>
+                <p class="hero-desc">
+                    Say goodbye to messy spreadsheets and disputes. LiteBill automates multi-meter reading, perfectly splits master bills, and provides transparent invoices for every tenant instantly.
+                </p>
+                <div class="hero-buttons">
+                    <a href="/auth/signup" class="btn btn-primary" style="min-height: 56px; padding: 0 32px; font-size: 1.1rem;">Start Free Trial</a>
+                    <a href="#how-it-works" class="btn btn-secondary" style="min-height: 56px; padding: 0 32px; font-size: 1.1rem;">See How It Works</a>
                 </div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Add Property & Meters</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Register your house and define all sub-meters.</p>
             </div>
-
-            <div style="display: flex; align-items: center; justify-content: center; height: 72px; color: var(--text-muted); opacity: 0.5; padding: 0 0.5rem;">
-                <i data-lucide="arrow-right" style="width: 24px; height: 24px;"></i>
-            </div>
-
-            <!-- Step 2 -->
-            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center;">
-                <div style="width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--accent-orange) 15%, transparent); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; position: relative;">
-                    <i data-lucide="file-text" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
-                    <div style="position: absolute; top: -5px; right: -5px; background: var(--accent-orange); color: #000; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">2</div>
-                </div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Submit Monthly Bill</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Input the main supplier bill and room readings.</p>
-            </div>
-
-            <div style="display: flex; align-items: center; justify-content: center; height: 72px; color: var(--text-muted); opacity: 0.5; padding: 0 0.5rem;">
-                <i data-lucide="arrow-right" style="width: 24px; height: 24px;"></i>
-            </div>
-
-            <!-- Step 3 -->
-            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center;">
-                <div style="width: 72px; height: 72px; border-radius: 50%; background: color-mix(in srgb, var(--accent-orange) 15%, transparent); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; position: relative;">
-                    <i data-lucide="calculator" style="color: var(--accent-orange); width: 32px; height: 32px;"></i>
-                    <div style="position: absolute; top: -5px; right: -5px; background: var(--accent-orange); color: #000; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">3</div>
-                </div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Get Per-Room Split</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Instantly see exact cost breakdowns per room.</p>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Section 2: Features -->
-    <div>
-        <div class="grid-layout">
-            <div class="analytic-card" style="text-align: center; padding: 2rem;">
-                <i data-lucide="pie-chart" style="color: var(--accent-green); margin-bottom: 1rem; width: 32px; height: 32px;"></i>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Automatic Bill Splitting</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Fairly distributes costs based on exact unit consumption.</p>
-            </div>
-
-            <div class="analytic-card" style="text-align: center; padding: 2rem;">
-                <i data-lucide="history" style="color: var(--accent-pink); margin-bottom: 1rem; width: 32px; height: 32px;"></i>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Full Billing History</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Access past cycles instantly without hunting for paper bills.</p>
-            </div>
-
-            <div class="analytic-card" style="text-align: center; padding: 2rem;">
-                <i data-lucide="building" style="color: var(--accent-yellow); margin-bottom: 1rem; width: 32px; height: 32px;"></i>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Multi-Property Support</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Manage multiple houses and all their meters from one account.</p>
+            <div class="hero-image-wrapper">
+                <img src="/public/images/hero.png" alt="LiteBill Smart Home Dashboard 3D" class="neon-bordered-image">
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- How It Works Section (Perfect Flow layout) -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="section-header">
+            <h2 class="section-title">How LiteBill Works</h2>
+            <p class="section-desc">We've simplified utility billing into three incredibly easy steps. No math required.</p>
+        </div>
+
+        <div class="flow-container" id="flowContainer">
+            <!-- Timeline Track -->
+            <div class="timeline-track">
+                <div class="timeline-fill" id="timelineFill"></div>
+            </div>
+
+            <!-- Step 1: Text Left, Image Right -->
+            <div class="flow-row">
+                <div class="flow-content">
+                    <div class="flow-step-number">1</div>
+                    <h3 class="flow-title">Add Property & Meters</h3>
+                    <p class="flow-desc">
+                        Register your main house and quickly define all sub-meters for your individual rooms or tenants in a clean digital layout. Set it up once and never worry again.
+                    </p>
+                </div>
+                <div class="flow-image">
+                    <img src="/public/images/meter.png" alt="Setup Property and Meters 3D" class="neon-bordered-image">
+                </div>
+            </div>
+
+            <!-- Step 2: Image Left, Text Right -->
+            <div class="flow-row reverse">
+                <div class="flow-content">
+                    <div class="flow-step-number">2</div>
+                    <h3 class="flow-title">Submit Monthly Bill</h3>
+                    <p class="flow-desc">
+                        Whenever the master utility bill arrives, simply input the total amount, total units, and record the current sub-meter readings. We'll handle the heavy lifting.
+                    </p>
+                </div>
+                <div class="flow-image">
+                    <!-- Reusing hero or if we have another image -->
+                    <img src="/public/images/hero.png" alt="Submit Master Bill" class="neon-bordered-image">
+                </div>
+            </div>
+
+            <!-- Step 3: Text Left, Image Right -->
+            <div class="flow-row">
+                <div class="flow-content">
+                    <div class="flow-step-number">3</div>
+                    <h3 class="flow-title">Automatic Precision Split</h3>
+                    <p class="flow-desc">
+                        LiteBill instantly calculates exact per-room consumption and fairly distributes the costs down to the decimal. Perfect accuracy every time.
+                    </p>
+                </div>
+                <div class="flow-image">
+                    <img src="/public/images/split.png" alt="Automatic Bill Splitting 3D" class="neon-bordered-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Footer & Signature -->
+    <footer class="footer">
+        <div class="public-brand" style="justify-content: center; margin-bottom: 24px; color: var(--text-on-dark);">
+            <i data-lucide="zap" style="color: var(--accent-primary);"></i>
+            LiteBill App
+        </div>
+        <p style="color: var(--text-on-dark-secondary); max-width: 400px; margin: 0 auto 60px;">
+            Designed specifically for landlords, property managers, and roommates who want zero friction in utility management.
+        </p>
+
+        <div class="developer-signature">
+            <span class="dev-label">Developer</span>
+            <span class="dev-name">SHUBHAM TANKARIYA</span>
+        </div>
+    </footer>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const flowContainer = document.getElementById("flowContainer");
+    const timelineFill = document.getElementById("timelineFill");
+    const rows = document.querySelectorAll(".flow-row");
+
+    if (!flowContainer || !timelineFill) return;
+
+    const handleScroll = () => {
+        const containerRect = flowContainer.getBoundingClientRect();
+        // Determine the horizontal center line of the viewport
+        const viewportCenter = window.innerHeight / 2;
+        
+        // Calculate the percentage of the container that has passed the viewport center
+        const distanceToCenter = viewportCenter - containerRect.top;
+        
+        let fillPercentage = 0;
+        if (distanceToCenter > 0) {
+            fillPercentage = (distanceToCenter / containerRect.height) * 100;
+        }
+        
+        fillPercentage = Math.max(0, Math.min(100, fillPercentage));
+        timelineFill.style.height = `${fillPercentage}%`;
+
+        // Check each row to see if the timeline has reached it
+        rows.forEach(row => {
+            const rowRect = row.getBoundingClientRect();
+            // We consider the node reached when the viewport center hits the node's position
+            const rowCenter = rowRect.top + (rowRect.height / 2);
+            
+            if (rowCenter <= viewportCenter) {
+                row.classList.add("reached");
+            } else {
+                row.classList.remove("reached");
+            }
+        });
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    // Trigger once on load
+    handleScroll();
+});
+</script>

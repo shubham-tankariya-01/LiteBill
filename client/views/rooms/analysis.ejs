@@ -1,330 +1,476 @@
 <% layout('layouts/boilerplate') %>
 
-<!-- Header -->
-<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
-            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
-            <span>/</span> 
-            <a href="/rooms/<%= roomId %>" style="color: var(--text-dim); text-decoration: none;"><%= room.meter_name %></a>
-            <span>/</span>
-            <span style="color: var(--accent-blue);">Analytics</span>
-        </div>
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
-            <i data-lucide="bar-chart-2" style="color: var(--accent-blue); width: 32px; height: 32px;"></i> Analytics Dashboard
+<div class="room-analysis-breadcrumb">Properties / <span><%= house ? house.house_name : 'Property' %></span> / <span><%= room.meter_name %></span> / Analytics</div>
+
+<section class="page-header room-analysis-header">
+    <div class="room-analysis-header-left">
+        <a href="/rooms/<%= roomId %>" class="btn btn-secondary">
+            <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+            <span>Back</span>
+        </a>
+        <h1 class="room-analysis-title">
+            <i data-lucide="bar-chart-2"></i>
+            <span>Analytics Dashboard</span>
         </h1>
     </div>
-    <a href="/rooms/<%= roomId %>" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Back to Room</a>
-</div>
+</section>
 
 <% if (typeof roomBills !== 'undefined' && roomBills.length > 0) { %>
-    <% 
+    <%
         const totalCycles = roomBills.length;
-        const highestBill = roomBills.reduce((max, b) => b.amount > max.amount ? b : max, roomBills[0]);
-        const lowestBill = roomBills.reduce((min, b) => b.amount < min.amount ? b : min, roomBills[0]);
-        const avgUnits = (roomBills.reduce((s,b) => s+b.units_consumed, 0)/roomBills.length).toFixed(1);
-        
-        let maxUnits = 0;
-        roomBills.forEach(b => { if(b.units_consumed > maxUnits) maxUnits = b.units_consumed; });
-        if (maxUnits === 0) maxUnits = 1;
+        const highestBill = roomBills.reduce((max, bill) => bill.amount > max.amount ? bill : max, roomBills[0]);
+        const lowestBill = roomBills.reduce((min, bill) => bill.amount < min.amount ? bill : min, roomBills[0]);
+        const averageUnits = (roomBills.reduce((sum, bill) => sum + bill.units_consumed, 0) / roomBills.length).toFixed(1);
 
-        let maxAmount = 0;
-        roomBills.forEach(b => { if(b.amount > maxAmount) maxAmount = b.amount; });
-        if (maxAmount === 0) maxAmount = 1;
-        
-        let totalAmount = 0;
-        let totalUnitsAll = 0;
-        roomBills.forEach(b => {
-            totalAmount += b.amount;
-            totalUnitsAll += b.units_consumed;
-        });
+        const totalUnitsAll = roomBills.reduce((sum, bill) => sum + (bill.units_consumed || 0), 0);
+        const totalAmount = roomBills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
 
-        // Ensure chronological order for charts (oldest to newest)
-        const sortedBills = [...roomBills].sort((a,b) => {
+        const sortedBills = [...roomBills].sort((a, b) => {
             const dateA = a.billing_cycle_id && a.billing_cycle_id.startDate ? new Date(a.billing_cycle_id.startDate) : new Date(0);
             const dateB = b.billing_cycle_id && b.billing_cycle_id.startDate ? new Date(b.billing_cycle_id.startDate) : new Date(0);
             return dateA - dateB;
         });
+
+        let maxUnits = Math.max(...sortedBills.map((bill) => bill.units_consumed || 0), 1);
+        let maxAmount = Math.max(...sortedBills.map((bill) => bill.amount || 0), 1);
     %>
 
-    <!-- Summary Row -->
-    <div class="grid-4" style="margin-bottom: 2rem;">
-        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Total Cycles</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary);"><%= totalCycles %></div>
-        </div>
-        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Highest Bill</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-red);">₹<%= highestBill.amount.toLocaleString() %></div>
-        </div>
-        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Lowest Bill</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-green);">₹<%= lowestBill.amount.toLocaleString() %></div>
-        </div>
-        <div class="card-raised" style="text-align: center; padding: 1.5rem;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.5rem;">Average Units</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-blue);"><%= avgUnits %></div>
-        </div>
-    </div>
+    <section class="room-analysis-summary">
+        <article class="room-summary-card">
+            <div class="room-summary-label">Total Cycles</div>
+            <div class="room-summary-value"><%= totalCycles %></div>
+        </article>
+        <article class="room-summary-card">
+            <div class="room-summary-label">Highest Bill</div>
+            <div class="room-summary-value" style="color: #EF4444;">₹<%= Number(highestBill.amount || 0).toLocaleString('en-IN') %></div>
+        </article>
+        <article class="room-summary-card">
+            <div class="room-summary-label">Lowest Bill</div>
+            <div class="room-summary-value" style="color: #4CAF7D;">₹<%= Number(lowestBill.amount || 0).toLocaleString('en-IN') %></div>
+        </article>
+        <article class="room-summary-card">
+            <div class="room-summary-label">Average Units</div>
+            <div class="room-summary-value" style="color: #5B8DEF;"><%= averageUnits %></div>
+        </article>
+    </section>
 
-    <!-- Charts Section -->
-    <div class="grid-layout" style="margin-bottom: 2.5rem;">
-        <!-- Units Chart -->
-        <div class="card-raised" style="padding: 2rem;">
-            <h3 style="margin: 0 0 2rem 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="zap" style="color: var(--accent-purple);"></i> Units Consumed
-            </h3>
-            
-            <div class="custom-chart" style="height: 250px; display: flex; position: relative; padding-left: 40px; padding-bottom: 30px;">
-                <!-- Grid Lines & Y-Axis -->
-                <div class="chart-y-axis">
-                    <span><%= maxUnits.toFixed(0) %> U</span>
-                    <span><%= (maxUnits * 0.75).toFixed(0) %></span>
-                    <span><%= (maxUnits * 0.5).toFixed(0) %></span>
-                    <span><%= (maxUnits * 0.25).toFixed(0) %></span>
+    <section class="grid-2 room-analysis-charts">
+        <article class="card room-chart-card">
+            <div class="room-chart-header">
+                <div class="room-chart-title">
+                    <i data-lucide="zap" style="color: #1F1F1F;"></i>
+                    <span>Units Consumed</span>
+                </div>
+            </div>
+
+            <div class="room-css-chart">
+                <div class="room-chart-y-axis">
+                    <span><%= maxUnits %></span>
+                    <span><%= Math.round(maxUnits * 0.75) %></span>
+                    <span><%= Math.round(maxUnits * 0.5) %></span>
+                    <span><%= Math.round(maxUnits * 0.25) %></span>
                     <span>0</span>
                 </div>
-                <div class="chart-grid">
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
+
+                <div class="room-chart-grid">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
-                
-                <!-- Bars -->
-                <div class="chart-bars">
-                    <% sortedBills.forEach(bill => { 
-                        const pct = Math.max((bill.units_consumed / maxUnits) * 100, 2);
-                        const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'short'}) : '?';
+
+                <div class="room-chart-bars">
+                    <% sortedBills.forEach((bill) => {
+                        const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate
+                            ? new Date(bill.billing_cycle_id.startDate).toLocaleDateString('en-IN', { month: 'short' })
+                            : 'N/A';
+                        const height = Math.max(((bill.units_consumed || 0) / maxUnits) * 100, 4);
                     %>
-                        <div class="chart-bar-wrap group">
-                            <!-- Tooltip -->
-                            <div class="chart-tooltip">
-                                <strong><%= bill.units_consumed %> Units</strong><br>
-                                <span style="color: var(--text-dim); font-size: 0.75rem;"><%= label %></span>
+                        <div class="room-chart-bar-group">
+                            <div class="room-chart-tooltip">
+                                <strong><%= bill.units_consumed %> units</strong>
+                                <span><%= label %></span>
                             </div>
-                            
-                            <!-- Bar -->
-                            <div class="chart-bar" style="height: <%= pct %>%; background: linear-gradient(180deg, var(--accent-purple) 0%, rgba(139,92,246,0.2) 100%);"></div>
-                            
-                            <!-- X-Axis Label -->
-                            <div class="chart-x-label"><%= label %></div>
+                            <div class="room-chart-bar room-chart-bar-dark" style="height: <%= height %>%"></div>
+                            <div class="room-chart-x-label"><%= label %></div>
                         </div>
                     <% }) %>
                 </div>
             </div>
-        </div>
+        </article>
 
-        <!-- Amount Chart -->
-        <div class="card-raised" style="padding: 2rem;">
-            <h3 style="margin: 0 0 2rem 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="indian-rupee" style="color: var(--accent-green);"></i> Bill Amount
-            </h3>
-            
-            <div class="custom-chart" style="height: 250px; display: flex; position: relative; padding-left: 50px; padding-bottom: 30px;">
-                <!-- Grid Lines & Y-Axis -->
-                <div class="chart-y-axis">
-                    <span>₹<%= maxAmount.toFixed(0) %></span>
-                    <span><%= (maxAmount * 0.75).toFixed(0) %></span>
-                    <span><%= (maxAmount * 0.5).toFixed(0) %></span>
-                    <span><%= (maxAmount * 0.25).toFixed(0) %></span>
+        <article class="card room-chart-card">
+            <div class="room-chart-header">
+                <div class="room-chart-title">
+                    <i data-lucide="indian-rupee" style="color: #FF6B2B;"></i>
+                    <span>Bill Amount</span>
+                </div>
+            </div>
+
+            <div class="room-css-chart">
+                <div class="room-chart-y-axis">
+                    <span>₹<%= maxAmount %></span>
+                    <span><%= Math.round(maxAmount * 0.75) %></span>
+                    <span><%= Math.round(maxAmount * 0.5) %></span>
+                    <span><%= Math.round(maxAmount * 0.25) %></span>
                     <span>0</span>
                 </div>
-                <div class="chart-grid">
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
-                    <div class="grid-line"></div>
+
+                <div class="room-chart-grid">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
-                
-                <!-- Bars -->
-                <div class="chart-bars">
-                    <% sortedBills.forEach(bill => { 
-                        const pct = Math.max((bill.amount / maxAmount) * 100, 2);
-                        const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'short'}) : '?';
+
+                <div class="room-chart-bars">
+                    <% sortedBills.forEach((bill) => {
+                        const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate
+                            ? new Date(bill.billing_cycle_id.startDate).toLocaleDateString('en-IN', { month: 'short' })
+                            : 'N/A';
+                        const height = Math.max(((bill.amount || 0) / maxAmount) * 100, 4);
                     %>
-                        <div class="chart-bar-wrap group">
-                            <!-- Tooltip -->
-                            <div class="chart-tooltip tooltip-green">
-                                <strong>₹<%= bill.amount %></strong><br>
-                                <span style="color: var(--text-dim); font-size: 0.75rem;"><%= label %></span>
+                        <div class="room-chart-bar-group">
+                            <div class="room-chart-tooltip">
+                                <strong>₹<%= Number(bill.amount || 0).toLocaleString('en-IN') %></strong>
+                                <span><%= label %></span>
                             </div>
-                            
-                            <!-- Bar -->
-                            <div class="chart-bar" style="height: <%= pct %>%; background: linear-gradient(180deg, var(--accent-green) 0%, rgba(45,212,191,0.2) 100%); border-radius: 4px;"></div>
-                            
-                            <!-- X-Axis Label -->
-                            <div class="chart-x-label"><%= label %></div>
+                            <div class="room-chart-bar room-chart-bar-accent" style="height: <%= height %>%"></div>
+                            <div class="room-chart-x-label"><%= label %></div>
                         </div>
                     <% }) %>
                 </div>
             </div>
-        </div>
-    </div>
+        </article>
+    </section>
 
-    <!-- Data Table -->
-    <div class="card-raised" style="padding: 0; overflow: hidden;">
-        <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);">
-            <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i data-lucide="table" style="color: var(--text-muted);"></i> Historical Data
-            </h3>
+    <section class="card room-analysis-table-card">
+        <div class="room-chart-header" style="padding: 24px 24px 0;">
+            <div class="room-chart-title">
+                <i data-lucide="table" style="color: #5B8DEF;"></i>
+                <span>Historical Data</span>
+            </div>
         </div>
-        
-        <div class="table-responsive">
+
+        <div class="table-responsive" style="padding: 20px 0 0;">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="cursor: pointer;">Period <i data-lucide="chevron-down" style="width: 12px; display: inline;"></i></th>
-                        <th>Prev Reading</th>
-                        <th>Curr Reading</th>
-                        <th>Units Consumed</th>
-                        <th style="text-align: right; cursor: pointer;">Amount <i data-lucide="chevron-down" style="width: 12px; display: inline;"></i></th>
+                        <th>Period</th>
+                        <th>Prev</th>
+                        <th>Current</th>
+                        <th>Units</th>
+                        <th style="text-align: right;">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% [...roomBills].reverse().forEach(bill => { %>
+                    <% sortedBills.forEach((bill) => { %>
                         <tr>
-                            <td style="font-weight: 600;"><%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'long', year: 'numeric'}) : 'N/A' %></td>
+                            <td><%= bill.billing_cycle_id && bill.billing_cycle_id.startDate ? new Date(bill.billing_cycle_id.startDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'N/A' %></td>
                             <td><%= bill.previous_reading %></td>
                             <td><%= bill.current_reading %></td>
-                            <td><%= bill.units_consumed %> <span style="color: var(--text-dim); font-size: 0.8rem;">U</span></td>
-                            <td style="text-align: right; font-weight: 700; color: var(--text-primary);">₹<%= bill.amount.toLocaleString() %></td>
+                            <td><%= bill.units_consumed %></td>
+                            <td style="text-align: right; font-weight: 700;">₹<%= Number(bill.amount || 0).toLocaleString('en-IN') %></td>
                         </tr>
                     <% }) %>
                 </tbody>
-                <tfoot style="border-top: 2px solid var(--border);">
-                    <tr>
-                        <td colspan="3" style="font-weight: 700; padding: 1.5rem;">Lifetime Aggregates</td>
-                        <td style="font-weight: 800; color: var(--accent-blue);"><%= totalUnitsAll %> U</td>
-                        <td style="text-align: right; font-weight: 800; color: var(--accent-green); font-size: 1.1rem;">₹<%= totalAmount.toLocaleString() %></td>
+                <tfoot>
+                    <tr class="room-analysis-footer-row">
+                        <td colspan="3">Lifetime</td>
+                        <td><strong><%= totalUnitsAll %></strong></td>
+                        <td style="text-align: right;"><strong>₹<%= Number(totalAmount || 0).toLocaleString('en-IN') %></strong></td>
                     </tr>
                 </tfoot>
             </table>
         </div>
-    </div>
-
+    </section>
 <% } else { %>
-    <div class="card-raised" style="padding: 5rem 2rem; text-align: center;">
-        <i data-lucide="bar-chart-2" style="width: 64px; height: 64px; color: var(--border); margin-bottom: 1.5rem;"></i>
-        <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">No Data Available</h2>
-        <p class="text-secondary" style="max-width: 400px; margin: 0 auto;">There is not enough data to generate analytics yet. Complete at least one billing cycle to unlock trends and insights.</p>
+    <div class="card empty-state" style="min-height: 320px;">
+        <div class="empty-state-icon">
+            <i data-lucide="bar-chart-2" style="width: 28px; height: 28px; color: #5B8DEF;"></i>
+        </div>
+        <div class="empty-state-title">No analytics yet</div>
+        <div class="empty-state-description">Complete at least one billing cycle to unlock trends and usage history.</div>
     </div>
 <% } %>
 
 <style>
-    /* Custom Chart CSS */
-    .chart-y-axis {
+    .room-analysis-breadcrumb {
+        margin-bottom: 14px;
+        color: #7A7A8A;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .room-analysis-breadcrumb span {
+        color: #1A1A1A;
+    }
+
+    .room-analysis-header {
+        margin-bottom: 24px;
+    }
+
+    .room-analysis-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .room-analysis-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .room-analysis-title i {
+        width: 24px;
+        height: 24px;
+        color: #5B8DEF;
+    }
+
+    .room-analysis-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .room-summary-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .room-summary-label {
+        color: #7A7A8A;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 10px;
+    }
+
+    .room-summary-value {
+        color: #1A1A1A;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .room-analysis-charts {
+        margin-bottom: 24px;
+    }
+
+    .room-chart-card {
+        padding: 24px;
+    }
+
+    .room-chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .room-chart-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1A1A1A;
+    }
+
+    .room-chart-title i {
+        width: 20px;
+        height: 20px;
+    }
+
+    .room-css-chart {
+        position: relative;
+        height: 220px;
+        padding-bottom: 28px;
+        padding-left: 45px;
+    }
+
+    .room-chart-y-axis {
         position: absolute;
-        left: 0;
         top: 0;
-        bottom: 30px;
-        width: 35px;
+        left: 0;
+        bottom: 28px;
+        width: 36px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         align-items: flex-end;
-        font-size: 0.75rem;
-        color: var(--text-dim);
+        color: #7A7A8A;
+        font-size: 0.7rem;
         font-weight: 600;
-        z-index: 2;
     }
-    
-    .chart-grid {
+
+    .room-chart-grid {
         position: absolute;
+        top: 0;
         left: 45px;
         right: 0;
-        top: 0;
-        bottom: 30px;
+        bottom: 28px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        z-index: 1;
+        pointer-events: none;
     }
-    
-    .grid-line {
-        height: 1px;
-        width: 100%;
-        background: var(--border);
-        border-bottom: 1px dashed transparent;
+
+    .room-chart-grid span {
+        display: block;
+        border-top: 1px dashed #F0EFE9;
     }
-    
-    .chart-bars {
-        flex: 1;
+
+    .room-chart-bars {
+        height: 100%;
         display: flex;
         align-items: flex-end;
         justify-content: space-around;
-        gap: 0.5rem;
-        height: 100%;
+        gap: 10px;
         position: relative;
-        z-index: 3;
-        margin-left: 10px;
     }
-    
-    .chart-bar-wrap {
+
+    .room-chart-bar-group {
         flex: 1;
-        max-width: 50px;
+        max-width: 52px;
         height: 100%;
+        position: relative;
         display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: center;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .room-chart-bar {
+        width: 100%;
+        border-radius: 6px 6px 0 0;
+        transform: scaleY(0);
+        transform-origin: bottom;
+        animation: roomChartGrow 0.7s ease forwards;
         position: relative;
     }
-    
-    .chart-bar {
-        width: 100%;
-        border-radius: 4px 4px 0 0;
-        animation: growUp 1s ease forwards;
-        transform-origin: bottom;
-        transition: opacity 0.2s;
-        cursor: pointer;
+
+    .room-chart-bar-dark {
+        background: #1F1F1F;
     }
-    
-    .chart-bar-wrap:hover .chart-bar {
-        opacity: 0.8;
+
+    .room-chart-bar-accent {
+        background: #FF6B2B;
     }
-    
-    .chart-x-label {
+
+    .room-chart-tooltip {
         position: absolute;
-        bottom: -25px;
-        font-size: 0.75rem;
-        color: var(--text-dim);
-        font-weight: 600;
-        white-space: nowrap;
-    }
-    
-    .chart-tooltip {
-        position: absolute;
-        bottom: calc(100% + 10px);
-        background: var(--surface-raised);
-        border: 1px solid var(--accent-purple);
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        color: #fff;
-        white-space: nowrap;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(6px);
+        min-width: 92px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #FFFFFF;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.2s ease;
+        transition: opacity 0.18s ease, transform 0.18s ease;
         pointer-events: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        z-index: 10;
         text-align: center;
+        z-index: 2;
     }
-    
-    .tooltip-green {
-        border-color: var(--accent-green);
+
+    .room-chart-tooltip::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -6px;
+        width: 12px;
+        height: 12px;
+        background: #FFFFFF;
+        transform: translateX(-50%) rotate(45deg);
     }
-    
-    .chart-bar-wrap:hover .chart-tooltip {
+
+    .room-chart-tooltip strong {
+        display: block;
+        color: #1A1A1A;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .room-chart-tooltip span {
+        color: #7A7A8A;
+        font-size: 0.7rem;
+    }
+
+    .room-chart-bar-group:hover .room-chart-tooltip {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
     }
-    
-    @keyframes growUp {
-        from { transform: scaleY(0); }
-        to { transform: scaleY(1); }
+
+    .room-chart-x-label {
+        position: absolute;
+        bottom: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #7A7A8A;
+        font-size: 0.7rem;
+        white-space: nowrap;
+    }
+
+    .room-analysis-table-card {
+        padding: 0 0 24px;
+    }
+
+    .room-analysis-footer-row td {
+        font-weight: 700;
+        background: #FAFAF8;
+    }
+
+    @keyframes roomChartGrow {
+        from {
+            transform: scaleY(0);
+        }
+        to {
+            transform: scaleY(1);
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .room-analysis-summary {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .room-analysis-summary {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin: 0 -16px 24px;
+            padding: 0 16px;
+            scrollbar-width: none;
+        }
+
+        .room-analysis-summary::-webkit-scrollbar {
+            display: none;
+        }
+
+        .room-summary-card {
+            min-width: 170px;
+        }
+
+        .room-analysis-charts {
+            grid-template-columns: 1fr !important;
+        }
     }
 </style>

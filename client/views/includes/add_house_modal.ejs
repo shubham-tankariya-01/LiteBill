@@ -1,154 +1,275 @@
 <style>
-    /* Global Modal System */
     .modal {
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        z-index: 9999;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 9999;
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
+
     .modal.hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
-    .modal-content-new {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        width: 100%;
-        max-width: 480px;
-        padding: 2rem;
-        position: relative;
-        transform: scale(1);
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    }
-    .modal.hidden .modal-content-new {
-        transform: scale(0.95);
-    }
-    .modal-close-btn {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 8px;
-        transition: all 0.2s;
-        z-index: 10;
-    }
-    .modal-close-btn:hover {
-        background: rgba(255,255,255,0.05);
-        color: var(--text-primary);
-    }
-    
-    /* Steps Animation */
-    .step-wrapper {
-        position: relative;
-        overflow: hidden;
-    }
-    .step-container {
-        width: 100%;
-        transition: transform 0.4s ease, opacity 0.4s ease;
-    }
-    .step-container.hidden {
         display: none;
     }
-    
+
+    .modal-sheet {
+        position: relative;
+        width: calc(100% - 32px);
+        max-width: 480px;
+        margin: auto;
+        padding: 32px;
+        background: #FFFFFF;
+        border-radius: 24px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14);
+        animation: modalScaleIn 0.25s ease;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: #F7F6F2;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+        background: #F0EFE9;
+    }
+
+    .modal-close-btn i {
+        width: 16px;
+        height: 16px;
+        margin: 0 auto;
+    }
+
+    .modal-step-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .modal-step-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #E8E7E2;
+        transition: background 0.2s ease;
+    }
+
+    .modal-step-dot.is-active {
+        background: #1F1F1F;
+    }
+
+    .modal-step {
+        animation: fadeUp 0.25s ease;
+    }
+
+    .modal-step.hidden {
+        display: none;
+    }
+
+    .modal-heading {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .modal-heading h2 {
+        margin-bottom: 8px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .modal-heading p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .modal-cancel-link {
+        display: inline-flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 12px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .modal-cancel-link:hover {
+        color: var(--text-primary);
+    }
+
+    .meters-scroll {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+        padding-right: 4px;
+    }
+
     .meter-row {
         display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
     }
+
+    .meter-row:last-child {
+        margin-bottom: 0;
+    }
+
     .meter-row input {
         flex: 1;
     }
-    .meter-row .remove-meter-btn {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--accent-red);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        border-radius: var(--radius-sm);
-        width: 42px;
+
+    .remove-meter-btn {
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #FEF2F2;
+        color: #DC2626;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .remove-meter-btn:hover {
+        background: #FECACA;
+    }
+
+    .remove-meter-btn i {
+        width: 16px;
+        height: 16px;
+        margin: 0 auto;
+    }
+
+    .modal-add-meter-btn {
+        width: 100%;
+        margin-bottom: 24px;
+        border-style: dashed;
+    }
+
+    .modal-step-actions {
         display: flex;
         align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s;
+        gap: 12px;
     }
-    .meter-row .remove-meter-btn:hover {
-        background: rgba(239, 68, 68, 0.2);
+
+    .modal-step-actions .btn {
+        flex: 1;
     }
-    
-    body.modal-open {
-        overflow: hidden;
+
+    .modal-step-actions .btn-primary {
+        flex: 2;
+    }
+
+    .modal-step-actions .btn[data-wide] {
+        flex: 2;
+    }
+
+    @keyframes modalScaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes modalSheetUp {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .modal {
+            align-items: flex-end;
+            padding: 0;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 24px 24px 0 0;
+            padding: 28px 16px calc(28px + env(safe-area-inset-bottom));
+            animation: modalSheetUp 0.25s ease;
+        }
     }
 </style>
 
-<div id="modal" class="modal hidden">
-    <div class="modal-content-new">
-        <button type="button" id="closeModalBtn" class="modal-close-btn">
-            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+<div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="addPropertyModalTitle">
+        <button type="button" id="closeModalBtn" class="modal-close-btn" aria-label="Close modal">
+            <i data-lucide="x" aria-hidden="true"></i>
         </button>
 
-        <div class="step-wrapper">
-            <!-- STEP 1 -->
-            <div id="step1" class="step-container">
-                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange);"></div>
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--border);"></div>
-                </div>
-                
-                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); text-align: center;">Add New Property</h2>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.9rem;">What would you like to call this house?</p>
+        <div id="step1" class="modal-step">
+            <div class="modal-step-dots" aria-hidden="true">
+                <span class="modal-step-dot is-active"></span>
+                <span class="modal-step-dot"></span>
+            </div>
 
-                <div class="form-group" style="margin-bottom: 2rem;">
-                    <label class="form-label" for="houseName">House Name</label>
-                    <input type="text" id="houseName" class="form-input" placeholder="e.g. Sunset Villa" autocomplete="off" />
-                </div>
+            <div class="modal-heading">
+                <h2 id="addPropertyModalTitle">Add New Property</h2>
+                <p>Start with a property name, then add the meters you want to track for billing.</p>
+            </div>
 
-                <div style="display: flex; gap: 1rem;">
-                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('closeModalBtn').click()">Cancel</button>
-                    <button type="button" id="nextBtn" class="btn btn-primary" style="flex: 1.5; background: var(--accent-orange); color: #fff;">Next &rarr;</button>
+            <div class="form-group">
+                <label class="form-label" for="houseName">Property Name</label>
+                <input type="text" id="houseName" class="form-input" placeholder="e.g. Sunset Villa" autocomplete="off">
+            </div>
+
+            <button type="button" id="nextBtn" class="btn btn-primary" style="width: 100%;">Next →</button>
+            <button type="button" class="modal-cancel-link" onclick="document.getElementById('closeModalBtn').click()">Cancel</button>
+        </div>
+
+        <div id="step2" class="modal-step hidden">
+            <div class="modal-step-dots" aria-hidden="true">
+                <span class="modal-step-dot"></span>
+                <span class="modal-step-dot is-active"></span>
+            </div>
+
+            <div class="modal-heading">
+                <h2>Configure Meters</h2>
+                <p>Add each meter you want to track for this property. You can update them later if needed.</p>
+            </div>
+
+            <div id="metersContainer" class="meters-scroll">
+                <div class="meter-row">
+                    <input type="text" name="meters[]" class="form-input" placeholder="e.g. Main Electricity" autocomplete="off">
+                    <button type="button" class="remove-meter-btn" title="Remove meter" style="visibility: hidden;">
+                        <i data-lucide="trash-2" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- STEP 2 -->
-            <div id="step2" class="step-container hidden">
-                <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange); opacity: 0.5;"></div>
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-orange);"></div>
-                </div>
+            <button type="button" id="addMeterBtn" class="btn btn-secondary modal-add-meter-btn">
+                <i data-lucide="plus" aria-hidden="true"></i>
+                <span>Add Another Meter</span>
+            </button>
 
-                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); text-align: center;">Configure Meters</h2>
-                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Enter the names of the meters installed in this house.</p>
-
-                <div id="metersContainer" style="margin-bottom: 1rem; max-height: 200px; overflow-y: auto; padding-right: 0.5rem;">
-                    <div class="meter-row">
-                        <input type="text" name="meters[]" class="form-input" placeholder="e.g. Main Electricity" autocomplete="off" />
-                        <button type="button" class="remove-meter-btn" title="Remove" style="visibility: hidden;">
-                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button type="button" id="addMeterBtn" class="btn btn-secondary" style="width: 100%; margin-bottom: 2rem; border-style: dashed;">
-                    <i data-lucide="plus" style="width: 16px;"></i> Add Another Meter
-                </button>
-
-                <div style="display: flex; gap: 1rem;">
-                    <button type="button" id="backToStep1Btn" class="btn btn-secondary" style="flex: 1;">&larr; Back</button>
-                    <button type="button" id="submitBtn" class="btn btn-primary" style="flex: 1.5; background: var(--accent-green); color: #000;">Complete Setup</button>
-                </div>
+            <div class="modal-step-actions">
+                <button type="button" id="backToStep1Btn" class="btn btn-ghost">← Back</button>
+                <button type="button" id="submitBtn" class="btn btn-primary" data-wide>Complete Setup</button>
             </div>
         </div>
     </div>

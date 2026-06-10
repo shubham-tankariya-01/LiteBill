@@ -1,19 +1,35 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="container" style="max-width: 600px;">
-    <div class="analytic-card">
-        <h2>Add New House</h2>
-        <p class="text-muted" style="margin-bottom: 2rem;">Create a new property to manage rooms and billing.</p>
+<div class="container" style="max-width: 580px; padding-top: 40px;">
+    <div class="glass-card gradient-border-card">
+        <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">Create New Property</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">Configure a new property to begin managing your rooms and billing cycles.</p>
+        </div>
 
         <form action="/houses" method="POST">
-            <div class="form-group">
-                <label class="form-label" for="house_name">House Name</label>
-                <input type="text" id="house_name" name="house_name" class="form-control" required placeholder="e.g. Sunset Villa">
+            <div class="form-group" style="margin-bottom: 32px;">
+                <label class="form-label" for="house_name" style="font-weight: 700;">Property Name</label>
+                <input 
+                    type="text" 
+                    id="house_name" 
+                    name="house_name" 
+                    class="form-input" 
+                    required 
+                    placeholder="e.g. Skyline Apartments"
+                    style="min-height: 54px; font-size: 1rem;"
+                >
+                <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">
+                    Give your property a unique name to easily identify it.
+                </div>
             </div>
             
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Create House</button>
-                <a href="/houses" class="btn btn-outline" style="flex: 1;">Cancel</a>
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <button type="submit" class="btn btn-primary" style="flex: 2; min-height: 54px; font-weight: 700;">
+                    <span>Create Property</span>
+                    <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+                <a href="/houses" class="btn btn-secondary" style="flex: 1; min-height: 54px; font-weight: 700;">Cancel</a>
             </div>
         </form>
     </div>

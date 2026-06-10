@@ -1,416 +1,338 @@
 <% layout('layouts/boilerplate') %>
 
 <style>
-    /* Hide default navbar and main container padding for full-bleed auth pages */
-    .top-navbar { display: none !important; }
-    .main-container { padding: 0 !important; max-width: 100% !important; }
+    .litebill-navbar,
+    .top-navbar {
+        display: none !important;
+    }
 
-    /* Layout */
-    .auth-split-layout {
-        display: flex;
+    .main-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .auth-shell {
         min-height: 100vh;
-        width: 100%;
-    }
-
-    /* Left Panel */
-    .auth-left-panel {
-        flex: 1;
-        background: var(--gradient-hero);
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 4rem;
-        color: #fff;
-        overflow: hidden;
-    }
-
-    .auth-left-content {
-        animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .auth-logo-large {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 3rem;
-    }
-
-    .auth-tagline {
-        font-size: 2.75rem;
-        font-weight: 800;
-        line-height: 1.2;
-        margin-bottom: 2rem;
-        max-width: 450px;
-    }
-
-    .auth-features {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 3rem;
-    }
-
-    .auth-features li {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        font-size: 1.15rem;
-        font-weight: 500;
-        margin-bottom: 1.25rem;
-    }
-
-    .auth-features i {
-        background: rgba(255,255,255,0.2);
-        padding: 0.35rem;
-        border-radius: 50%;
-        color: #fff;
-    }
-
-    .auth-testimonial {
-        background: rgba(0,0,0,0.2);
-        backdrop-filter: blur(10px);
-        padding: 1.5rem;
-        border-radius: var(--radius-card);
-        border: 1px solid rgba(255,255,255,0.1);
-        max-width: 450px;
-        animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: 0.2s;
-        opacity: 0;
-    }
-
-    /* Right Panel */
-    .auth-right-panel {
-        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         background: var(--bg-body);
-        padding: 2rem;
-    }
-
-    .auth-form-container {
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .mobile-logo {
-        display: none;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 800;
-        margin-bottom: 2.5rem;
-        color: var(--text-primary);
-        text-decoration: none;
-    }
-    
-    .mobile-logo i {
-        color: var(--accent-orange);
-    }
-
-    /* Form Styles */
-    .auth-heading {
-        font-size: 1.75rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        color: var(--text-primary);
-    }
-
-    .auth-subheading {
-        color: var(--text-secondary);
-        margin-bottom: 2.5rem;
-        font-size: 0.95rem;
-    }
-
-    .input-group {
+        padding: 24px;
         position: relative;
-        display: flex;
-        align-items: center;
+        overflow: hidden;
     }
 
-    .input-prefix {
+    /* Subtle background pattern */
+    .auth-shell::before {
+        content: '';
         position: absolute;
-        left: 1rem;
-        color: var(--text-secondary);
-        font-weight: 600;
-        font-size: 0.95rem;
+        inset: 0;
+        opacity: 0.03;
         pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        background-size: 140px 140px;
+        z-index: 0;
     }
 
-    .input-with-prefix {
-        padding-left: 3rem !important;
-    }
-
-    .input-toggle-btn {
-        position: absolute;
-        right: 0.5rem;
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        padding: 0.5rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .input-toggle-btn:hover {
-        color: var(--text-primary);
-    }
-
-    .auth-submit-btn {
+    .auth-form-card {
+        position: relative;
+        z-index: 1;
         width: 100%;
-        background: var(--accent-orange);
-        color: #fff;
-        padding: 0.9rem;
-        font-size: 1rem;
-        font-weight: 700;
-        border: none;
-        border-radius: var(--radius-btn);
-        cursor: pointer;
-        transition: all 0.2s ease;
+        max-width: 440px;
+        background: var(--surface);
+        border-radius: 24px;
+        padding: 48px 40px;
+        box-shadow: var(--shadow-modal);
+        border: 1px solid var(--border-subtle);
+    }
+
+    .auth-brand {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 10px;
+        margin-bottom: 32px;
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 800;
     }
 
-    .auth-submit-btn:hover {
-        filter: brightness(1.1);
-        transform: translateY(-1px);
+    .auth-brand i {
+        width: 24px;
+        height: 24px;
+        color: var(--accent-primary);
     }
-    
-    .auth-submit-btn:disabled {
-        opacity: 0.7;
+
+    .auth-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: var(--surface-soft);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 0 auto 18px;
+        display: flex;
+        width: fit-content;
+    }
+
+    .auth-card-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1.2;
+        text-align: center;
+        margin-bottom: 8px;
+    }
+
+    .auth-card-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .auth-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        background: #FEF2F2;
+        border-left: 3px solid var(--accent-red);
+        border-radius: 12px;
+        color: #B91C1C;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .auth-error i {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .auth-input-combo {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .auth-prefix-chip {
+        min-height: 52px;
+        padding: 14px 16px;
+        background: var(--surface-soft);
+        color: var(--text-primary);
+        font-weight: 700;
+        border-radius: 12px 0 0 12px;
+        display: inline-flex;
+        align-items: center;
+        border: 1.5px solid var(--border-input);
+        border-right: 0;
+    }
+
+    .auth-input-combo .form-input {
+        border-radius: 0 12px 12px 0;
+    }
+
+    .auth-password-wrap {
+        position: relative;
+    }
+
+    .auth-password-wrap .form-input {
+        padding-right: 50px;
+    }
+
+    .auth-input-action {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .auth-input-action i {
+        width: 18px;
+        height: 18px;
+    }
+
+    .auth-submit {
+        width: 100%;
+        min-height: 52px;
+        margin-top: 12px;
+        background: var(--surface-dark);
+        color: var(--text-on-dark);
+        border-radius: 999px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .auth-submit:hover {
+        background: var(--surface-dark-alt);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-submit:active {
+        transform: translateY(0);
+    }
+
+    .auth-submit:disabled {
+        opacity: 0.75;
         cursor: not-allowed;
         transform: none;
     }
 
-    /* Staggered Animations */
-    .stagger-1 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 50ms; }
-    .stagger-2 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 100ms; }
-    .stagger-3 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 150ms; }
-    .stagger-4 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 200ms; }
-    .stagger-5 { animation: fadeUp 0.4s ease forwards; opacity: 0; animation-delay: 250ms; }
-
-    @keyframes slideInLeft {
-        from { opacity: 0; transform: translateX(-30px); }
-        to { opacity: 1; transform: translateX(0); }
+    .auth-spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.28);
+        border-top-color: var(--text-on-dark);
+        border-radius: 999px;
+        animation: authSpin 0.8s linear infinite;
     }
 
-    .spinner {
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 1s ease-in-out infinite;
+    .auth-submit.loading .auth-submit-text {
         display: none;
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
+    .auth-submit.loading .auth-spinner {
+        display: inline-block;
     }
 
-    .auth-submit-btn.loading .btn-text { display: none; }
-    .auth-submit-btn.loading .spinner { display: block; }
+    .auth-footer {
+        margin-top: 32px;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
 
-    @media (max-width: 900px) {
-        .auth-left-panel { display: none; }
-        .mobile-logo { display: flex; }
-        .auth-right-panel { padding: 2rem 1.5rem; }
+    .auth-footer a {
+        color: var(--accent-primary);
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+
+    .auth-footer a:hover {
+        color: var(--surface-dark);
+        text-decoration: underline;
+    }
+
+    @keyframes authSpin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .auth-form-card {
+            padding: 32px 24px;
+            border-radius: 20px;
+        }
     }
 </style>
 
-<div class="auth-split-layout">
-    <div class="auth-left-panel">
-        <div class="auth-left-content">
-            <div class="auth-logo-large">
-                <i data-lucide="zap" style="color: #fff; width: 32px; height: 32px;"></i> LiteBill
+<div class="auth-shell">
+    <div class="auth-form-card">
+        <a href="/" class="auth-brand">
+            <i data-lucide="zap"></i>
+            <span>LiteBill</span>
+        </a>
+
+        <div class="auth-pill">New here?</div>
+        <h2 class="auth-card-title">Create account</h2>
+        <p class="auth-card-subtitle">Start managing your properties.</p>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="auth-error">
+                <i data-lucide="alert-circle"></i>
+                <span><%= error %></span>
             </div>
-            <h1 class="auth-tagline">Smart billing for smart landlords.</h1>
-            <ul class="auth-features">
-                <li><i data-lucide="check" style="width: 18px; height: 18px;"></i> Automatic bill splitting</li>
-                <li><i data-lucide="check" style="width: 18px; height: 18px;"></i> Full billing history</li>
-                <li><i data-lucide="check" style="width: 18px; height: 18px;"></i> Multi-property support</li>
-            </ul>
-        </div>
-        <div class="auth-testimonial">
-            <p style="font-style: italic; font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.5;">"LiteBill completely eliminated the monthly headache of calculating utility splits. My tenants appreciate the transparency, and I save hours every billing cycle."</p>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--accent-orange); display: flex; align-items: center; justify-content: center; font-weight: 800;">A</div>
-                <div>
-                    <div style="font-weight: 700; color: #fff;">Arjun M.</div>
-                    <div style="font-size: 0.8rem; opacity: 0.8;">Property Manager, 14 Units</div>
+        <% } %>
+
+        <form action="/auth/signup" method="POST" id="signupForm">
+            <div class="form-group">
+                <label class="form-label" for="mobile_number">Mobile Number</label>
+                <div class="auth-input-combo">
+                    <span class="auth-prefix-chip">+91</span>
+                    <input
+                        id="mobile_number"
+                        name="mobile_number"
+                        type="text"
+                        class="form-input"
+                        placeholder="Enter 10-digit number"
+                        value="<%= typeof mobileValue !== 'undefined' ? mobileValue : '' %>"
+                        maxlength="10"
+                        pattern="\d{10}"
+                        required
+                    />
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="auth-right-panel">
-        <div class="auth-form-container">
-            <a href="/" class="mobile-logo stagger-1">
-                <i data-lucide="zap" style="width: 28px; height: 28px;"></i> LiteBill
-            </a>
-            
-            <h2 class="auth-heading stagger-1">Create your account</h2>
-            <p class="auth-subheading stagger-1">Sign up to start tracking bills and properties today.</p>
-
-            <% if (typeof error !== 'undefined' && error) { %>
-                <div class="stagger-2" style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid var(--accent-red); border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; animation: fadeUp 0.3s ease forwards;">
-                    <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: var(--accent-red); flex-shrink: 0;"></i>
-                    <span style="color: var(--accent-red); font-size: 0.875rem; font-weight: 500;"><%= error %></span>
-                </div>
-            <% } %>
-
-            <form action="/auth/signup" method="POST" id="signupForm">
-                <div class="form-group stagger-2">
-                    <label class="form-label" for="mobile_number">Mobile Number</label>
-                    <div class="input-group">
-                        <span class="input-prefix">+91</span>
-                        <input type="text" id="mobile_number" name="mobile_number" class="form-input input-with-prefix"
-                            required placeholder="Enter 10-digit number"
-                            value="<%= typeof mobileValue !== 'undefined' ? mobileValue : '' %>"
-                            maxlength="10" pattern="\d{10}">
-                    </div>
-                </div>
-
-                <div class="form-group stagger-3">
-                    <label class="form-label" for="password">Password</label>
-                    <div class="input-group">
-                        <input type="password" id="password" name="password" class="form-input"
-                            required placeholder="Create a password">
-                        <button type="button" class="input-toggle-btn" id="togglePassword" tabindex="-1">
-                            <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
-                        </button>
-                    </div>
-                    <!-- Strength indicator -->
-                    <div style="display: flex; gap: 4px; margin-top: 0.5rem; height: 4px;" id="strengthBars">
-                        <div style="flex: 1; background: var(--border); border-radius: 2px; transition: background 0.3s;"></div>
-                        <div style="flex: 1; background: var(--border); border-radius: 2px; transition: background 0.3s;"></div>
-                        <div style="flex: 1; background: var(--border); border-radius: 2px; transition: background 0.3s;"></div>
-                        <div style="flex: 1; background: var(--border); border-radius: 2px; transition: background 0.3s;"></div>
-                    </div>
-                    <div id="strengthText" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; text-align: right; min-height: 15px;"></div>
-                </div>
-
-                <div class="form-group stagger-4">
-                    <label class="form-label" for="confirm_password">Confirm Password</label>
-                    <div class="input-group">
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-input"
-                            required placeholder="••••••••">
-                        <div class="input-toggle-btn" style="pointer-events: none; opacity: 1;" id="confirmStatus">
-                            <!-- Icon injected via JS -->
-                        </div>
-                    </div>
-                    <p id="confirmError" style="font-size: 0.8rem; color: var(--accent-red); margin-top: 0.35rem; display: none;">
-                        Passwords do not match.
-                    </p>
-                </div>
-
-                <p class="stagger-4" style="color: var(--text-dim); font-size: 0.75rem; line-height: 1.4; margin-bottom: 1.5rem;">
-                    By creating an account you agree to responsible data management and our Terms of Service.
-                </p>
-
-                <div class="stagger-4">
-                    <button type="submit" class="auth-submit-btn" id="submitBtn">
-                        <span class="btn-text">Create Account</span>
-                        <div class="spinner"></div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="auth-password-wrap">
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        class="form-input"
+                        placeholder="At least 6 characters"
+                        minlength="6"
+                        required
+                    />
+                    <button type="button" class="auth-input-action" id="togglePassword" aria-label="Toggle password visibility">
+                        <i data-lucide="eye"></i>
                     </button>
                 </div>
-            </form>
+            </div>
 
-            <p class="stagger-5" style="text-align: center; margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
-                Already have an account? <a href="/auth/login" style="color: var(--text-primary); font-weight: 600;">Log In</a>
-            </p>
-        </div>
+            <button type="submit" class="auth-submit" id="submitButton">
+                <span class="auth-submit-text">Create Account -></span>
+                <span class="auth-spinner"></span>
+            </button>
+        </form>
+
+        <p class="auth-footer">Already have an account? <a href="/auth/login">Sign in</a></p>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Toggle password visibility
-        const toggleBtn = document.getElementById('togglePassword');
-        const pwdInput = document.getElementById('password');
-        
-        if(toggleBtn && pwdInput) {
-            toggleBtn.addEventListener('click', () => {
-                const type = pwdInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                pwdInput.setAttribute('type', type);
-                toggleBtn.innerHTML = type === 'password' ? '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>' : '<i data-lucide="eye-off" style="width: 18px; height: 18px;"></i>';
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            });
-        }
+    document.addEventListener("DOMContentLoaded", () => {
+        const passwordInput = document.getElementById("password");
+        const togglePassword = document.getElementById("togglePassword");
+        const signupForm = document.getElementById("signupForm");
+        const submitButton = document.getElementById("submitButton");
 
-        // Password strength logic
-        const bars = document.getElementById('strengthBars').children;
-        const text = document.getElementById('strengthText');
-        
-        pwdInput.addEventListener('input', (e) => {
-            const val = e.target.value;
-            let strength = 0;
-            if(val.length >= 6) strength++;
-            if(val.length >= 8) strength++;
-            if(/[A-Z]/.test(val)) strength++;
-            if(/[0-9!@#\$%\^&\*]/.test(val)) strength++;
-            
-            // reset bars
-            for(let i=0; i<4; i++) bars[i].style.background = 'var(--border)';
-            
-            if(val.length === 0) { text.textContent = ''; return; }
-            
-            const colors = ['var(--accent-red)', 'var(--accent-yellow)', 'var(--accent-blue)', 'var(--accent-green)'];
-            const labels = ['Weak', 'Fair', 'Strong', 'Very Strong'];
-            
-            const idx = Math.min(Math.max(strength - 1, 0), 3);
-            for(let i=0; i<=idx; i++) {
-                bars[i].style.background = colors[idx];
-            }
-            text.textContent = labels[idx];
-            text.style.color = colors[idx];
+        togglePassword?.addEventListener("click", () => {
+            const isPassword = passwordInput.type === "password";
+            passwordInput.type = isPassword ? "text" : "password";
+            togglePassword.innerHTML = isPassword
+                ? '<i data-lucide="eye-off"></i>'
+                : '<i data-lucide="eye"></i>';
+            if (typeof lucide !== "undefined") lucide.createIcons();
         });
 
-        // Confirm Password Status logic
-        const confirmInput = document.getElementById('confirm_password');
-        const confirmStatus = document.getElementById('confirmStatus');
-        const confirmError = document.getElementById('confirmError');
-        
-        const checkMatch = () => {
-            if(confirmInput.value.length === 0) {
-                confirmStatus.innerHTML = '';
-                confirmError.style.display = 'none';
-                return;
-            }
-            if(confirmInput.value === pwdInput.value) {
-                confirmStatus.innerHTML = '<i data-lucide="check" style="width: 18px; height: 18px; color: var(--accent-green);"></i>';
-                confirmError.style.display = 'none';
-            } else {
-                confirmStatus.innerHTML = '<i data-lucide="x" style="width: 18px; height: 18px; color: var(--accent-red);"></i>';
-                confirmError.style.display = 'block';
-            }
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        };
-
-        confirmInput.addEventListener('input', checkMatch);
-        pwdInput.addEventListener('input', checkMatch);
-
-        // Submit loading state & final validation
-        const form = document.getElementById('signupForm');
-        const submitBtn = document.getElementById('submitBtn');
-        if(form && submitBtn) {
-            form.addEventListener('submit', (e) => {
-                if(confirmInput.value !== pwdInput.value) {
-                    e.preventDefault();
-                    confirmError.style.display = 'block';
-                    return;
-                }
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-            });
-        }
+        signupForm?.addEventListener("submit", () => {
+            submitButton.classList.add("loading");
+            submitButton.disabled = true;
+        });
     });
 </script>

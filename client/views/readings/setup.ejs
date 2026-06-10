@@ -1,137 +1,396 @@
 <% layout('layouts/boilerplate') %>
 
-<!-- Stepper -->
-<div style="margin-bottom: 2.5rem; display: flex; justify-content: center;">
-    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); flex-wrap: wrap; justify-content: center;">
-        <span>1. Add House</span>
-        <i data-lucide="chevron-right" style="width: 14px;"></i>
-        <span>2. Configure Meters</span>
-        <i data-lucide="chevron-right" style="width: 14px;"></i>
-        <span style="color: var(--accent-orange);">3. Set Baseline Readings</span>
-        <i data-lucide="chevron-right" style="width: 14px;"></i>
-        <span>4. Ready</span>
+<section class="setup-stepper">
+    <div class="setup-step-pill">1. Add House</div>
+    <i data-lucide="arrow-right" class="setup-step-arrow"></i>
+    <div class="setup-step-pill">2. Configure Meters</div>
+    <i data-lucide="arrow-right" class="setup-step-arrow"></i>
+    <div class="setup-step-pill setup-step-pill-active">3. Set Baseline ●</div>
+    <i data-lucide="arrow-right" class="setup-step-arrow"></i>
+    <div class="setup-step-pill">4. Ready</div>
+</section>
+
+<section class="setup-header">
+    <h1>Initial House Setup</h1>
+    <p>Set the opening meter values once so every future cycle starts from the correct baseline.</p>
+</section>
+
+<section class="setup-info-card" id="setupInfoCard">
+    <div class="setup-info-copy">
+        <i data-lucide="info"></i>
+        <div>
+            <div class="setup-info-title">One-Time Setup Required</div>
+            <p>Enter the reading currently visible on each physical meter. These values become your starting baseline for all future billing cycles in this property.</p>
+        </div>
     </div>
+    <span class="badge badge-dim setup-info-badge" id="setupInfoBadge">0 / <%= rooms.length %> rooms filled</span>
+</section>
+
+<div class="setup-progress-wrap">
+    <span class="setup-progress-badge badge badge-dim" id="progressCounter">0 / <%= rooms.length %> rooms filled</span>
 </div>
 
-<div style="max-width: 600px; margin: 0 auto;">
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary);">Initial House Setup</h1>
-        <p class="text-secondary" style="font-size: 1rem;">Let's synchronize the system with your physical meters.</p>
-    </div>
+<form action="/houses/<%= houseId %>/readings/setup" method="POST" id="setupForm" class="setup-form">
+    <% rooms.forEach((room) => { %>
+        <article class="setup-room-card">
+            <div class="setup-room-icon">
+                <i data-lucide="gauge"></i>
+            </div>
 
-    <div class="card-raised" style="background: linear-gradient(135deg, rgba(77, 159, 236, 0.1) 0%, rgba(26,29,39,1) 100%); border-left: 4px solid var(--accent-blue); padding: 1.5rem; margin-bottom: 2.5rem;">
-        <h4 style="margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; color: var(--accent-blue); font-size: 1.1rem; font-weight: 800;">
-            <i data-lucide="info" style="width: 20px; height: 20px;"></i> One-Time Setup Required
-        </h4>
-        <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
-            Enter the reading currently displayed on each physical meter. These values act as your starting point (or "baseline"). Your very first electricity bill will be calculated based on the difference between these initial readings and the next readings you enter. <strong>You will only need to do this once per property.</strong>
-        </p>
-    </div>
+            <div class="setup-room-body">
+                <h4><%= room.meter_name %></h4>
 
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem;">
-        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary);">Meter Baselines</h3>
-        <span class="badge badge-dim" id="progressCounter" style="font-size: 0.8rem;">0 / <%= rooms.length %> rooms filled</span>
-    </div>
-
-    <form action="/houses/<%= houseId %>/readings/setup" method="POST" id="setupForm">
-        <% rooms.forEach(room => { %>
-            <div class="card-raised room-card" style="margin-bottom: 1rem; padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem; transition: border-color 0.3s ease;">
-                <!-- Meter Icon -->
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i data-lucide="gauge" style="color: var(--text-muted);"></i>
-                </div>
-                
-                <div style="flex: 1;">
-                    <h4 style="margin: 0 0 1rem 0; font-size: 1.1rem; color: var(--text-primary);"><%= room.meter_name %></h4>
-                    
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <div style="flex: 2; min-width: 150px;">
-                            <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase;">Opening Reading</label>
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="number" step="0.1" name="readings[<%= room._id %>][units]" class="form-input setup-reading-input" required placeholder="0.0" style="padding-right: 2.5rem; font-weight: 600;">
-                                <span style="position: absolute; right: 0.75rem; color: var(--text-dim); font-weight: 700; pointer-events: none; font-size: 0.8rem;">U</span>
-                            </div>
-                            <div class="validation-msg" style="color: var(--accent-red); font-size: 0.75rem; margin-top: 0.25rem; display: none;">Value must be 0 or positive.</div>
-                        </div>
-                        <div style="flex: 1; min-width: 120px;">
-                            <label class="form-label" style="font-size: 0.75rem; text-transform: uppercase;">Date</label>
-                            <input type="date" value="<%= new Date().toISOString().split('T')[0] %>" name="readings[<%= room._id %>][date]" class="form-input custom-date-input" required>
+                <div class="setup-room-fields">
+                    <div class="form-group setup-reading-group">
+                        <label class="form-label" for="reading_<%= room._id %>">Opening Reading</label>
+                        <div class="setup-input-combo">
+                            <input
+                                id="reading_<%= room._id %>"
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                name="readings[<%= room._id %>][units]"
+                                class="form-input setup-reading-input"
+                                placeholder="0.0"
+                                required
+                            >
+                            <span class="setup-suffix-chip">U</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        <% }) %>
 
-        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-            <a href="/houses/<%= houseId %>" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
-            <button type="submit" id="submitBtn" class="btn btn-primary" style="flex: 2; background: var(--accent-orange); color: #fff; font-weight: 800;" disabled>Complete Setup &rarr;</button>
-        </div>
-    </form>
-</div>
+                    <div class="form-group setup-date-group">
+                        <label class="form-label" for="date_<%= room._id %>">Date</label>
+                        <input
+                            id="date_<%= room._id %>"
+                            type="date"
+                            name="readings[<%= room._id %>][date]"
+                            class="form-input setup-date-input"
+                            value="<%= new Date().toISOString().split('T')[0] %>"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="setup-validation-msg">Value must be 0 or greater.</div>
+            </div>
+        </article>
+    <% }) %>
+
+    <div class="setup-actions">
+        <a href="/houses/<%= houseId %>" class="btn btn-secondary">Cancel</a>
+        <button type="submit" id="submitBtn" class="btn btn-primary setup-submit-btn" disabled>Complete Setup -&gt;</button>
+    </div>
+</form>
+
+<style>
+    .setup-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+
+    .setup-step-pill {
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid #E8E7E2;
+        background: transparent;
+        color: #7A7A8A;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .setup-step-pill-active {
+        background: #1F1F1F;
+        border-color: #1F1F1F;
+        color: #FFFFFF;
+    }
+
+    .setup-step-arrow {
+        width: 16px;
+        height: 16px;
+        color: #7A7A8A;
+    }
+
+    .setup-header {
+        max-width: 560px;
+        margin: 0 auto 24px;
+        text-align: center;
+    }
+
+    .setup-header h1 {
+        margin-bottom: 10px;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .setup-header p {
+        color: #7A7A8A;
+        font-size: 0.95rem;
+    }
+
+    .setup-info-card {
+        position: relative;
+        max-width: 560px;
+        margin: 0 auto 20px;
+        padding: 20px;
+        border-radius: 16px;
+        background: #EBF1FD;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .setup-info-copy {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .setup-info-copy i {
+        width: 20px;
+        height: 20px;
+        color: #2C5CC5;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .setup-info-title {
+        color: #2C5CC5;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .setup-info-copy p {
+        color: #45628D;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .setup-info-badge {
+        flex-shrink: 0;
+        align-self: flex-start;
+    }
+
+    .setup-progress-wrap {
+        max-width: 560px;
+        margin: 0 auto 18px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .setup-progress-badge {
+        min-height: 36px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+    }
+
+    .setup-form {
+        max-width: 560px;
+        margin: 0 auto;
+        padding-bottom: 32px;
+    }
+
+    .setup-room-card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        margin-bottom: 12px;
+        border-left: 4px solid #E8E7E2;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .setup-room-card.is-valid {
+        border-left-color: #4CAF7D;
+    }
+
+    .setup-room-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+    }
+
+    .setup-room-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #F7F6F2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .setup-room-icon i {
+        width: 20px;
+        height: 20px;
+        color: #7A7A8A;
+    }
+
+    .setup-room-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .setup-room-body h4 {
+        margin-bottom: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1A1A1A;
+    }
+
+    .setup-room-fields {
+        display: flex;
+        gap: 12px;
+    }
+
+    .setup-reading-group {
+        flex: 2;
+    }
+
+    .setup-date-group {
+        flex: 1;
+    }
+
+    .setup-input-combo {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .setup-input-combo .form-input {
+        flex: 1;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .setup-suffix-chip {
+        min-height: 48px;
+        padding: 14px 12px;
+        border-radius: 0 12px 12px 0;
+        background: #F0EFE9;
+        border: 1.5px solid #E8E7E2;
+        border-left: 0;
+        color: #7A7A8A;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .setup-date-input::-webkit-calendar-picker-indicator {
+        filter: brightness(0) saturate(100%);
+        opacity: 0.75;
+        cursor: pointer;
+    }
+
+    .setup-validation-msg {
+        margin-top: 10px;
+        color: #EF4444;
+        font-size: 0.78rem;
+        display: none;
+    }
+
+    .setup-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .setup-actions .btn:first-child {
+        flex: 1;
+    }
+
+    .setup-submit-btn {
+        flex: 2;
+        transition: opacity 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    }
+
+    @media (max-width: 768px) {
+        .setup-room-card {
+            width: 100%;
+        }
+
+        .setup-room-fields {
+            flex-direction: column;
+        }
+
+        .setup-form {
+            max-width: 100%;
+            padding-bottom: 40px;
+        }
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const inputs = document.querySelectorAll('.setup-reading-input');
-        const counter = document.getElementById('progressCounter');
-        const form = document.getElementById('setupForm');
+        const readingInputs = document.querySelectorAll('.setup-reading-input');
+        const progressCounter = document.getElementById('progressCounter');
+        const infoBadge = document.getElementById('setupInfoBadge');
         const submitBtn = document.getElementById('submitBtn');
         const totalRooms = <%= rooms.length %>;
 
-        function updateProgress() {
+        const setBadgeState = (filled) => {
+            const text = `${filled} / ${totalRooms} rooms filled`;
+            progressCounter.textContent = text;
+            infoBadge.textContent = text;
+
+            const complete = filled === totalRooms && totalRooms > 0;
+            progressCounter.className = complete ? 'setup-progress-badge badge badge-green' : 'setup-progress-badge badge badge-dim';
+            infoBadge.className = complete ? 'badge badge-green setup-info-badge' : 'badge badge-dim setup-info-badge';
+        };
+
+        const validateCards = () => {
             let filled = 0;
             let hasError = false;
 
-            inputs.forEach(input => {
-                const val = parseFloat(input.value);
-                const msg = input.parentElement.nextElementSibling;
-                const card = input.closest('.room-card');
+            readingInputs.forEach((input) => {
+                const card = input.closest('.setup-room-card');
+                const message = card.querySelector('.setup-validation-msg');
+                const rawValue = input.value.trim();
+                const value = parseFloat(rawValue);
 
-                if (!isNaN(val)) {
-                    if (val < 0) {
-                        msg.style.display = 'block';
-                        input.style.borderColor = 'var(--accent-red)';
-                        hasError = true;
-                    } else {
-                        msg.style.display = 'none';
-                        input.style.borderColor = 'var(--border)';
-                        card.style.borderColor = 'var(--accent-green)';
-                        filled++;
-                    }
-                } else {
-                    msg.style.display = 'none';
-                    input.style.borderColor = 'var(--border)';
-                    card.style.borderColor = 'var(--border)';
+                card.classList.remove('is-valid');
+                message.style.display = 'none';
+
+                if (rawValue === '') {
+                    return;
                 }
+
+                if (Number.isNaN(value) || value < 0) {
+                    hasError = true;
+                    message.style.display = 'block';
+                    return;
+                }
+
+                filled += 1;
+                card.classList.add('is-valid');
             });
 
-            counter.innerText = `${filled} / ${totalRooms} rooms filled`;
-            
-            if (filled === totalRooms) {
-                counter.className = 'badge badge-green';
-            } else {
-                counter.className = 'badge badge-dim';
-            }
-
+            setBadgeState(filled);
             submitBtn.disabled = hasError || filled !== totalRooms;
-        }
+        };
 
-        inputs.forEach(input => {
-            input.addEventListener('input', updateProgress);
+        readingInputs.forEach((input) => {
+            input.addEventListener('input', validateCards);
         });
 
-        form.addEventListener('submit', (e) => {
-            if (submitBtn.disabled) e.preventDefault();
+        document.getElementById('setupForm')?.addEventListener('submit', (event) => {
+            validateCards();
+            if (submitBtn.disabled) {
+                event.preventDefault();
+            }
         });
+
+        setBadgeState(0);
     });
 </script>
-
-<style>
-    .custom-date-input::-webkit-calendar-picker-indicator {
-        filter: invert(1);
-        opacity: 0.6;
-        cursor: pointer;
-    }
-    .custom-date-input::-webkit-calendar-picker-indicator:hover {
-        opacity: 1;
-    }
-</style>

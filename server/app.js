@@ -1,42 +1,56 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import path from "path";
+import { fileURLToPath } from "url";
+import ejsMate from "ejs-mate";
+
+// Routes
 import indexRoute from "./routes/index.js";
+import authRoute from "./routes/auth.js";
 import housesRoute from "./routes/houses.js";
 import roomsRoute from "./routes/rooms.js";
 import cyclesRoute from "./routes/cycles.js";
 import mainBillsRoute from "./routes/main_bills.js";
 import readingsRoute from "./routes/readings.js";
 import roomBillsRoute from "./routes/room_bills.js";
-import authRoute from "./routes/auth.js";
-import House from "./models/House.js";
-import path from "path";
-import { fileURLToPath } from "url";
-import ejsMate from "ejs-mate";
-import session from "express-session";
-import { errorHandler } from "./middleware/errorHandler.js";
-import { isLoggedIn } from "./middleware/isLoggedIn.js";
 
-// constants
+// Models
+import House from "./models/House.js";
+
+// Middleware
+import { isLoggedIn } from "./middleware/isLoggedIn.js";
+import { csrfProtection } from "./middleware/security.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { verifyHouse, verifyCycle } from "./middleware/verifyOwner.js";
+
+// ── Constants ────────────────────────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
+const dbUrl = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/LiteBill";
 
+if (!process.env.SESSION_SECRET && process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET environment variable must be set in production!");
+}
+const sessionSecret = process.env.SESSION_SECRET || "dev_fallback_secret_not_for_production";
 
-// settings
-app.engine('ejs', ejsMate);
+// ── Template Engine ──────────────────────────────────────────────────────────
+app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../client/views"));
+
+// ── Body Parsing ─────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'fallback_secret_keyboard_cat',
-    resave: false,
-    saveUninitialized: false
-}));
+// ── Static Files ─────────────────────────────────────────────────────────────
+app.use("/public", express.static(path.join(__dirname, "../client/public")));
 
-// Method override middleware for ?_method=PUT/DELETE
+// ── Method Override ──────────────────────────────────────────────────────────
 app.use((req, res, next) => {
     if (req.query && req.query._method) {
         req.method = req.query._method.toUpperCase();
@@ -45,61 +59,74 @@ app.use((req, res, next) => {
     }
     next();
 });
-// static files configuration
-app.use("/public", express.static(path.join(__dirname, "../client/public")));
 
-// Global middleware to pass houses to navbar dropdown
-app.use(async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState === 1) {
-      res.locals.navHouses = await House.find({});
-    } else {
-      res.locals.navHouses = [];
-    }
-  } catch (err) {
-    console.error("Error fetching houses for navbar:", err);
-    res.locals.navHouses = [];
-  }
-  next();
-});
-
-//db-connetion===================================================
+// ── Database Connection ───────────────────────────────────────────────────────
 main()
-  .then(() => {
-    console.log("Connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+    .then(() => console.log("Connected to DB"))
+    .catch((err) => console.error("DB connection error:", err));
 
 async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/LiteBill');
+    await mongoose.connect(dbUrl);
 }
-// end
 
-// Routes =========================================================
+// ── Session (MongoDB-backed) ─────────────────────────────────────────────────
+app.use(
+    session({
+        secret: sessionSecret,
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            mongoUrl: dbUrl,
+            collectionName: "sessions",
+            ttl: 24 * 60 * 60, // 1 day in seconds
+        }),
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // HTTPS only in production
+            sameSite: "lax",                               // Blocks cross-site form submissions
+            maxAge: 24 * 60 * 60 * 1000,                  // 1 day in milliseconds
+        },
+    })
+);
 
-// Protect routes
+// ── CSRF Protection ──────────────────────────────────────────────────────────
+app.use(csrfProtection);
+
+// ── Authentication Check ─────────────────────────────────────────────────────
 app.use(isLoggedIn);
 
+// ── Navbar Houses (Global) ───────────────────────────────────────────────────
+app.use(async (req, res, next) => {
+    try {
+        res.locals.currentPath = req.path;
+        res.locals.navHouses = [];
+        if (req.session && req.session.userId && mongoose.connection.readyState === 1) {
+            res.locals.navHouses = await House.find({ user_id: req.session.userId });
+        }
+    } catch (err) {
+        console.error("Error fetching houses for navbar:", err);
+        res.locals.navHouses = [];
+    }
+    next();
+});
+
+// ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/", indexRoute);
-app.use("/houses/:houseId/rooms", roomsRoute);
-app.use("/rooms", roomsRoute);
-app.use("/houses/:houseId/cycles", cyclesRoute);
-app.use("/cycles", cyclesRoute);
-app.use("/houses/:houseId/main-bill", mainBillsRoute);
-app.use("/houses/:houseId/readings", readingsRoute);
-app.use("/houses/:houseId/cycles/:cycleId/readings", readingsRoute);
-
-app.use("/cycles/:cycleId/room-bills", roomBillsRoute);
-app.use("/houses", housesRoute);
 app.use("/auth", authRoute);
-app.use("/user", authRoute);
+app.use("/houses", housesRoute);
+app.use("/houses/:houseId/rooms", verifyHouse, roomsRoute);
+app.use("/rooms", roomsRoute);
+app.use("/houses/:houseId/cycles", verifyHouse, cyclesRoute);
+app.use("/cycles", cyclesRoute);
+app.use("/houses/:houseId/main-bill", verifyHouse, mainBillsRoute);
+app.use("/houses/:houseId/readings", verifyHouse, readingsRoute);
+app.use("/houses/:houseId/cycles/:cycleId/readings", verifyHouse, verifyCycle, readingsRoute);
+app.use("/cycles/:cycleId/room-bills", verifyCycle, roomBillsRoute);
 
-// Error Handler Middleware
+// ── Error Handler ────────────────────────────────────────────────────────────
 app.use(errorHandler);
 
-//connecting to the server port...
-app.listen(port, (req, res) => {
-  console.log(`App is listening on port ${port}`)
+// ── Start Server ─────────────────────────────────────────────────────────────
+app.listen(port, () => {
+    console.log(`App is listening on port ${port}`);
 });

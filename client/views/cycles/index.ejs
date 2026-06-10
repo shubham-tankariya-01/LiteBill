@@ -1,164 +1,444 @@
 <% layout('layouts/boilerplate') %>
 
-<!-- Header -->
-<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
-            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
-            <span>/</span> 
-            <a href="/houses/<%= houseId %>" style="color: var(--text-dim); text-decoration: none;"><%= house.house_name %></a>
-            <span>/</span>
-            <span style="color: var(--accent-blue);">Billing Cycles</span>
-        </div>
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
-            <i data-lucide="refresh-cw" style="color: var(--accent-blue); width: 32px; height: 32px;"></i> Billing Timeline
-        </h1>
-    </div>
-</div>
+<div class="cycles-breadcrumb">Properties / <span><%= house.house_name %></span> / Billing Cycles</div>
 
-<div class="timeline-container" style="position: relative; max-width: 800px; margin: 0 auto; padding-left: 2rem;">
-    <!-- Timeline vertical line -->
-    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); border-radius: 2px;"></div>
+<section class="cycles-header">
+    <h1 class="cycles-title">
+        <i data-lucide="refresh-cw"></i>
+        <span>Billing Timeline</span>
+    </h1>
+</section>
+
+<section class="cycles-timeline">
+    <div class="cycles-timeline-line"></div>
 
     <% if (cycles.length === 0) { %>
-        <div class="card-raised" style="text-align: center; padding: 4rem 2rem;">
-            <i data-lucide="refresh-cw" style="color: var(--text-dim); width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No Cycles Yet</h3>
-            <p class="text-secondary">Complete the initial meter setup to start your first billing cycle.</p>
+        <div class="card empty-state cycles-empty-state">
+            <div class="empty-state-icon">
+                <i data-lucide="refresh-cw" style="width: 28px; height: 28px; color: #5B8DEF;"></i>
+            </div>
+            <div class="empty-state-title">No Cycles Yet</div>
+            <div class="empty-state-description">Complete the initial setup and supplier bill entry to start your first billing cycle.</div>
         </div>
     <% } else { %>
-        <% cycles.forEach((cycle, index) => { 
-            const data = cycleResults[cycle._id];
+        <% cycles.forEach((cycle) => {
+            const cycleData = cycleResults[cycle._id];
             const isActive = !cycle.endDate;
-            
-            // Calculate duration
             const start = new Date(cycle.startDate);
             const end = cycle.endDate ? new Date(cycle.endDate) : new Date();
             const daysRunning = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
-            
-            // Format dates
             const startDateStr = start.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
             const endDateStr = cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Present';
+            const mainBill = cycleData.mainBill;
+            const roomBills = cycleData.roomBills || [];
+            const roomCount = cycleData.roomBillsCount || 0;
+            const totalAmount = mainBill ? Number(mainBill.total_amount || 0) : 0;
+            const ratePerUnit = mainBill && Number(mainBill.total_units || 0) > 0 ? (totalAmount / Number(mainBill.total_units || 1)).toFixed(2) : '0.00';
+            const colors = ['#FF6B2B', '#5B8DEF', '#4CAF7D', '#8B5CF6'];
         %>
-            <div class="timeline-item" style="position: relative; margin-bottom: 3rem;">
-                <!-- Timeline Dot -->
-                <div style="position: absolute; left: -2rem; top: 1.5rem; transform: translate(-50%, -50%); width: 16px; height: 16px; border-radius: 50%; background: <%= isActive ? 'var(--accent-green)' : 'var(--accent-blue)' %>; border: 4px solid var(--bg-body); z-index: 2; box-shadow: 0 0 0 2px <%= isActive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(77, 159, 236, 0.3)' %>;">
+            <article class="cycles-item">
+                <div class="cycles-node <%= isActive ? 'is-active' : 'is-complete' %>">
                     <% if (isActive) { %>
-                        <div class="pulse-ring" style="position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px; border-radius: 50%; border: 2px solid var(--accent-green); animation: pulse 2s infinite;"></div>
+                        <span class="cycles-node-pulse"></span>
                     <% } %>
                 </div>
 
                 <% if (isActive) { %>
-                    <!-- Active Cycle Card -->
-                    <div class="card-raised" style="border-left: 4px solid var(--accent-green); transition: transform 0.2s ease;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                    <div class="cycles-card cycles-card-active">
+                        <div class="cycles-active-top">
                             <div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
-                                    <h3 style="margin: 0; font-size: 1.25rem; color: var(--text-primary);">Current Cycle</h3>
-                                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 800;">LIVE</span>
+                                <div class="cycles-active-title-row">
+                                    <h3>Current Cycle</h3>
+                                    <span class="cycles-live-pill">LIVE</span>
                                 </div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;"><%= startDateStr %> &rarr; Now</div>
+                                <div class="cycles-date-range"><%= startDateStr %> - Present</div>
                             </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= daysRunning %></div>
-                                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Days Running</div>
+
+                            <div class="cycles-days-col">
+                                <div class="cycles-days-value"><%= daysRunning %></div>
+                                <div class="cycles-days-label">Days Running</div>
                             </div>
                         </div>
 
-                        <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 1.5rem; text-align: center;">
-                            <% if (!data.mainBill) { %>
-                                <i data-lucide="file-input" style="color: var(--accent-yellow); margin-bottom: 0.5rem; width: 24px; height: 24px;"></i>
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">Awaiting Supplier Bill</h4>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">Enter the main electricity bill to calculate the current rate per unit.</p>
-                                <a href="/houses/<%= houseId %>/main-bill/new" class="btn btn-primary" style="background: var(--accent-yellow); color: #000; font-weight: 700; border: none;">Enter Main Bill &rarr;</a>
+                        <div class="cycles-active-body">
+                            <% if (!mainBill) { %>
+                                <i data-lucide="receipt" class="cycles-state-icon" style="color: #FF6B2B;"></i>
+                                <h4>Awaiting Supplier Bill</h4>
+                                <p>Enter the supplier bill first so the system can calculate the rate per unit for this cycle.</p>
+                                <a href="/houses/<%= houseId %>/main-bill/new" class="btn btn-accent">Enter Main Bill -&gt;</a>
                             <% } else { %>
-                                <i data-lucide="gauge" style="color: var(--accent-green); margin-bottom: 0.5rem; width: 24px; height: 24px;"></i>
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">Awaiting Room Readings</h4>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">Supplier bill recorded (₹<%= data.mainBill.total_amount %>). Record individual meter readings to close this cycle.</p>
-                                <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-primary" style="background: var(--accent-green); color: #000; font-weight: 700; border: none;">Record Readings &rarr;</a>
+                                <i data-lucide="gauge" class="cycles-state-icon" style="color: #4CAF7D;"></i>
+                                <h4>Awaiting Room Readings</h4>
+                                <p>Supplier bill recorded (₹<%= totalAmount.toLocaleString('en-IN') %>). Record room readings now to close this cycle.</p>
+                                <a href="/houses/<%= houseId %>/cycles/<%= cycle._id %>/readings/new" class="btn btn-primary">Record Readings -&gt;</a>
                             <% } %>
                         </div>
                     </div>
-
                 <% } else { %>
-                    <!-- Completed Cycle Card -->
-                    <div class="card-raised cycle-card" style="border-left: 4px solid var(--accent-blue); padding: 0;">
-                        <div style="padding: 1.5rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-                                <div>
-                                    <h3 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--text-primary);"><%= startDateStr %> &mdash; <%= endDateStr %></h3>
-                                    <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;"><%= daysRunning %> Days Duration</div>
-                                </div>
-                                <a href="/cycles/<%= cycle._id %>/room-bills" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; border-color: var(--accent-blue); color: var(--accent-blue);">View Distribution &rarr;</a>
+                    <div class="cycles-card cycles-card-complete">
+                        <div class="cycles-complete-top">
+                            <div>
+                                <h3><%= startDateStr %> - <%= endDateStr %></h3>
+                                <div class="cycles-duration"><%= daysRunning %> Days Duration</div>
                             </div>
-
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                                <% if (data.mainBill) { %>
-                                    <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                                        <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: 700;">Total Billed</div>
-                                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-green);">₹<%= data.mainBill.total_amount.toLocaleString() %></div>
-                                    </div>
-                                    <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                                        <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: 700;">Rate Per Unit</div>
-                                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">₹<%= (data.mainBill.total_amount / data.mainBill.total_units).toFixed(2) %></div>
-                                    </div>
-                                <% } %>
-                                <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                                    <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: 700;">Meters Billed</div>
-                                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);"><%= data.roomBillsCount %></div>
-                                </div>
-                            </div>
-
-                            <% if (data.mainBill && data.roomBills && data.roomBills.length > 0) { 
-                                const totalCost = data.mainBill.total_amount;
-                                // Simple distinct colors for visualization
-                                const colors = ['#4D9FEC', '#8B5CF6', '#2DD4BF', '#FBBF24', '#F43F5E', '#0EA5E9'];
-                            %>
-                                <div style="margin-top: 1rem;">
-                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">Cost Distribution</div>
-                                    <!-- Horizontal Stacked Bar -->
-                                    <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--border-soft); margin-bottom: 0.5rem;">
-                                        <% data.roomBills.forEach((rb, idx) => { 
-                                            const pct = Math.max((rb.amount / totalCost) * 100, 0);
-                                            const color = colors[idx % colors.length];
-                                        %>
-                                            <div style="width: <%= pct %>%; background: <%= color %>;" title="<%= rb.room_id ? rb.room_id.meter_name : 'Room' %>: ₹<%= rb.amount %>"></div>
-                                        <% }) %>
-                                    </div>
-                                    <!-- Legend (max 4 items for space) -->
-                                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                                        <% data.roomBills.slice(0, 4).forEach((rb, idx) => { 
-                                            const color = colors[idx % colors.length];
-                                        %>
-                                            <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; color: var(--text-dim);">
-                                                <div style="width: 8px; height: 8px; border-radius: 2px; background: <%= color %>;"></div>
-                                                <%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %>
-                                            </div>
-                                        <% }) %>
-                                        <% if (data.roomBills.length > 4) { %>
-                                            <div style="font-size: 0.7rem; color: var(--text-dim);">+ <%= data.roomBills.length - 4 %> more</div>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            <% } %>
+                            <a href="/cycles/<%= cycle._id %>/room-bills" class="cycles-distribution-btn">View Distribution -&gt;</a>
                         </div>
+
+                        <div class="cycles-chip-row">
+                            <div class="cycles-stat-chip">
+                                <div class="cycles-stat-chip-label">Total Billed</div>
+                                <div class="cycles-stat-chip-value">₹<%= totalAmount.toLocaleString('en-IN') %></div>
+                            </div>
+                            <div class="cycles-stat-chip">
+                                <div class="cycles-stat-chip-label">Rate</div>
+                                <div class="cycles-stat-chip-value">₹<%= ratePerUnit %>/U</div>
+                            </div>
+                            <div class="cycles-stat-chip">
+                                <div class="cycles-stat-chip-label">Meters Billed</div>
+                                <div class="cycles-stat-chip-value"><%= roomCount %></div>
+                            </div>
+                        </div>
+
+                        <% if (roomBills.length > 0 && totalAmount > 0) { %>
+                            <div class="cycles-distribution-wrap">
+                                <div class="cycles-distribution-bar">
+                                    <% roomBills.forEach((roomBill, index) => {
+                                        const width = Math.max((Number(roomBill.amount || 0) / totalAmount) * 100, 4);
+                                    %>
+                                        <span style="width: <%= width %>%; background: <%= colors[index % colors.length] %>;"></span>
+                                    <% }) %>
+                                </div>
+
+                                <div class="cycles-legend">
+                                    <% roomBills.slice(0, 4).forEach((roomBill, index) => { %>
+                                        <div class="cycles-legend-item">
+                                            <span class="cycles-legend-color" style="background: <%= colors[index % colors.length] %>;"></span>
+                                            <span><%= roomBill.room_id ? roomBill.room_id.meter_name : 'Room' %></span>
+                                        </div>
+                                    <% }) %>
+                                    <% if (roomBills.length > 4) { %>
+                                        <div class="cycles-legend-item cycles-legend-more">+<%= roomBills.length - 4 %> more</div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
                     </div>
                 <% } %>
-            </div>
+            </article>
         <% }) %>
     <% } %>
-</div>
+</section>
 
 <style>
-    @keyframes pulse {
-        0% { transform: scale(0.8); opacity: 0.8; }
-        100% { transform: scale(1.5); opacity: 0; }
+    .cycles-breadcrumb {
+        margin-bottom: 14px;
+        color: #7A7A8A;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
     }
-    .cycle-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    .cycles-breadcrumb span {
+        color: #1A1A1A;
     }
-    .cycle-card:hover {
-        transform: translateX(4px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+
+    .cycles-header {
+        margin-bottom: 24px;
+    }
+
+    .cycles-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .cycles-title i {
+        width: 24px;
+        height: 24px;
+        color: #5B8DEF;
+    }
+
+    .cycles-timeline {
+        position: relative;
+        max-width: 760px;
+        margin: 0 auto;
+        padding-left: 32px;
+    }
+
+    .cycles-timeline-line {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        border-radius: 2px;
+        background: #E8E7E2;
+    }
+
+    .cycles-item {
+        position: relative;
+        margin-bottom: 24px;
+    }
+
+    .cycles-node {
+        position: absolute;
+        left: -32px;
+        top: 28px;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        border: 4px solid #F2F1EC;
+        z-index: 2;
+    }
+
+    .cycles-node.is-active {
+        background: #FF6B2B;
+    }
+
+    .cycles-node.is-complete {
+        background: #1F1F1F;
+    }
+
+    .cycles-node-pulse {
+        position: absolute;
+        inset: -8px;
+        border-radius: 999px;
+        border: 2px solid rgba(255, 107, 43, 0.3);
+        animation: cyclesPulse 2s infinite;
+    }
+
+    .cycles-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    }
+
+    .cycles-card-active {
+        border-left: 3px solid #FF6B2B;
+    }
+
+    .cycles-card-complete {
+        border-left: 3px solid #E8E7E2;
+    }
+
+    .cycles-active-top,
+    .cycles-complete-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .cycles-active-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .cycles-active-title-row h3,
+    .cycles-complete-top h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1A1A1A;
+    }
+
+    .cycles-live-pill {
+        min-height: 28px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #FFF0E6;
+        color: #FF6B2B;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cycles-date-range,
+    .cycles-duration {
+        color: #7A7A8A;
+        font-size: 0.82rem;
+    }
+
+    .cycles-days-col {
+        text-align: right;
+    }
+
+    .cycles-days-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #1A1A1A;
+    }
+
+    .cycles-days-label {
+        color: #7A7A8A;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .cycles-active-body {
+        border: 1.5px dashed #E8E7E2;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+    }
+
+    .cycles-state-icon {
+        width: 24px;
+        height: 24px;
+        margin: 0 auto 10px;
+    }
+
+    .cycles-active-body h4 {
+        margin-bottom: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1A1A1A;
+    }
+
+    .cycles-active-body p {
+        margin-bottom: 16px;
+        color: #7A7A8A;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .cycles-distribution-btn {
+        min-height: 40px;
+        padding: 0 16px;
+        border-radius: 999px;
+        border: 1.5px solid #5B8DEF;
+        color: #2C5CC5;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .cycles-chip-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .cycles-stat-chip {
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #F7F6F2;
+    }
+
+    .cycles-stat-chip-label {
+        margin-bottom: 4px;
+        color: #7A7A8A;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .cycles-stat-chip-value {
+        color: #1A1A1A;
+        font-size: 1.1rem;
+        font-weight: 800;
+    }
+
+    .cycles-distribution-wrap {
+        margin-top: 8px;
+    }
+
+    .cycles-distribution-bar {
+        display: flex;
+        width: 100%;
+        height: 10px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #E8E7E2;
+        margin-bottom: 10px;
+    }
+
+    .cycles-distribution-bar span {
+        display: block;
+        height: 100%;
+    }
+
+    .cycles-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+    }
+
+    .cycles-legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #7A7A8A;
+        font-size: 0.74rem;
+    }
+
+    .cycles-legend-color {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        display: inline-block;
+    }
+
+    .cycles-legend-more {
+        color: #7A7A8A;
+        font-weight: 600;
+    }
+
+    .cycles-empty-state {
+        min-height: 300px;
+    }
+
+    @keyframes cyclesPulse {
+        0% {
+            transform: scale(0.9);
+            opacity: 0.7;
+        }
+        100% {
+            transform: scale(1.45);
+            opacity: 0;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cycles-timeline {
+            padding-left: 24px;
+        }
+
+        .cycles-node {
+            left: -24px;
+        }
+
+        .cycles-chip-row {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            scrollbar-width: none;
+        }
+
+        .cycles-chip-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cycles-stat-chip {
+            min-width: 140px;
+            flex-shrink: 0;
+        }
     }
 </style>

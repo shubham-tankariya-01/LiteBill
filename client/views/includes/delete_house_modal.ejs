@@ -1,24 +1,92 @@
-<!-- Delete House Confirmation Modal -->
-<div id="deleteHouseModal" class="modal hidden" style="z-index: 10000;">
-    <div class="modal-content-new" style="max-width: 400px; text-align: center; padding: 2.5rem 2rem;">
-        <button type="button" class="modal-close-btn" onclick="closeDeleteHouseModal()">
-            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+<style>
+    .delete-modal-sheet {
+        text-align: center;
+    }
+
+    .delete-modal-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 20px;
+        border-radius: 999px;
+        background: #FEF2F2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-modal-icon i {
+        width: 32px;
+        height: 32px;
+        color: #EF4444;
+    }
+
+    .delete-modal-title {
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .delete-modal-copy {
+        margin-bottom: 28px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .delete-modal-actions .btn {
+        flex: 1;
+    }
+
+    .delete-modal-danger {
+        flex: 1.5;
+        background: #EF4444;
+        color: #FFFFFF;
+    }
+
+    .delete-modal-danger:hover {
+        background: #DC2626;
+    }
+
+    @media (max-width: 768px) {
+        .delete-modal-actions {
+            flex-direction: column;
+        }
+
+        .delete-modal-actions .btn,
+        .delete-modal-danger {
+            width: 100%;
+            flex: none;
+        }
+    }
+</style>
+
+<div id="deleteHouseModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-sheet delete-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="deleteHouseModalTitle">
+        <button type="button" class="modal-close-btn" onclick="closeDeleteHouseModal()" aria-label="Close modal">
+            <i data-lucide="x" aria-hidden="true"></i>
         </button>
 
-        <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; border: 1px solid rgba(239, 68, 68, 0.2);">
-            <i data-lucide="alert-triangle" style="color: var(--accent-red); width: 32px; height: 32px;"></i>
+        <div class="delete-modal-icon">
+            <i data-lucide="alert-triangle" aria-hidden="true"></i>
         </div>
-        
-        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">Are you sure?</h2>
-        <p class="text-secondary" style="margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5;">
-            You are about to delete <strong id="deleteHouseName" style="color: var(--text-primary);">this house</strong>. 
-            This action cannot be undone and will permanently erase all associated rooms, bills, and history.
+
+        <h2 id="deleteHouseModalTitle" class="delete-modal-title">Are you sure?</h2>
+        <p class="delete-modal-copy">
+            You are about to delete <strong id="deleteHouseName" style="color: var(--text-primary);">this property</strong>.
+            This cannot be undone and will permanently delete all rooms, bills, and history.
         </p>
 
         <form id="deleteHouseForm" method="POST" action="">
-            <div style="display: flex; gap: 1rem;">
-                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeDeleteHouseModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="flex: 1.5; background: var(--accent-red); color: white; border: none;">Delete Permanently</button>
+            <div class="delete-modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteHouseModal()">Cancel</button>
+                <button type="submit" class="btn delete-modal-danger">Delete Permanently</button>
             </div>
         </form>
     </div>
@@ -26,14 +94,30 @@
 
 <script>
     function openDeleteHouseModal(houseId, houseName) {
+        const modal = document.getElementById('deleteHouseModal');
         document.getElementById('deleteHouseName').innerText = houseName;
         document.getElementById('deleteHouseForm').action = `/houses/${houseId}?_method=DELETE`;
-        document.getElementById('deleteHouseModal').classList.remove('hidden');
+        modal.classList.remove('hidden');
         document.body.classList.add('modal-open');
     }
 
     function closeDeleteHouseModal() {
-        document.getElementById('deleteHouseModal').classList.add('hidden');
+        const modal = document.getElementById('deleteHouseModal');
+        modal.classList.add('hidden');
         document.body.classList.remove('modal-open');
     }
+
+    document.addEventListener('keydown', (event) => {
+        const modal = document.getElementById('deleteHouseModal');
+        if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+            closeDeleteHouseModal();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        const modal = document.getElementById('deleteHouseModal');
+        if (event.target === modal) {
+            closeDeleteHouseModal();
+        }
+    });
 </script>

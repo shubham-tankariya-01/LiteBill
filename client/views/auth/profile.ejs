@@ -1,231 +1,576 @@
 <% layout('layouts/boilerplate') %>
 
-<div style="max-width: 1000px; margin: 0 auto; padding-bottom: 3rem;">
-    <!-- Header -->
-    <div style="margin-bottom: 2.5rem;">
-        <h1 style="margin: 0 0 0.5rem 0; font-size: 2.25rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem;">
-            <i data-lucide="user" style="color: var(--accent-orange);"></i> Your Profile
-        </h1>
-        <p class="text-secondary" style="font-size: 1rem; margin: 0;">Manage your account settings and security preferences.</p>
-    </div>
+<%
+    const mobileNumber = user && user.mobile_number ? `+91 ${user.mobile_number}` : '+91 User';
+    const initials = user && user.mobile_number ? user.mobile_number.toString().slice(0, 1) : 'U';
+    const memberSince = user && user.createdAt
+        ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        : 'Recently';
+%>
 
-    <!-- Alert Messages -->
+<div class="profile-page">
+    <header class="page-header profile-header">
+        <div>
+            <h1 class="profile-title">
+                <i data-lucide="user" aria-hidden="true"></i>
+                <span>Your Profile</span>
+            </h1>
+            <p class="profile-subtitle">Manage your account details and keep your security settings up to date.</p>
+        </div>
+    </header>
+
     <% if (error) { %>
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--accent-red);">
-            <i data-lucide="alert-circle" style="width: 20px;"></i>
-            <span style="font-weight: 600;"><%= error %></span>
+        <div class="profile-banner profile-banner-error">
+            <i data-lucide="alert-circle" aria-hidden="true"></i>
+            <span><%= error %></span>
         </div>
     <% } %>
+
     <% if (success) { %>
-        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--accent-green);">
-            <i data-lucide="check-circle" style="width: 20px;"></i>
-            <span style="font-weight: 600;"><%= success %></span>
+        <div class="profile-banner profile-banner-success">
+            <i data-lucide="check-circle-2" aria-hidden="true"></i>
+            <span><%= success %></span>
         </div>
     <% } %>
 
-    <div class="split-layout" style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: stretch;">
-        
-        <!-- Left Panel: Profile Info -->
-        <div style="flex: 1; min-width: 300px;">
-            <div class="card-raised" style="height: 100%; border-top: 4px solid var(--accent-orange); display: flex; flex-direction: column;">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <div style="width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, #FF6B35 0%, #8B5CF6 100%); margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);">
-                        <span style="font-size: 2.5rem; font-weight: 800; color: #fff;">
-                            <%= user.mobile_number ? user.mobile_number.toString().charAt(0) : 'U' %>
-                        </span>
-                    </div>
-                    <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem 0;">+91 <%= user.mobile_number %></h2>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
-                        Member since <%= new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %>
-                    </p>
-                </div>
-
-                <div style="margin-top: auto;">
-                    <h3 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem;">Account Statistics</h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
-                                <i data-lucide="home" style="width: 18px; color: var(--accent-yellow);"></i>
-                                <span style="font-weight: 600;">Properties</span>
-                            </div>
-                            <span style="font-weight: 800; font-size: 1.1rem;"><%= stats.propertiesCount %></span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
-                                <i data-lucide="bed-double" style="width: 18px; color: var(--accent-purple);"></i>
-                                <span style="font-weight: 600;">Configured Meters</span>
-                            </div>
-                            <span style="font-weight: 800; font-size: 1.1rem;"><%= stats.roomsCount %></span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
-                                <i data-lucide="file-text" style="width: 18px; color: var(--accent-blue);"></i>
-                                <span style="font-weight: 600;">Main Bills Tracked</span>
-                            </div>
-                            <span style="font-weight: 800; font-size: 1.1rem;"><%= stats.billsCount %></span>
-                        </div>
-                    </div>
+    <div class="profile-layout">
+        <section class="card profile-sidebar">
+            <div class="profile-identity">
+                <div class="profile-avatar" aria-hidden="true"><%= initials %></div>
+                <div class="profile-identity-copy">
+                    <h2><%= mobileNumber %></h2>
+                    <p>Member since <%= memberSince %></p>
                 </div>
             </div>
-        </div>
 
-        <!-- Right Panel: Security -->
-        <div style="flex: 1.5; min-width: 350px;">
-            <div class="card-raised" style="height: 100%; border-top: 4px solid var(--accent-blue);">
-                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="shield-check" style="color: var(--accent-blue);"></i> Security Settings
-                </h2>
+            <div class="profile-divider"></div>
 
-                <form action="/auth/change-password" method="POST" id="passwordForm">
-                    <div class="form-group" style="margin-bottom: 1.5rem;">
-                        <label class="form-label" for="current_password">Current Password</label>
-                        <div style="position: relative;">
-                            <input type="password" id="current_password" name="current_password" class="form-input" style="padding-right: 3rem;" required>
-                            <button type="button" class="pwd-toggle" data-target="current_password" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0;">
-                                <i data-lucide="eye" style="width: 18px;"></i>
-                            </button>
-                        </div>
+            <div class="profile-stats">
+                <div class="stat-label">Account Statistics</div>
+
+                <div class="profile-stat-row">
+                    <div class="profile-stat-label">
+                        <i data-lucide="home" class="profile-stat-icon profile-stat-icon-orange" aria-hidden="true"></i>
+                        <span>Properties</span>
                     </div>
+                    <strong><%= stats.propertiesCount %></strong>
+                </div>
 
-                    <div class="form-group" style="margin-bottom: 1.5rem;">
-                        <label class="form-label" for="new_password">New Password</label>
-                        <div style="position: relative;">
-                            <input type="password" id="new_password" name="new_password" class="form-input" style="padding-right: 3rem;" required minlength="6">
-                            <button type="button" class="pwd-toggle" data-target="new_password" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0;">
-                                <i data-lucide="eye" style="width: 18px;"></i>
-                            </button>
-                        </div>
-                        <!-- Strength indicator -->
-                        <div style="display: flex; gap: 4px; margin-top: 0.5rem;" id="strength-bars">
-                            <div style="height: 4px; flex: 1; border-radius: 2px; background: var(--border-soft); transition: background 0.3s;" class="str-bar"></div>
-                            <div style="height: 4px; flex: 1; border-radius: 2px; background: var(--border-soft); transition: background 0.3s;" class="str-bar"></div>
-                            <div style="height: 4px; flex: 1; border-radius: 2px; background: var(--border-soft); transition: background 0.3s;" class="str-bar"></div>
-                        </div>
-                        <p id="strength-text" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 600;">Enter a password</p>
+                <div class="profile-stat-row">
+                    <div class="profile-stat-label">
+                        <i data-lucide="bed-double" class="profile-stat-icon profile-stat-icon-purple" aria-hidden="true"></i>
+                        <span>Configured Meters</span>
                     </div>
+                    <strong><%= stats.roomsCount %></strong>
+                </div>
 
-                    <div class="form-group" style="margin-bottom: 2rem;">
-                        <label class="form-label" for="confirm_password">Confirm New Password</label>
-                        <div style="position: relative;">
-                            <input type="password" id="confirm_password" class="form-input" style="padding-right: 3rem;" required minlength="6">
-                            <button type="button" class="pwd-toggle" data-target="confirm_password" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0;">
-                                <i data-lucide="eye" style="width: 18px;"></i>
-                            </button>
-                        </div>
-                        <p id="match-error" style="font-size: 0.8rem; color: var(--accent-red); margin-top: 0.5rem; display: none; font-weight: 600;">Passwords do not match.</p>
+                <div class="profile-stat-row">
+                    <div class="profile-stat-label">
+                        <i data-lucide="file-text" class="profile-stat-icon profile-stat-icon-blue" aria-hidden="true"></i>
+                        <span>Main Bills Tracked</span>
                     </div>
-
-                    <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; background: var(--accent-blue); color: #000; font-weight: 800;">Update Password &rarr;</button>
-                </form>
+                    <strong><%= stats.billsCount %></strong>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section class="card profile-security-card">
+            <div class="profile-section-heading">
+                <i data-lucide="shield-check" aria-hidden="true"></i>
+                <span>Security Settings</span>
+            </div>
+
+            <form action="/auth/change-password" method="POST" id="passwordForm" class="profile-password-form">
+                <div class="form-group">
+                    <label class="form-label" for="current_password">Current Password</label>
+                    <div class="profile-password-field">
+                        <input type="password" id="current_password" name="current_password" class="form-input" required>
+                        <button type="button" class="profile-password-toggle" data-target="current_password" aria-label="Toggle current password visibility">
+                            <i data-lucide="eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="new_password">New Password</label>
+                    <div class="profile-password-field">
+                        <input type="password" id="new_password" name="new_password" class="form-input" required minlength="6">
+                        <button type="button" class="profile-password-toggle" data-target="new_password" aria-label="Toggle new password visibility">
+                            <i data-lucide="eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="profile-strength-bars" aria-hidden="true">
+                        <span class="profile-strength-bar"></span>
+                        <span class="profile-strength-bar"></span>
+                        <span class="profile-strength-bar"></span>
+                    </div>
+                    <p id="strengthText" class="profile-helper-text">Enter a password</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirm_password">Confirm New Password</label>
+                    <div class="profile-password-field">
+                        <input type="password" id="confirm_password" class="form-input" required minlength="6">
+                        <button type="button" class="profile-password-toggle" data-target="confirm_password" aria-label="Toggle confirm password visibility">
+                            <i data-lucide="eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <p id="matchMessage" class="profile-helper-text profile-helper-error hidden">Passwords do not match</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary profile-submit-btn">Update Password →</button>
+            </form>
+        </section>
     </div>
 
-    <!-- Danger Zone -->
-    <div class="card-raised" style="border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%);">
-        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.5rem 0;">Danger Zone</h2>
-        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Actions taken here may be irreversible. Please proceed with caution.</p>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding-top: 1.5rem; border-top: 1px solid rgba(239, 68, 68, 0.2);">
-            <form action="/auth/logout" method="POST" style="margin: 0;">
-                <button type="submit" class="btn btn-secondary" style="border-color: var(--text-muted); color: var(--text-primary);">
-                    <i data-lucide="log-out" style="width: 16px;"></i> Sign Out of LiteBill
+    <section class="profile-danger-zone">
+        <div>
+            <h2>Danger Zone</h2>
+            <p>These actions affect your current session and account access. Please continue carefully.</p>
+        </div>
+
+        <div class="profile-danger-divider"></div>
+
+        <div class="profile-danger-actions">
+            <form action="/auth/logout" method="POST">
+                <button type="submit" class="btn btn-secondary profile-danger-btn">
+                    <i data-lucide="log-out" aria-hidden="true"></i>
+                    <span>Sign Out of LiteBill</span>
                 </button>
             </form>
 
-            <button type="button" class="btn btn-outline" style="border-color: var(--accent-red); color: var(--accent-red);" onclick="alert('Account deletion is currently unavailable. Please contact support.')">
-                <i data-lucide="trash-2" style="width: 16px;"></i> Delete Account
+            <button
+                type="button"
+                class="btn profile-delete-btn"
+                onclick="alert('Account deletion is currently unavailable. Please contact support.')"
+            >
+                <i data-lucide="trash-2" aria-hidden="true"></i>
+                <span>Delete Account</span>
             </button>
         </div>
-    </div>
+    </section>
 </div>
+
+<style>
+    .profile-page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .profile-header {
+        margin-bottom: 0;
+    }
+
+    .profile-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .profile-title i {
+        width: 26px;
+        height: 26px;
+        color: var(--accent-orange);
+    }
+
+    .profile-subtitle {
+        margin-top: 8px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .profile-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-weight: 600;
+    }
+
+    .profile-banner i {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    .profile-banner-error {
+        background: #FEF2F2;
+        border-left: 4px solid #EF4444;
+        color: #B91C1C;
+    }
+
+    .profile-banner-success {
+        background: #ECFDF3;
+        border-left: 4px solid #4CAF7D;
+        color: #2E7D52;
+    }
+
+    .profile-layout {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        align-items: stretch;
+    }
+
+    .profile-sidebar {
+        flex: 1;
+        min-width: 280px;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profile-security-card {
+        flex: 1.5;
+        min-width: 340px;
+        padding: 28px;
+    }
+
+    .profile-identity {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #FF6B2B 0%, #8B5CF6 100%);
+        color: #FFFFFF;
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 18px;
+        box-shadow: 0 16px 28px rgba(255, 107, 43, 0.18);
+    }
+
+    .profile-identity-copy h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .profile-identity-copy p {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .profile-divider,
+    .profile-danger-divider {
+        height: 1px;
+        background: var(--border-subtle);
+        margin: 20px 0;
+    }
+
+    .profile-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profile-stat-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: var(--surface-soft);
+        border-radius: 12px;
+        padding: 12px 16px;
+    }
+
+    .profile-stat-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .profile-stat-row strong {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .profile-stat-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .profile-stat-icon-orange {
+        color: var(--accent-orange);
+    }
+
+    .profile-stat-icon-purple {
+        color: #8B5CF6;
+    }
+
+    .profile-stat-icon-blue {
+        color: var(--accent-blue);
+    }
+
+    .profile-section-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .profile-section-heading i {
+        width: 20px;
+        height: 20px;
+        color: var(--accent-blue);
+    }
+
+    .profile-password-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .profile-password-field {
+        position: relative;
+    }
+
+    .profile-password-field .form-input {
+        padding-right: 52px;
+    }
+
+    .profile-password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        color: var(--text-secondary);
+        transform: translateY(-50%);
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .profile-password-toggle:hover {
+        background: var(--surface-muted);
+        color: var(--text-primary);
+    }
+
+    .profile-password-toggle i {
+        width: 18px;
+        height: 18px;
+        margin: 0 auto;
+    }
+
+    .profile-strength-bars {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .profile-strength-bar {
+        height: 6px;
+        border-radius: 999px;
+        background: var(--border-subtle);
+        transition: background 0.2s ease;
+    }
+
+    .profile-helper-text {
+        margin-top: 8px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .profile-helper-error {
+        color: #DC2626;
+    }
+
+    .profile-submit-btn {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .profile-danger-zone {
+        background: var(--surface);
+        border: 1.5px solid #FECACA;
+        border-left: 4px solid #EF4444;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: var(--shadow-card-soft);
+    }
+
+    .profile-danger-zone h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .profile-danger-zone p {
+        color: var(--text-secondary);
+    }
+
+    .profile-danger-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .profile-danger-actions form {
+        margin: 0;
+    }
+
+    .profile-danger-btn,
+    .profile-delete-btn {
+        min-width: 210px;
+    }
+
+    .profile-delete-btn {
+        background: transparent;
+        color: #DC2626;
+        border: 1.5px solid #FCA5A5;
+    }
+
+    .profile-delete-btn:hover {
+        border-color: #DC2626;
+        background: #FEF2F2;
+    }
+
+    @media (max-width: 768px) {
+        .profile-sidebar,
+        .profile-security-card,
+        .profile-danger-zone {
+            width: 100%;
+        }
+
+        .profile-identity {
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            margin-bottom: 0;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .profile-danger-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .profile-danger-actions form,
+        .profile-danger-btn,
+        .profile-delete-btn {
+            width: 100%;
+        }
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Password toggles
-        document.querySelectorAll('.pwd-toggle').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const targetId = e.currentTarget.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                const icon = e.currentTarget.querySelector('i');
-                
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.setAttribute('data-lucide', 'eye-off');
-                } else {
-                    input.type = 'password';
-                    icon.setAttribute('data-lucide', 'eye');
-                }
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            });
-        });
-
-        // Password strength and validation
-        const newPwd = document.getElementById('new_password');
-        const confPwd = document.getElementById('confirm_password');
+        const toggles = document.querySelectorAll('.profile-password-toggle');
+        const newPassword = document.getElementById('new_password');
+        const confirmPassword = document.getElementById('confirm_password');
         const form = document.getElementById('passwordForm');
-        const matchError = document.getElementById('match-error');
-        const bars = document.querySelectorAll('.str-bar');
-        const strText = document.getElementById('strength-text');
+        const strengthBars = Array.from(document.querySelectorAll('.profile-strength-bar'));
+        const strengthText = document.getElementById('strengthText');
+        const matchMessage = document.getElementById('matchMessage');
 
-        function checkStrength(val) {
-            let strength = 0;
-            if (val.length >= 6) strength++;
-            if (val.match(/[A-Z]/) || val.match(/[0-9]/)) strength++;
-            if (val.length >= 10 && val.match(/[^A-Za-z0-9]/)) strength++;
+        const resetStrength = () => {
+            strengthBars.forEach((bar) => {
+                bar.style.background = 'var(--border-subtle)';
+            });
+            strengthText.textContent = 'Enter a password';
+            strengthText.style.color = 'var(--text-secondary)';
+        };
 
-            bars.forEach(b => b.style.background = 'var(--border-soft)');
-            
-            if (val.length === 0) {
-                strText.textContent = 'Enter a password';
-                strText.style.color = 'var(--text-muted)';
+        const updateStrength = (value) => {
+            if (!value) {
+                resetStrength();
                 return;
             }
 
-            if (strength >= 1) {
-                bars[0].style.background = 'var(--accent-red)';
-                strText.textContent = 'Weak';
-                strText.style.color = 'var(--accent-red)';
-            }
-            if (strength >= 2) {
-                bars[0].style.background = 'var(--accent-yellow)';
-                bars[1].style.background = 'var(--accent-yellow)';
-                strText.textContent = 'Good';
-                strText.style.color = 'var(--accent-yellow)';
-            }
-            if (strength >= 3) {
-                bars.forEach(b => b.style.background = 'var(--accent-green)');
-                strText.textContent = 'Strong';
-                strText.style.color = 'var(--accent-green)';
-            }
-        }
+            let score = 0;
+            if (value.length >= 6) score += 1;
+            if (/[A-Z0-9]/.test(value)) score += 1;
+            if (value.length >= 10 && /[^A-Za-z0-9]/.test(value)) score += 1;
 
-        newPwd.addEventListener('input', (e) => {
-            checkStrength(e.target.value);
-            if (confPwd.value) checkMatch();
-        });
+            resetStrength();
 
-        confPwd.addEventListener('input', checkMatch);
+            if (score >= 1) {
+                strengthBars[0].style.background = '#EF4444';
+                strengthText.textContent = 'Weak';
+                strengthText.style.color = '#EF4444';
+            }
+            if (score >= 2) {
+                strengthBars[0].style.background = '#F59E0B';
+                strengthBars[1].style.background = '#F59E0B';
+                strengthText.textContent = 'Good';
+                strengthText.style.color = '#D97706';
+            }
+            if (score >= 3) {
+                strengthBars.forEach((bar) => {
+                    bar.style.background = 'var(--accent-green)';
+                });
+                strengthText.textContent = 'Strong';
+                strengthText.style.color = 'var(--accent-green)';
+            }
+        };
 
-        function checkMatch() {
-            if (confPwd.value !== newPwd.value) {
-                matchError.style.display = 'block';
-                confPwd.style.borderColor = 'var(--accent-red)';
-                return false;
-            } else {
-                matchError.style.display = 'none';
-                confPwd.style.borderColor = 'var(--border)';
+        const validateMatch = () => {
+            if (!confirmPassword.value) {
+                matchMessage.classList.add('hidden');
+                confirmPassword.style.borderColor = '';
                 return true;
             }
-        }
 
-        form.addEventListener('submit', (e) => {
-            if (!checkMatch()) {
-                e.preventDefault();
+            const isMatch = confirmPassword.value === newPassword.value;
+            matchMessage.classList.toggle('hidden', isMatch);
+            confirmPassword.style.borderColor = isMatch ? '' : '#EF4444';
+            return isMatch;
+        };
+
+        toggles.forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const target = document.getElementById(toggle.dataset.target);
+                const icon = toggle.querySelector('i');
+                const nextType = target.type === 'password' ? 'text' : 'password';
+                target.type = nextType;
+                icon.setAttribute('data-lucide', nextType === 'password' ? 'eye' : 'eye-off');
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            });
+        });
+
+        newPassword.addEventListener('input', (event) => {
+            updateStrength(event.target.value);
+            validateMatch();
+        });
+
+        confirmPassword.addEventListener('input', validateMatch);
+
+        form.addEventListener('submit', (event) => {
+            if (!validateMatch()) {
+                event.preventDefault();
             }
         });
+
+        resetStrength();
     });
 </script>

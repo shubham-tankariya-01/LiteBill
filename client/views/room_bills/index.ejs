@@ -1,221 +1,362 @@
 <% layout('layouts/boilerplate') %>
 
-<!-- Header -->
-<div class="page-header sticky-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
-            <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
-            <span>/</span> 
-            <a href="/houses/<%= houseId %>" style="color: var(--text-dim); text-decoration: none;"><%= cycle.house.house_name %></a>
-            <span>/</span>
-            <a href="/houses/<%= houseId %>/cycles" style="color: var(--text-dim); text-decoration: none;">Cycles</a>
-            <span>/</span>
-            <span style="color: var(--accent-blue);">Distribution</span>
-        </div>
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
-            <i data-lucide="pie-chart" style="color: var(--accent-blue); width: 32px; height: 32px;"></i> Room Distribution
-        </h1>
-        <p class="text-secondary" style="margin-top: 0.5rem; margin-bottom: 0; font-size: 1rem;">
-            Billing period: <%= cycle.startDate.toLocaleDateString('en-IN', {month: 'long', day: 'numeric', year: 'numeric'}) %> 
-            &rarr; 
-            <%= cycle.endDate ? cycle.endDate.toLocaleDateString('en-IN', {month: 'long', day: 'numeric', year: 'numeric'}) : 'Present' %>
-        </p>
-    </div>
-    <button class="btn btn-secondary" onclick="window.print()" style="display: flex; align-items: center; gap: 0.5rem; border-color: var(--accent-blue); color: var(--accent-blue);">
-        <i data-lucide="printer" style="width: 18px;"></i> Print Ledger
-    </button>
-</div>
+    <% const colors=['#0F172A', '#2563EB' , '#059669' , '#D97706' , '#4F46E5' , '#64748B' ]; const
+        totalDistributedAmount=roomBills.reduce((sum, bill)=> sum + (bill.amount || 0), 0);
+        const totalDistributedUnits = roomBills.reduce((sum, bill) => sum + (bill.units_consumed || 0), 0);
+        const totalPreviousReadings = roomBills.reduce((sum, bill) => sum + Number(bill.previous_reading || 0), 0);
+        const totalCurrentReadings = roomBills.reduce((sum, bill) => sum + Number(bill.current_reading || 0), 0);
+        const totalRawUnits = roomBills.reduce((sum, bill) => sum + ((Number(bill.current_reading || 0) -
+        Number(bill.previous_reading || 0)) || 0), 0);
+        const totalAdjustmentUnits = roomBills.reduce((sum, bill) => {
+        const rawUnits = Number(bill.current_reading || 0) - Number(bill.previous_reading || 0);
+        return sum + ((Number(bill.units_consumed || 0) - rawUnits) || 0);
+        }, 0);
+        const highestBill = roomBills.reduce((top, bill) => {
+        return Number(bill.amount || 0) > Number((top && top.amount) || 0) ? bill : top;
+        }, roomBills[0] || null);
+        const highestBillPct = totalDistributedAmount > 0 && highestBill
+        ? ((Number(highestBill.amount || 0) / totalDistributedAmount) * 100).toFixed(1)
+        : '0.0';
+        const periodStart = cycle.startDate ? new Date(cycle.startDate).toLocaleDateString('en-IN', { day: 'numeric',
+        month: 'short', year: 'numeric' }) : 'N/A';
+        const periodEnd = cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('en-IN', { day: 'numeric', month:
+        'short', year: 'numeric' }) : 'Present';
+        const ratePerUnit = hasBill && Number(mainBill.total_units || 0) > 0
+        ? Number(mainBill.total_amount || 0) / Number(mainBill.total_units || 0)
+        : 0;
+        const differenceValue = Number(billDifference || 0);
+        const isVerified = hasBill && differenceValue < 1; %>
 
-<!-- Summary Header Card -->
-<% if (hasBill) { %>
-    <div class="card-raised print-no-break" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-blue);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
-            
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <i data-lucide="indian-rupee" style="color: var(--accent-blue); width: 32px; height: 32px;"></i>
-                </div>
+            <div class="distribution-breadcrumb">Properties / <span>
+                    <%= cycle.house.house_name %>
+                </span> / Cycles / Distribution</div>
+
+            <section class="page-header distribution-header">
                 <div>
-                    <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Supplier Bill</div>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary); line-height: 1;">₹<%= mainBill.total_amount.toLocaleString() %></div>
+                    <h1 class="distribution-title">
+                        <i data-lucide="pie-chart"></i>
+                        <span>Room Distribution</span>
+                    </h1>
+                    <p class="distribution-subtitle">
+                        <%= periodStart %> - <%= periodEnd %>
+                    </p>
                 </div>
-            </div>
 
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-                <div style="background: rgba(255,255,255,0.02); padding: 1rem 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Units</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= mainBill.total_units %> <span style="font-size: 1rem; color: var(--text-dim);">U</span></div>
+                <div style="display: flex; gap: 12px;">
+                    <button id="downloadPdfBtn" class="btn btn-primary" onclick="generateBillPDF()"
+                        style="border-radius: 999px; display: flex; align-items: center; gap: 0.5rem; background-color: #FF6B35; border-color: #FF6B35;">
+                        <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+                        <span>Download Bill PDF</span>
+                    </button>
                 </div>
-                <div style="background: rgba(255,255,255,0.02); padding: 1rem 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Rate Per Unit</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= (mainBill.total_amount / mainBill.total_units).toFixed(2) %></div>
-                </div>
-                <div style="background: rgba(255,255,255,0.02); padding: 1rem 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Bill Date</div>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-top: 0.25rem;"><%= mainBill.bill_date ? new Date(mainBill.bill_date).toLocaleDateString('en-IN', {month: 'short', day: 'numeric', year: 'numeric'}) : 'N/A' %></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Verification Row -->
-        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                Generated Room Bills Total: <strong style="color: var(--text-primary);">₹<%= roomBillsTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></strong>
-                <span style="margin: 0 0.5rem; color: var(--text-dim);">|</span>
-                Difference: <strong>₹<%= billDifference %></strong>
-            </div>
-            <div>
-                <% if (parseFloat(billDifference) < 1.00) { %>
-                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 1rem;">
-                        <i data-lucide="check-circle" style="width: 16px; margin-right: 0.25rem;"></i> Distribution Verified
-                    </span>
-                <% } else { %>
-                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.5rem 1rem;">
-                        <i data-lucide="alert-triangle" style="width: 16px; margin-right: 0.25rem;"></i> Mismatch Detected
-                    </span>
+            </section>
+
+            <% if (!hasBill) { %>
+                <section class="distribution-warning-card">
+                    <i data-lucide="alert-triangle"></i>
+                    <div>
+                        <div class="distribution-warning-title">No Main Bill</div>
+                        <div class="distribution-warning-copy">Add the supplier bill for this cycle before final room
+                            distribution can be verified accurately.</div>
+                    </div>
+                </section>
                 <% } %>
-            </div>
-        </div>
-    </div>
-<% } else { %>
-    <div class="card-raised" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-orange);">
-        <h3 style="color: var(--accent-orange); margin-top: 0;"><i data-lucide="alert-triangle"></i> No Main Bill</h3>
-        <p class="text-secondary">This cycle does not have a supplier bill recorded, so individual room costs cannot be calculated accurately.</p>
-    </div>
-<% } %>
 
-<% if (roomBills.length > 0) { 
-    // Colors for visualization
-    const colors = ['#4D9FEC', '#8B5CF6', '#2DD4BF', '#FBBF24', '#F43F5E', '#0EA5E9', '#A855F7', '#10B981'];
-    const totalAmount = roomBills.reduce((s, b) => s + b.amount, 0);
-    const totalUnits = roomBills.reduce((s, b) => s + b.units_consumed, 0);
-%>
-
-<!-- Distribution Visualization -->
-<div class="card-raised print-no-break" style="margin-bottom: 2rem;">
-    <h3 style="margin: 0 0 1.5rem 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
-        <i data-lucide="align-left" style="color: var(--text-muted);"></i> Usage Distribution
-    </h3>
-    
-    <!-- Large Horizontal Stacked Bar -->
-    <div style="display: flex; height: 24px; border-radius: 12px; overflow: hidden; background: var(--border-soft); margin-bottom: 1.5rem;">
-        <% roomBills.forEach((rb, idx) => { 
-            const pct = Math.max((rb.amount / totalAmount) * 100, 0);
-            const color = colors[idx % colors.length];
-        %>
-            <div style="width: <%= pct %>%; background: <%= color %>; transition: filter 0.2s;" class="dist-bar chart-bar" data-room="<%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %>" title="<%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %>: <%= pct.toFixed(1) %>%"></div>
-        <% }) %>
-    </div>
-    
-    <!-- Legend -->
-    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-        <% roomBills.forEach((rb, idx) => { 
-            const color = colors[idx % colors.length];
-            const pct = totalAmount > 0 ? ((rb.amount / totalAmount) * 100).toFixed(1) : 0;
-        %>
-            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-soft); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);">
-                <div style="width: 12px; height: 12px; border-radius: 3px; background: <%= color %>;"></div>
-                <div style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;"><%= rb.room_id ? rb.room_id.meter_name : 'Unknown' %></div>
-                <div style="font-size: 0.75rem; color: var(--text-dim); margin-left: 0.25rem;"><%= pct %>%</div>
-            </div>
-        <% }) %>
-    </div>
-</div>
-
-<!-- Bills Table -->
-<div class="card-raised" style="padding: 0; overflow: hidden;">
-    <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="list" style="color: var(--text-muted);"></i> Room Invoices
-        </h3>
-    </div>
-    
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Room Name</th>
-                    <th>Prev Reading</th>
-                    <th>Curr Reading</th>
-                    <th>Units</th>
-                    <th style="width: 20%;">Proportion</th>
-                    <th style="text-align: right;">Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% roomBills.forEach((bill, idx) => { 
-                    const color = colors[idx % colors.length];
-                    const pct = totalAmount > 0 ? (bill.amount / totalAmount) * 100 : 0;
-                %>
-                    <tr>
-                        <td style="font-weight: 700; color: var(--text-primary);">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <div style="width: 8px; height: 8px; border-radius: 50%; background: <%= color %>;"></div>
-                                <%= bill.room_id ? bill.room_id.meter_name : 'Deleted Room' %>
-                            </div>
-                        </td>
-                        <td style="color: var(--text-secondary);"><%= bill.previous_reading %></td>
-                        <td style="color: var(--text-primary); font-weight: 500;"><%= bill.current_reading %></td>
-                        <td style="font-weight: 600;"><%= bill.units_consumed %> <span style="font-size: 0.8rem; color: var(--text-dim);">U</span></td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <div style="flex: 1; height: 6px; background: var(--border-soft); border-radius: 3px; overflow: hidden;">
-                                    <div style="height: 100%; width: <%= pct %>%; background: <%= color %>;"></div>
+                    <% if (hasBill) { %>
+                        <section class="gradient-border-card distribution-summary-card">
+                            <div class="distribution-summary-top">
+                                <div class="distribution-summary-left">
+                                    <div class="distribution-summary-icon">
+                                        <i data-lucide="indian-rupee"></i>
+                                    </div>
+                                    <div>
+                                        <div class="distribution-summary-label">Total Supplier Bill</div>
+                                        <div class="distribution-summary-value">&#8377;<%= Number(mainBill.total_amount
+                                                || 0).toLocaleString('en-IN') %>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span style="font-size: 0.75rem; color: var(--text-dim); width: 35px; text-align: right;"><%= pct.toFixed(1) %>%</span>
+
+                                <div class="distribution-summary-chips">
+                                    <div class="distribution-summary-chip">
+                                        <div class="distribution-summary-chip-label">Total Units</div>
+                                        <div class="distribution-summary-chip-value">
+                                            <%= Number(mainBill.total_units || 0).toLocaleString('en-IN') %> U
+                                        </div>
+                                    </div>
+                                    <div class="distribution-summary-chip">
+                                        <div class="distribution-summary-chip-label">Rate Per Unit</div>
+                                        <div class="distribution-summary-chip-value">&#8377;<%= ratePerUnit.toFixed(2)
+                                                %>
+                                        </div>
+                                    </div>
+                                    <div class="distribution-summary-chip">
+                                        <div class="distribution-summary-chip-label">Bill Date</div>
+                                        <div class="distribution-summary-chip-value">
+                                            <%= mainBill.bill_date ? new
+                                                Date(mainBill.bill_date).toLocaleDateString('en-IN', { day: 'numeric' ,
+                                                month: 'short' , year: 'numeric' }) : 'N/A' %>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                        <td style="text-align: right; font-weight: 800; color: var(--accent-green); font-size: 1.1rem;">₹<%= bill.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
-                    </tr>
-                <% }) %>
-            </tbody>
-            <tfoot style="border-top: 2px solid var(--border); background: rgba(255,255,255,0.02);">
-                <tr>
-                    <td colspan="3" style="font-weight: 700; padding: 1.5rem; text-transform: uppercase; color: var(--text-secondary);">Total Distributed</td>
-                    <td style="font-weight: 800; color: var(--text-primary); font-size: 1.1rem;"><%= totalUnits %> <span style="font-size: 0.8rem; color: var(--text-dim);">U</span></td>
-                    <td></td>
-                    <td style="text-align: right; font-weight: 800; color: var(--text-primary); font-size: 1.25rem;">₹<%= totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-</div>
 
-<% } else { %>
-    <div class="card-raised" style="padding: 5rem 2rem; text-align: center;">
-        <i data-lucide="file-x" style="width: 64px; height: 64px; color: var(--border); margin-bottom: 1.5rem;"></i>
-        <h2 style="font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;">No Room Bills Yet</h2>
-        <p class="text-secondary" style="max-width: 400px; margin: 0 auto;">Room bills will be generated automatically once the final readings for this cycle are submitted.</p>
-    </div>
-<% } %>
+                            <div class="distribution-summary-bottom">
+                                <div class="distribution-summary-highlights">
+                                    <div class="distribution-highlight-card is-primary">
+                                        <span class="distribution-highlight-label">Generated Total</span>
+                                        <strong class="distribution-highlight-value">&#8377;<%=
+                                                Number(totalDistributedAmount || 0).toLocaleString('en-IN', {
+                                                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong>
+                                    </div>
 
-<style>
-    .dist-bar:hover {
-        filter: brightness(1.2);
-    }
-    
-    @media print {
-        body {
-            background: #fff;
-            color: #000;
-        }
-        .navbar, .sidebar, .btn, .print-no-break {
-            /* We'll handle this in a dedicated print stylesheet, 
-               but basic cleanup here */
-            break-inside: avoid;
-        }
-        .card-raised {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-            background: #fff !important;
-        }
-        .data-table th, .data-table td {
-            color: #000 !important;
-            border-color: #ddd !important;
-        }
-        .dist-bar {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-    }
-</style>
+                                    <div
+                                        class="distribution-highlight-card <%= isVerified ? 'is-success' : 'is-warning' %>">
+                                        <span class="distribution-highlight-label">Difference</span>
+                                        <strong class="distribution-highlight-value">&#8377;<%=
+                                                differenceValue.toLocaleString('en-IN', { minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2 }) %></strong>
+                                    </div>
+
+                                    <div class="distribution-highlight-card">
+                                        <span class="distribution-highlight-label">Rooms Billed</span>
+                                        <strong class="distribution-highlight-value">
+                                            <%= roomBills.length %>
+                                        </strong>
+                                    </div>
+
+                                    <% if (highestBill) { %>
+                                        <div class="distribution-highlight-card">
+                                            <span class="distribution-highlight-label">Largest Share</span>
+                                            <strong class="distribution-highlight-value">
+                                                <%= highestBill.room_id ? highestBill.room_id.meter_name
+                                                    : 'Deleted Room' %> - <%= highestBillPct %>%
+                                            </strong>
+                                        </div>
+                                        <% } %>
+                                </div>
+
+                                <div class="distribution-verify-pill <%= isVerified ? 'is-verified' : 'is-mismatch' %>">
+                                    <i data-lucide="<%= isVerified ? 'check-circle' : 'alert-triangle' %>"></i>
+                                    <span>
+                                        <%= isVerified ? 'Distribution Verified' : 'Mismatch Detected' %>
+                                    </span>
+                                </div>
+                            </div>
+                        </section>
+                        <% } %>
+
+                            <% if (roomBills.length> 0) { %>
+                                <section class="glass-card-tinted distribution-visual-card"
+                                    style="padding: 24px; margin-bottom: 24px;">
+                                    <div class="distribution-card-title">
+                                        <i data-lucide="align-left"></i>
+                                        <span>Usage Distribution</span>
+                                    </div>
+
+                                    <div class="distribution-bar">
+                                        <% roomBills.forEach((bill, index)=> {
+                                            const amount = Number(bill.amount || 0);
+                                            const width = totalDistributedAmount > 0 ? Math.max((amount /
+                                            totalDistributedAmount) * 100, 4) : 0;
+                                            %>
+                                            <span class="distribution-bar-segment"
+                                                style="width: <%= width %>%; background: <%= colors[index % colors.length] %>;"
+                                                title="<%= bill.room_id ? bill.room_id.meter_name : 'Room' %>"></span>
+                                            <% }) %>
+                                    </div>
+
+                                    <div class="distribution-legend">
+                                        <% roomBills.forEach((bill, index)=> {
+                                            const pct = totalDistributedAmount > 0 ? ((Number(bill.amount || 0) /
+                                            totalDistributedAmount) * 100).toFixed(1) : '0.0';
+                                            %>
+                                            <div class="distribution-legend-item">
+                                                <span class="distribution-legend-swatch"
+                                                    style="background: <%= colors[index % colors.length] %>;"></span>
+                                                <span class="distribution-legend-name">
+                                                    <%= bill.room_id ? bill.room_id.meter_name : 'Deleted Room' %>
+                                                </span>
+                                                <span class="distribution-legend-pct">
+                                                    <%= pct %>%
+                                                </span>
+                                            </div>
+                                            <% }) %>
+                                    </div>
+                                </section>
+
+                                <section class="card distribution-table-card">
+                                    <div class="distribution-table-head multi-color-border">
+                                        <div class="distribution-card-title" style="margin-bottom: 0;">
+                                            <i data-lucide="list"></i>
+                                            <span>Room Invoices</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Room Name</th>
+                                                    <th style="text-align: right;">Prev Reading</th>
+                                                    <th style="text-align: right;">Curr Reading</th>
+                                                    <th style="text-align: right;">Units</th>
+                                                    <th style="min-width: 180px;">Proportion</th>
+                                                    <th style="text-align: right;">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% roomBills.forEach((bill, index)=> {
+                                                    const pct = totalDistributedAmount > 0 ? (Number(bill.amount || 0) /
+                                                    totalDistributedAmount) * 100 : 0;
+                                                    %>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="distribution-room-name">
+                                                                <span class="distribution-room-dot"
+                                                                    style="background: <%= colors[index % colors.length] %>;"></span>
+                                                                <span>
+                                                                    <%= bill.room_id ? bill.room_id.meter_name
+                                                                        : 'Deleted Room' %>
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right;">
+                                                            <%= bill.previous_reading %>
+                                                        </td>
+                                                        <td style="text-align: right;">
+                                                            <%= bill.current_reading %>
+                                                        </td>
+                                                        <td style="text-align: right;">
+                                                            <%= bill.units_consumed %>
+                                                        </td>
+                                                        <td>
+                                                            <div class="distribution-proportion-cell">
+                                                                <div class="distribution-proportion-track">
+                                                                    <div class="distribution-proportion-fill"
+                                                                        style="width: <%= pct %>%; background: <%= colors[index % colors.length] %>;">
+                                                                    </div>
+                                                                </div>
+                                                                <span class="distribution-proportion-pct">
+                                                                    <%= pct.toFixed(1) %>%
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="distribution-amount-cell">&#8377;<%=
+                                                                Number(bill.amount || 0).toLocaleString('en-IN', {
+                                                                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="distribution-footer-row">
+                                                    <td colspan="3" style="text-align: right;">
+                                                        <div class="distribution-footer-title">Total Distributed</div>
+                                                        <div class="distribution-footer-subtitle">Final bill allocation
+                                                            across all room invoices</div>
+                                                    </td>
+                                                    <td style="text-align: right;"><strong>
+                                                            <%= totalDistributedUnits %>
+                                                        </strong></td>
+                                                    <td></td>
+                                                    <td class="distribution-footer-amount"><strong>&#8377;<%=
+                                                                totalDistributedAmount.toLocaleString('en-IN', {
+                                                                minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                                                        </strong></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </section>
+                                <% } else { %>
+                                    <div class="card empty-state distribution-empty-state">
+                                        <div class="empty-state-icon"
+                                            style="width: 88px; height: 88px; border-radius: 24px;">
+                                            <i data-lucide="file-x"
+                                                style="width: 40px; height: 40px; color: #7A7A8A;"></i>
+                                        </div>
+                                        <div class="empty-state-title">No Room Bills Yet</div>
+                                        <div class="empty-state-description">Room bills will appear here automatically
+                                            after final readings are submitted for this cycle.</div>
+                                    </div>
+                                    <% } %>
+
+                                        <link rel="stylesheet" href="/public/css/billing/report.css">
+
+                                        <script
+                                            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+                                        <script
+                                            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+                                        <script src="/public/js/utilities/pdf_engine.js"></script>
+
+                                        <script>
+                                            const BILL_DATA = {
+                                                house: {
+                                                    name: <%- JSON.stringify(cycle.house.house_name) %>,
+                                                },
+                                                cycle: {
+                                                    startDate: <%- JSON.stringify(periodStart) %>,
+                                                    endDate: <%- JSON.stringify(periodEnd) %>,
+                                                },
+                                                mainBill: {
+                                                    totalUnits: <%= Number(hasBill ? mainBill.total_units : 0) %>,
+                                                    totalAmount: <%= Number(hasBill ? mainBill.total_amount : 0) %>,
+                                                    billDate: <%- JSON.stringify(hasBill && mainBill.bill_date ? new Date(mainBill.bill_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A') %>,
+                                                    ratePerUnit: <%= Number(ratePerUnit.toFixed(4)) %>,
+                                                },
+                                                roomBills: [
+                                                    <% roomBills.forEach((bill, index) => {
+                                                        const rawUnits = Number(bill.current_reading || 0) - Number(bill.previous_reading || 0);
+                                                        const finalUnits = Number(bill.units_consumed || 0);
+                                                        const adjustmentUnits = finalUnits - rawUnits;
+                                                    %>
+                                                    {
+                                                        roomName: <%- JSON.stringify(bill.room_id ? bill.room_id.meter_name : 'Room ' + (index + 1)) %>,
+                                                        previousReading: <%= Number(bill.previous_reading || 0) %>,
+                                                        currentReading: <%= Number(bill.current_reading || 0) %>,
+                                                        rawUnitsConsumed: <%= rawUnits %>,
+                                                        adjustedUnitsConsumed: <%= finalUnits %>,
+                                                        adjustmentUnits: <%= adjustmentUnits %>,
+                                                        amount: <%= Number(bill.amount || 0) %>,
+                                                        proportion: <%= totalDistributedAmount > 0 ? Number(((bill.amount || 0) / totalDistributedAmount) * 100).toFixed(2) : 0 %>,
+                                                    }<%= index < roomBills.length - 1 ? ',' : '' %>
+                                                    <% }) %>
+                                                ],
+                                                summary: {
+                                                    totalRoomBills: <%= Number(totalDistributedAmount || 0) %>,
+                                                    totalDistributedUnits: <%= Number(totalDistributedUnits || 0) %>,
+                                                    totalPreviousReadings: <%= Number(totalPreviousReadings || 0) %>,
+                                                    totalCurrentReadings: <%= Number(totalCurrentReadings || 0) %>,
+                                                    totalRawUnits: <%= Number(totalRawUnits || 0) %>,
+                                                    totalAdjustmentUnits: <%= Number(totalAdjustmentUnits || 0) %>,
+                                                    billDifference: <%= Number((differenceValue || 0).toFixed(2)) %>,
+                                                    isVerified: <%= typeof isVerified !== 'undefined' ? isVerified : false %>,
+                                                    roomCount: <%= roomBills.length %>,
+                                                    generatedAt: <%- JSON.stringify(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })) %>,
+                                                }
+                                            };
+
+                                            async function generateBillPDF() {
+                                                const btn = document.getElementById('downloadPdfBtn');
+                                                if (!btn) return;
+
+                                                const origHTML = btn.innerHTML;
+                                                btn.disabled = true;
+                                                btn.innerHTML = '<span>Generating PDF...</span>';
+
+                                                try {
+                                                    if (!window.LiteBillPDF) {
+                                                        throw new Error('PDF Engine not loaded. Please refresh the page.');
+                                                    }
+                                                    await window.LiteBillPDF.generate(BILL_DATA);
+                                                } catch (err) {
+                                                    console.error('PDF Error:', err);
+                                                    alert('Failed to generate PDF: ' + err.message);
+                                                } finally {
+                                                    btn.disabled = false;
+                                                    btn.innerHTML = origHTML;
+                                                    if (window.lucide) lucide.createIcons();
+                                                }
+                                            }
+                                        </script>

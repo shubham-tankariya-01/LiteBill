@@ -55,6 +55,7 @@ export const authLimiter = rateLimit({
     limit: 100, // Limit each IP to 100 requests per window
     standardHeaders: 'draft-6', // standard rate limit headers
     legacyHeaders: false, // Disable older headers
+    validate: { xForwardedForHeader: false }, // Prevent hard crashes behind Render/Vercel proxies
     handler: (req, res, next, options) => {
         const err = new Error(options.message || "Too many requests, please try again later.");
         err.status = 429;

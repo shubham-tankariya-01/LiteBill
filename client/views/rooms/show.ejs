@@ -1,24 +1,25 @@
 <% layout('layouts/boilerplate') %>
 
-<!-- Header -->
-<div style="margin-bottom: 2.5rem;">
-    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase;">
-        <a href="/houses" style="color: var(--text-dim); text-decoration: none;">Properties</a> 
-        <span>/</span> 
-        <a href="/houses/<%= house._id %>" style="color: var(--text-dim); text-decoration: none;"><%= house.house_name %></a>
-        <span>/</span>
-        <span style="color: var(--accent-purple);"><%= room.meter_name %></span>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2.25rem;">
-            <i data-lucide="bed-double" style="color: var(--accent-purple); width: 32px; height: 32px;"></i> <%= room.meter_name %>
-        </h1>
-        <div style="display: flex; gap: 0.5rem;">
-            <a href="/rooms/<%= roomId %>/edit" class="btn btn-ghost"><i data-lucide="settings-2"></i> Edit</a>
-            <button type="button" class="btn btn-icon btn-ghost" style="color: var(--accent-red);" onclick="openDeleteRoomModal('<%= roomId %>', '<%= room.meter_name %>')">
-                <i data-lucide="trash-2"></i>
-            </button>
+<div class="page-header room-show-header">
+    <div>
+        <div class="room-show-breadcrumb">
+            <a href="/houses">Properties</a> 
+            <span>/</span> 
+            <a href="/houses/<%= house._id %>"><%= house.house_name %></a>
+            <span>/</span>
+            <span class="active-crumb"><%= room.meter_name %></span>
         </div>
+        <h1 class="room-show-title">
+            <i data-lucide="bed-double"></i> <%= room.meter_name %>
+        </h1>
+    </div>
+    <div class="room-show-actions">
+        <a href="/rooms/<%= roomId %>/edit" class="btn btn-secondary">
+            <i data-lucide="settings-2"></i> Edit
+        </a>
+        <button type="button" class="btn btn-icon btn-ghost delete-btn" onclick="openDeleteRoomModal('<%= roomId %>', '<%= room.meter_name %>')">
+            <i data-lucide="trash-2"></i>
+        </button>
     </div>
 </div>
 
@@ -36,59 +37,51 @@
     }
 %>
 
-<!-- Hero Stat Bar -->
-<div class="card-raised" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-    <!-- Total Billed -->
-    <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 1rem; padding: 0.5rem;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(45, 212, 191, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+<section class="grid-3 room-show-stats">
+    <article class="card stat-card">
+        <div class="stat-icon-wrap" style="background: rgba(45, 212, 191, 0.1);">
             <i data-lucide="indian-rupee" style="color: var(--accent-green);"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Total Billed</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">₹<%= totalBilled.toLocaleString() %></div>
+        <div class="stat-content">
+            <div class="stat-label">Total Billed</div>
+            <div class="stat-value">₹<%= totalBilled.toLocaleString() %></div>
         </div>
-    </div>
+    </article>
     
-    <div style="width: 1px; background: var(--border); display: none; @media(min-width: 768px) { display: block; }"></div>
-    
-    <!-- Avg Units -->
-    <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 1rem; padding: 0.5rem;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(77, 159, 236, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+    <article class="card stat-card">
+        <div class="stat-icon-wrap" style="background: rgba(77, 159, 236, 0.1);">
             <i data-lucide="zap" style="color: var(--accent-blue);"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Avg Units/month</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= avgUnits %> <span style="font-size: 1rem; color: var(--text-secondary); font-weight: 600;">U</span></div>
+        <div class="stat-content">
+            <div class="stat-label">Avg Units/month</div>
+            <div class="stat-value"><%= avgUnits %> <span>U</span></div>
         </div>
-    </div>
-
-    <div style="width: 1px; background: var(--border); display: none; @media(min-width: 768px) { display: block; }"></div>
+    </article>
     
-    <!-- Bills Generated -->
-    <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 1rem; padding: 0.5rem;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+    <article class="card stat-card">
+        <div class="stat-icon-wrap" style="background: rgba(139, 92, 246, 0.1);">
             <i data-lucide="file-text" style="color: var(--accent-purple);"></i>
         </div>
-        <div>
-            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 0.25rem;">Bills Generated</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);"><%= billCount %></div>
+        <div class="stat-content">
+            <div class="stat-label">Bills Generated</div>
+            <div class="stat-value"><%= billCount %></div>
         </div>
-    </div>
-</div>
+    </article>
+</section>
 
 <!-- Bills Table -->
-<div class="card-raised" style="padding: 0; overflow: hidden;">
-    <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <h3 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="history" style="color: var(--text-muted);"></i> Billing History
+<section class="card room-bills-card">
+    <div class="room-bills-header">
+        <h3 class="room-bills-title">
+            <i data-lucide="history"></i> Billing History
         </h3>
-        <a href="/rooms/<%= roomId %>/analysis" class="btn btn-secondary" style="border-color: var(--accent-purple); color: var(--accent-purple);">
+        <a href="/rooms/<%= roomId %>/analysis" class="btn btn-secondary room-analysis-btn">
             <i data-lucide="bar-chart-2"></i> View Analysis &rarr;
         </a>
     </div>
 
     <% if (typeof roomBills !== 'undefined' && roomBills.length > 0) { %>
-        <div class="table-responsive">
+        <div class="table-responsive desktop-only">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -119,13 +112,286 @@
                 </tbody>
             </table>
         </div>
-    <% } else { %>
-        <div style="padding: 4rem 2rem; text-align: center;">
-            <i data-lucide="receipt" style="width: 48px; height: 48px; color: var(--border); margin-bottom: 1rem;"></i>
-            <h3 style="font-size: 1.25rem; color: var(--text-primary); margin-bottom: 0.5rem;">No bills recorded</h3>
-            <p class="text-secondary" style="max-width: 300px; margin: 0 auto;">Once a billing cycle is completed, the finalized bills for this meter will appear here.</p>
+
+        <div class="mobile-only room-show-mobile-list">
+            <% roomBills.forEach(bill => { 
+                const startDateStr = bill.billing_cycle_id && bill.billing_cycle_id.startDate ? bill.billing_cycle_id.startDate.toLocaleDateString('en-IN', {month: 'short', year: 'numeric'}) : 'N/A';
+                const endDateStr = bill.billing_cycle_id && bill.billing_cycle_id.endDate ? bill.billing_cycle_id.endDate.toLocaleDateString('en-IN', {month: 'short', day: 'numeric'}) : '';
+            %>
+                <div class="room-show-mobile-card">
+                    <div class="room-show-card-top">
+                        <span class="room-show-period">
+                            <%= startDateStr %>
+                            <% if (endDateStr) { %>
+                                <span style="color: var(--text-dim); font-weight: 400; font-size: 0.85rem;">(&rarr; <%= endDateStr %>)</span>
+                            <% } %>
+                        </span>
+                        <span class="room-show-amount">₹<%= bill.amount.toLocaleString() %></span>
+                    </div>
+                    <div class="room-show-card-stats">
+                        <div class="room-show-stat">
+                            <span class="lbl">Prev</span>
+                            <span class="val"><%= bill.previous_reading %></span>
+                        </div>
+                        <div class="room-show-stat">
+                            <span class="lbl">Current</span>
+                            <span class="val"><%= bill.current_reading %></span>
+                        </div>
+                        <div class="room-show-stat highlight-stat">
+                            <span class="lbl">Units</span>
+                            <span class="val"><%= bill.units_consumed %></span>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
         </div>
     <% } %>
-</div>
+</section>
+
+<style>
+    .room-show-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .room-show-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+
+    .room-show-breadcrumb a {
+        color: var(--text-dim);
+        text-decoration: none;
+    }
+    
+    .room-show-breadcrumb .active-crumb {
+        color: var(--accent-purple);
+    }
+
+    .room-show-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .room-show-title i,
+    .room-show-title svg {
+        width: 32px;
+        height: 32px;
+        color: var(--accent-purple);
+    }
+
+    .room-show-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .room-show-actions .delete-btn {
+        color: #EF4444;
+    }
+    .room-show-actions .delete-btn:hover {
+        background: #FFF0E6;
+    }
+
+    .room-show-stats {
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+    }
+
+    .stat-icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .stat-icon-wrap i,
+    .stat-icon-wrap svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+    
+    .stat-value span {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .room-bills-card {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .room-bills-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .room-bills-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .room-bills-title i,
+    .room-bills-title svg {
+        color: var(--text-secondary);
+    }
+
+    .room-analysis-btn {
+        border-color: var(--accent-purple);
+        color: var(--accent-purple);
+    }
+    
+    .room-analysis-btn:hover {
+        background: rgba(139, 92, 246, 0.05);
+    }
+
+    .mobile-only {
+        display: none !important;
+    }
+
+    @media (max-width: 768px) {
+        .room-show-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .room-show-actions {
+            width: 100%;
+        }
+        
+        .room-show-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .desktop-only {
+            display: none !important;
+        }
+        
+        .mobile-only {
+            display: block !important;
+        }
+
+        .room-show-mobile-list.mobile-only {
+            display: flex !important;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .room-show-mobile-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .room-show-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .room-show-period {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .room-show-amount {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .room-show-card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .room-show-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .room-show-stat .lbl {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .room-show-stat .val {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .highlight-stat {
+            background: rgba(45, 212, 191, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(45, 212, 191, 0.2);
+        }
+
+        .highlight-stat .val {
+            color: var(--accent-green);
+        }
+    }
+</style>
 
 <%- include('../includes/delete_room_modal') %>

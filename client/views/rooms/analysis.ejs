@@ -154,7 +154,7 @@
             </div>
         </div>
 
-        <div class="table-responsive" style="padding: 20px 0 0;">
+        <div class="table-responsive desktop-only" style="padding: 20px 0 0;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -184,6 +184,43 @@
                     </tr>
                 </tfoot>
             </table>
+        </div>
+
+        <div class="mobile-only room-analysis-mobile-list">
+            <% sortedBills.forEach((bill) => {
+                const label = bill.billing_cycle_id && bill.billing_cycle_id.startDate ? new Date(bill.billing_cycle_id.startDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'N/A';
+            %>
+                <div class="room-analysis-mobile-card">
+                    <div class="room-mobile-card-top">
+                        <span class="room-mobile-period"><%= label %></span>
+                        <span class="room-mobile-amount">₹<%= Number(bill.amount || 0).toLocaleString('en-IN') %></span>
+                    </div>
+                    <div class="room-mobile-card-stats">
+                        <div class="room-mobile-stat">
+                            <span class="lbl">Prev</span>
+                            <span class="val"><%= bill.previous_reading %></span>
+                        </div>
+                        <div class="room-mobile-stat">
+                            <span class="lbl">Current</span>
+                            <span class="val"><%= bill.current_reading %></span>
+                        </div>
+                        <div class="room-mobile-stat highlight-stat">
+                            <span class="lbl">Units</span>
+                            <span class="val"><%= bill.units_consumed %></span>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+            <div class="room-analysis-mobile-summary">
+                <div class="summary-row">
+                    <span class="lbl">Lifetime Units</span>
+                    <span class="val"><%= totalUnitsAll %></span>
+                </div>
+                <div class="summary-row total-row">
+                    <span class="lbl">Lifetime Amount</span>
+                    <span class="val">₹<%= Number(totalAmount || 0).toLocaleString('en-IN') %></span>
+                </div>
+            </div>
         </div>
     </section>
 <% } else { %>
@@ -230,7 +267,8 @@
         line-height: 1.1;
     }
 
-    .room-analysis-title i {
+    .room-analysis-title i,
+    .room-analysis-title svg {
         width: 24px;
         height: 24px;
         color: #5B8DEF;
@@ -292,7 +330,8 @@
         color: #1A1A1A;
     }
 
-    .room-chart-title i {
+    .room-chart-title i,
+    .room-chart-title svg {
         width: 20px;
         height: 20px;
     }
@@ -445,6 +484,10 @@
         }
     }
 
+    .mobile-only {
+        display: none !important;
+    }
+
     @media (max-width: 1024px) {
         .room-analysis-summary {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -452,25 +495,146 @@
     }
 
     @media (max-width: 768px) {
-        .room-analysis-summary {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            margin: 0 -16px 24px;
-            padding: 0 16px;
-            scrollbar-width: none;
+        .desktop-only {
+            display: none !important;
+        }
+        
+        .mobile-only {
+            display: block !important;
         }
 
-        .room-analysis-summary::-webkit-scrollbar {
-            display: none;
+        .room-analysis-mobile-list.mobile-only {
+            display: flex !important;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .room-analysis-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
         .room-summary-card {
-            min-width: 170px;
+            min-width: auto;
+            padding: 16px;
+        }
+
+        .room-summary-value {
+            font-size: 1.5rem;
         }
 
         .room-analysis-charts {
             grid-template-columns: 1fr !important;
+        }
+
+        .room-analysis-mobile-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #F0EFE9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .room-mobile-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #F0EFE9;
+        }
+
+        .room-mobile-period {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1A1A1A;
+        }
+
+        .room-mobile-amount {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #4CAF7D;
+        }
+
+        .room-mobile-card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .room-mobile-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .room-mobile-stat .lbl {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #7A7A8A;
+            text-transform: uppercase;
+        }
+
+        .room-mobile-stat .val {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1A1A1A;
+        }
+        
+        .highlight-stat {
+            background: #F4F8FD;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #D5E4F9;
+        }
+
+        .highlight-stat .val {
+            color: #2C5CC5;
+        }
+
+        .room-analysis-mobile-summary {
+            background: #1F1F1F;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #A0A0B0;
+        }
+
+        .summary-row .lbl {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .summary-row .val {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .summary-row.total-row {
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .summary-row.total-row .lbl {
+            color: #FFFFFF;
+        }
+
+        .summary-row.total-row .val {
+            color: #4CAF7D;
+            font-size: 1.25rem;
         }
     }
 </style>

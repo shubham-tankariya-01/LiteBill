@@ -1,70 +1,241 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase;">
-            <a href="/houses/<%= house._id %>" style="color: var(--text-dim); text-decoration: none;"><%= house.house_name %></a> 
-            <span>/</span> 
-            <span style="color: var(--accent-purple);">Meters</span>
-        </div>
-        <h1 style="margin: 0; display: flex; align-items: center; gap: 0.75rem; font-size: 2rem;">
-            <i data-lucide="bed-double" style="color: var(--accent-purple);"></i> Meters
+<div class="page-header rooms-header">
+    <div class="rooms-title-wrap">
+        <h1 class="rooms-title">
+            <i data-lucide="bed-double"></i>
+            <span>Meters</span>
         </h1>
-        <p class="text-secondary" style="margin-top: 0.5rem;"><%= rooms.length %> meters configured</p>
+        <p class="text-secondary" style="margin-top: 0.5rem;"><%= rooms.length %> meters configured in <%= house.house_name %></p>
     </div>
-    <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-primary" style="background: var(--accent-purple); color: #fff; border: none;"><i data-lucide="plus"></i> Add Meter</a>
+    <div class="rooms-header-actions">
+        <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-primary" style="background: var(--accent-purple); border-color: var(--accent-purple);">
+            <i data-lucide="plus"></i>
+            <span>Add Meter</span>
+        </a>
+    </div>
 </div>
 
 <% if (rooms.length === 0) { %>
-    <div class="card-raised" style="text-align: center; padding: 5rem 2rem; max-width: 600px; margin: 0 auto;">
-        <div style="width: 80px; height: 80px; background: rgba(139, 92, 246, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
-            <i data-lucide="bed-double" style="width: 40px; height: 40px; color: var(--accent-purple);"></i>
+    <div class="card empty-state">
+        <div class="empty-state-icon" style="background: rgba(139, 92, 246, 0.1);">
+            <i data-lucide="bed-double" style="color: var(--accent-purple);"></i>
         </div>
-        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">No meters configured</h2>
-        <p class="text-secondary" style="margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-            To calculate individual bills, you need to add the sub-meters installed in this property (e.g., Master Bedroom, Shop 1).
-        </p>
-        <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-primary" style="padding: 0.8rem 1.5rem; background: var(--accent-purple); border: none;"><i data-lucide="plus"></i> Setup First Meter</a>
+        <div class="empty-state-title">No meters configured</div>
+        <div class="empty-state-description">To calculate individual bills, you need to add the sub-meters installed in this property.</div>
+        <a href="/houses/<%= house._id %>/rooms/new" class="btn btn-primary" style="background: var(--accent-purple); border-color: var(--accent-purple);">Setup First Meter &rarr;</a>
     </div>
 <% } else { %>
-    <div class="grid-3">
+    <section class="grid-2 rooms-grid">
         <% rooms.forEach(room => { %>
             <% const data = roomData[room._id.toString()]; %>
-            <div class="card-raised card-accent house-card" style="--card-accent-color: var(--accent-purple); display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
-                    <h3 style="margin: 0; color: var(--text-primary); font-size: 1.3rem; font-weight: 800;"><%= room.meter_name %></h3>
-                    <i data-lucide="zap" style="color: var(--accent-purple); opacity: 0.5;"></i>
+            <article class="card rooms-card">
+                <div class="rooms-card-top">
+                    <h3><%= room.meter_name %></h3>
+                    <div class="rooms-icon-wrap">
+                        <i data-lucide="zap"></i>
+                    </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                    <span class="badge badge-dim" style="display: flex; align-items: center; gap: 0.25rem;">
-                        <i data-lucide="indian-rupee" style="width: 12px;"></i> <%- data.latestBill ? data.latestBill.amount : 'N/A' %>
-                    </span>
-                    <span class="badge badge-dim" style="display: flex; align-items: center; gap: 0.25rem;">
-                        <i data-lucide="gauge" style="width: 12px;"></i> <%- data.latestReading ? data.latestReading.reading_value + ' U' : 'No reads' %>
-                    </span>
+                <div class="rooms-card-middle">
+                    <div class="rooms-meta-row">
+                        <span class="rooms-meta-chip">
+                            <i data-lucide="indian-rupee"></i>
+                            <span><%- data.latestBill ? data.latestBill.amount : 'N/A' %></span>
+                        </span>
+                        <span class="rooms-meta-chip">
+                            <i data-lucide="gauge"></i>
+                            <span><%- data.latestReading ? data.latestReading.reading_value + ' U' : 'No reads' %></span>
+                        </span>
+                    </div>
                 </div>
 
-                <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                    <a href="/rooms/<%= room._id %>" class="btn btn-secondary" style="flex: 1; border-color: var(--border);">View Profile</a>
-                    <a href="/rooms/<%= room._id %>/edit" class="btn btn-icon btn-ghost"><i data-lucide="settings-2"></i></a>
-                    <button type="button" class="btn btn-icon btn-ghost" style="color: var(--accent-red);" onclick="openDeleteRoomModal('<%= room._id %>', '<%= room.meter_name %>')">
-                        <i data-lucide="trash-2"></i>
-                    </button>
+                <div class="rooms-card-bottom">
+                    <a href="/rooms/<%= room._id %>" class="btn btn-secondary rooms-open-btn">View Profile</a>
+                    <div class="rooms-card-actions">
+                        <a href="/rooms/<%= room._id %>/edit" class="rooms-icon-btn" aria-label="Edit meter">
+                            <i data-lucide="settings-2"></i>
+                        </a>
+                        <button type="button" class="rooms-icon-btn rooms-delete-btn" aria-label="Delete meter" onclick="openDeleteRoomModal('<%= room._id %>', '<%= room.meter_name %>')">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </article>
         <% }) %>
-    </div>
+    </section>
 <% } %>
 
 <style>
-    .house-card {
-        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    .rooms-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
     }
-    .house-card:hover {
+
+    .rooms-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .rooms-title i,
+    .rooms-title svg {
+        width: 24px;
+        height: 24px;
+        color: var(--accent-purple);
+    }
+
+    .rooms-grid {
+        gap: 20px;
+    }
+
+    .rooms-card {
+        border-radius: 20px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        border: 1px solid var(--border-subtle);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .rooms-card:hover {
         transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
         border-color: var(--accent-purple);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .rooms-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .rooms-card-top h3 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .rooms-icon-wrap {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(139, 92, 246, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .rooms-icon-wrap i,
+    .rooms-icon-wrap svg {
+        width: 16px;
+        height: 16px;
+        color: var(--accent-purple);
+    }
+
+    .rooms-card-middle {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .rooms-meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .rooms-meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        background: var(--surface-soft);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .rooms-meta-chip i,
+    .rooms-meta-chip svg {
+        width: 14px;
+        height: 14px;
+        color: var(--text-secondary);
+    }
+
+    .rooms-card-bottom {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border-subtle);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .rooms-open-btn {
+        flex: 1;
+        border-color: var(--border-subtle);
+    }
+
+    .rooms-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rooms-icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        background: transparent;
+        transition: background 0.2s ease, color 0.2s ease;
+        cursor: pointer;
+        border: none;
+    }
+    
+    .rooms-icon-btn:hover {
+        background: var(--surface-soft);
+        color: var(--text-primary);
+    }
+
+    .rooms-icon-btn i,
+    .rooms-icon-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .rooms-delete-btn:hover {
+        background: #FFF0E6;
+        color: #EF4444;
+    }
+    
+    @media (max-width: 768px) {
+        .rooms-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .rooms-header-actions .btn {
+            width: 100%;
+        }
     }
 </style>
 

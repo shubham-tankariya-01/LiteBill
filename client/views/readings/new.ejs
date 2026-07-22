@@ -432,6 +432,7 @@
         .readings-card-top {
             flex-direction: column;
             align-items: stretch;
+            gap: 12px;
         }
 
         .readings-date-wrap {
@@ -439,29 +440,18 @@
         }
 
         .readings-card-body {
-            grid-template-columns: 1fr auto;
-            grid-template-areas:
-                "prev arrow"
-                "current result";
-            gap: 14px;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-areas: none;
+            gap: 16px;
         }
 
-        .readings-card-body > :nth-child(1) {
-            grid-area: prev;
+        .readings-card-body > * {
+            grid-area: auto !important;
         }
 
-        .readings-card-body > :nth-child(2) {
-            grid-area: arrow;
-            align-self: center;
-            padding-bottom: 0;
-        }
-
-        .readings-card-body > :nth-child(3) {
-            grid-area: current;
-        }
-
-        .readings-card-body > :nth-child(4) {
-            grid-area: result;
+        .readings-arrow-wrap {
+            display: none;
         }
 
         .readings-form {
@@ -470,13 +460,14 @@
 
         .readings-sticky-shell {
             height: auto;
-            padding: 12px 0;
+            padding: 16px 0;
         }
 
         .readings-sticky-bar {
             padding: 0 16px;
             flex-direction: column;
             align-items: stretch;
+            gap: 16px;
         }
 
         .readings-sticky-summary {
@@ -489,6 +480,7 @@
 
         .readings-sticky-actions .btn {
             flex: 1;
+            justify-content: center;
         }
     }
 </style>

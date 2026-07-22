@@ -193,7 +193,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="table-responsive">
+                                    <div class="table-responsive desktop-only">
                                         <table class="data-table">
                                             <thead>
                                                 <tr>
@@ -267,6 +267,57 @@
                                                 </tr>
                                             </tfoot>
                                         </table>
+                                    </div>
+                                    <div class="distribution-mobile-grid mobile-only">
+                                        <% roomBills.forEach((bill, index)=> {
+                                            const pct = totalDistributedAmount > 0 ? (Number(bill.amount || 0) /
+                                            totalDistributedAmount) * 100 : 0;
+                                            %>
+                                            <article class="distribution-mobile-card">
+                                                <div class="distribution-mobile-card-top">
+                                                    <div class="distribution-room-name">
+                                                        <span class="distribution-room-dot" style="background: <%= colors[index % colors.length] %>;"></span>
+                                                        <span style="font-weight: 700; font-size: 1.1rem; color: #1A1A1A;"><%= bill.room_id ? bill.room_id.meter_name : 'Deleted Room' %></span>
+                                                    </div>
+                                                </div>
+                                                <div class="distribution-mobile-stats">
+                                                    <div class="distribution-mobile-stat">
+                                                        <span class="stat-lbl">Prev</span>
+                                                        <span class="stat-val"><%= bill.previous_reading %></span>
+                                                    </div>
+                                                    <div class="distribution-mobile-stat">
+                                                        <span class="stat-lbl">Curr</span>
+                                                        <span class="stat-val"><%= bill.current_reading %></span>
+                                                    </div>
+                                                    <div class="distribution-mobile-stat">
+                                                        <span class="stat-lbl">Units</span>
+                                                        <span class="stat-val"><%= bill.units_consumed %></span>
+                                                    </div>
+                                                    <div class="distribution-mobile-stat stat-amt">
+                                                        <span class="stat-lbl">Amount</span>
+                                                        <span class="stat-val amount">&#8377;<%= Number(bill.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                                    </div>
+                                                </div>
+                                                <div class="distribution-mobile-progress-wrap">
+                                                    <div class="distribution-proportion-cell">
+                                                        <div class="distribution-proportion-track">
+                                                            <div class="distribution-proportion-fill" style="width: <%= pct %>%; background: <%= colors[index % colors.length] %>;"></div>
+                                                        </div>
+                                                        <span class="distribution-proportion-pct"><%= pct.toFixed(1) %>%</span>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        <% }) %>
+                                        <div class="distribution-mobile-summary">
+                                            <div class="distribution-mobile-summary-row">
+                                                <span class="sum-lbl">Total Units</span>
+                                                <span class="sum-val"><%= totalDistributedUnits %> U</span>
+                                            </div>
+                                            <div class="distribution-mobile-summary-row summary-total-row">
+                                                <span class="sum-lbl">Total Distributed</span>
+                                                <span class="sum-val amount">&#8377;<%= totalDistributedAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </section>
                                 <% } else { %>

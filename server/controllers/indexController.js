@@ -2,6 +2,7 @@ import House from "../models/House.js";
 import BillingCycle from "../models/BillingCycle.js";
 import MainBill from "../models/MainBill.js";
 import RoomReading from "../models/RoomReading.js";
+import Room from "../models/Room.js";
 
 export const getLandingPage = (req, res) => {
     res.render("index/landing");
@@ -62,13 +63,17 @@ export const getDashboard = async (req, res, next) => {
             }
         }
  
+        // Total rooms configured
+        const totalRoomsConfigured = await Room.countDocuments({ house_id: { $in: houseIds } });
+
         res.render("index/dashboard", { 
             houseCount, 
             activeCyclesCount, 
             totalRevenue,
             recentBills,
             nextStep,
-            actionHouseId
+            actionHouseId,
+            totalRoomsConfigured
         });
     } catch (err) {
         next(err);

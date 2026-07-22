@@ -592,7 +592,8 @@ textarea {
     background: var(--surface-soft);
 }
 
-.data-table tbody td {
+.data-table tbody td,
+.data-table tfoot td {
     padding: 16px 20px;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-subtle);
